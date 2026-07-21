@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Zombie Shooter</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none;cursor:crosshair}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Score: <span id="sc">0</span> | Wave: <span id="wv">1</span> | Lives: <span id="lv">5</span> | Best: <span id="bs">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">Click/tap zombies to shoot them! Don't let them reach you!</div>
+<script>
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80);
+const c=document.getElementById('c');c.width=W;c.height=H;
+const x=c.getContext('2d');
+let score=0,wave=1,lives=5,zombies=[],bullets=[],particles=[],gameOver=false,best=+localStorage.getItem('zombie-shoot-best')||0;
+document.getElementById('bs').textContent=best;
+function spawnWave(){const n=3+wave*2;for(let i=0;i<n;i++){setTimeout(()=>{if(!gameOver)zombies.push({x:Math.random()*(W-40)+20,y:-30-Math.random()*100,s:0.5+wave*0.15+Math.random()*0.3,hp:1+Math.floor(wave/3),r:15+Math.random()*5});},i*600);}}
+spawnWave();
+function shoot(tx,ty){let hit=false;for(let i=zombies.length-1;i>=0;i--){const z=zombies[i];const d=Math.hypot(tx-z.x,ty-z.y);if(d<z.r+10){z.hp--;hit=true;for(let p=0;p<5;p++)particles.push({x:z.x,y:z.y,vx:(Math.random()-0.5)*4,vy:(Math.random()-0.5)*4,life:20,color:'#4caf50'});if(z.hp<=0){zombies.splice(i,1);score+=10*wave;document.getElementById('sc').textContent=score;if(score>best){best=score;localStorage.setItem('zombie-shoot-best',best);document.getElementById('bs').textContent=best;}}break;}}if(!hit){particles.push({x:tx,y:ty,vx:0,vy:0,life:10,color:'#ff5722'});}}
+c.addEventListener('pointerdown',e=>{if(gameOver){reset();return;}const r=c.getBoundingClientRect();shoot(e.clientX-r.left,e.clientY-r.top);});
+function reset(){score=0;wave=1;lives=5;zombies=[];particles=[];gameOver=false;document.getElementById('sc').textContent=0;document.getElementById('wv').textContent=1;document.getElementById('lv').textContent=5;spawnWave();}
+function update(){if(gameOver)return;zombies.forEach((z,i)=>{z.y+=z.s;if(z.y>H-20){zombies.splice(i,1);lives--;document.getElementById('lv').textContent=lives;if(lives<=0){gameOver=true;if(score>best){best=score;localStorage.setItem('zombie-shoot-best',best);document.getElementById('bs').textContent=best;}}}});
+if(zombies.length===0&&!gameOver){wave++;document.getElementById('wv').textContent=wave;spawnWave();}
+particles.forEach((p,i)=>{p.x+=p.vx;p.y+=p.vy;p.life--;if(p.life<=0)particles.splice(i,1);});}
+function draw(){x.fillStyle='#1a1a2e';x.fillRect(0,0,W,H);
+x.fillStyle='#2d5a27';x.fillRect(0,H-20,W,20);
+zombies.forEach(z=>{x.beginPath();x.arc(z.x,z.y,z.r,0,Math.PI*2);x.fillStyle=z.hp>1?'#2e7d32':'#4caf50';x.fill();x.fillStyle='#1b5e20';x.fillRect(z.x-6,z.y-4,4,4);x.fillRect(z.x+2,z.y-4,4,4);x.fillStyle='#333';x.fillRect(z.x-5,z.y+4,10,3);});
+particles.forEach(p=>{x.globalAlpha=p.life/20;x.fillStyle=p.color;x.fillRect(p.x-2,p.y-2,4,4);x.globalAlpha=1;});
+if(gameOver){x.fillStyle='rgba(0,0,0,0.7)';x.fillRect(0,0,W,H);x.fillStyle='#e94560';x.font='bold 28px Arial';x.textAlign='center';x.fillText('GAME OVER',W/2,H/2-20);x.fillStyle='#fff';x.font='16px Arial';x.fillText('Score: '+score+' | Tap to restart',W/2,H/2+20);}}
+function loop(){update();draw();requestAnimationFrame(loop);}
+loop();
+</script>
+</body>
+</html>

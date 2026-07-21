@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Fruit Catch</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:15px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Score: <span id="sc">0</span> | ❤️ <span id="lv">5</span> | Best: <span id="bs">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">Move mouse / touch to catch fruits • Avoid 💣</div>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80);c.width=W;c.height=H;
+const FRUITS=['🍎','🍊','🍋','🍇','🍓','🍑','🍒','🥝','🍌','🫐'];
+let basket,items=[],score=0,lives=5,best=0,gameOver=false,spawnTimer=0,speed=2;
+
+function init(){
+  basket={x:W/2-30,y:H-50,w:60,h:30};
+  items=[];score=0;lives=5;gameOver=false;spawnTimer=0;speed=2;
+  document.getElementById('sc').textContent='0';
+  document.getElementById('lv').textContent='5';
+  loop();
+}
+
+function loop(){
+  if(gameOver)return;
+  update();draw();requestAnimationFrame(loop);
+}
+
+function update(){
+  spawnTimer++;
+  const rate=Math.max(20,50-score);
+  if(spawnTimer>=rate){
+    spawnTimer=0;speed=2+score*0.03;
+    const isBomb=Math.random()<0.15;
+    items.push({
+      x:20+Math.random()*(W-40),y:-20,
+      vy:speed+Math.random()*1.5,
+      emoji:isBomb?'💣':FRUITS[Math.floor(Math.random()*FRUITS.length)],
+      isBomb,size:24
+    });
+  }
+  
+  for(let i=items.length-1;i>=0;i--){
+    items[i].y+=items[i].vy;
+    const it=items[i];
+    // Catch check
+    if(it.y+it.size>basket.y&&it.y<basket.y+basket.h&&it.x>basket.x-10&&it.x<basket.x+basket.w+10){
+      if(it.isBomb){lives-=2;document.getElementById('lv').textContent=Math.max(0,lives);if(lives<=0)endGame();}
+      else{score++;document.getElementById('sc').textContent=score;if(score>best){best=score;document.getElementById('bs').textContent=best;}}
+      items.splice(i,1);continue;
+    }
+    // Missed
+    if(it.y>H+20){
+      if(!it.isBomb){lives--;document.getElementById('lv').textContent=lives;if(lives<=0)endGame();}
+      items.splice(i,1);
+    }
+  }
+}
+
+function endGame(){
+  gameOver=true;draw();
+}
+
+function draw(){
+  const grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'#16213e');grad.addColorStop(1,'#1a1a2e');
+  ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+  
+  // Items
+  ctx.font='24px Arial';ctx.textAlign='center';
+  items.forEach(it=>ctx.fillText(it.emoji,it.x,it.y));
+  
+  // Basket
+  ctx.fillStyle='#8d6e63';
+  ctx.beginPath();ctx.roundRect(basket.x,basket.y,basket.w,basket.h,6);ctx.fill();
+  ctx.fillStyle='#6d4c41';
+  ctx.fillRect(basket.x+5,basket.y+5,basket.w-10,4);
+  ctx.fillRect(basket.x+5,basket.y+14,basket.w-10,4);
+  
+  if(gameOver){
+    ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#fff';ctx.font='bold 26px Arial';ctx.textAlign='center';
+    ctx.fillText('Game Over!',W/2,H/2-20);
+    ctx.fillStyle='#4fc3f7';ctx.font='18px Arial';
+    ctx.fillText(`Caught: ${score} fruits`,W/2,H/2+15);
+    ctx.fillStyle='#aaa';ctx.font='14px Arial';
+    ctx.fillText('Tap to restart',W/2,H/2+50);
+  }
+}
+
+c.addEventListener('mousemove',e=>{
+  const rect=c.getBoundingClientRect();
+  basket.x=(e.clientX-rect.left)*(W/rect.width)-basket.w/2;
+  basket.x=Math.max(0,Math.min(W-basket.w,basket.x));
+});
+c.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  const rect=c.getBoundingClientRect();
+  basket.x=(e.touches[0].clientX-rect.left)*(W/rect.width)-basket.w/2;
+  basket.x=Math.max(0,Math.min(W-basket.w,basket.x));
+},{passive:false});
+c.addEventListener('click',()=>{if(gameOver)init();});
+c.addEventListener('touchstart',()=>{if(gameOver)init();});
+
+init();
+</script>
+</body>
+</html>

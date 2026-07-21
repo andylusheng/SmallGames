@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#1a1a2e"/>
+<polygon points="150,80 180,65 210,80 210,110 180,125 150,110" fill="#4fc3f7" stroke="#16213e" stroke-width="2"/>
+<text x="180" y="102" text-anchor="middle" fill="#fff" font-size="18" font-weight="bold">2</text>
+<polygon points="215,80 245,65 275,80 275,110 245,125 215,110" fill="#4caf50" stroke="#16213e" stroke-width="2"/>
+<text x="245" y="102" text-anchor="middle" fill="#fff" font-size="18" font-weight="bold">3</text>
+<polygon points="182,125 212,110 242,125 242,155 212,170 182,155" fill="#ffc107" stroke="#16213e" stroke-width="2"/>
+<text x="212" y="147" text-anchor="middle" fill="#fff" font-size="18" font-weight="bold">5</text>
+<polygon points="118,125 148,110 178,125 178,155 148,170 118,155" fill="#e94560" stroke="#16213e" stroke-width="2"/>
+<text x="148" y="147" text-anchor="middle" fill="#fff" font-size="18" font-weight="bold">1</text>
+<polygon points="248,125 278,110 308,125 308,155 278,170 248,155" fill="#9c27b0" stroke="#16213e" stroke-width="2"/>
+<text x="278" y="147" text-anchor="middle" fill="#fff" font-size="18" font-weight="bold">4</text>
+<polygon points="150,170 180,155 210,170 210,200 180,215 150,200" fill="#16213e" stroke="#233" stroke-width="2"/>
+<polygon points="215,170 245,155 275,170 275,200 245,215 215,200" fill="#ff9800" stroke="#16213e" stroke-width="2"/>
+<text x="245" y="192" text-anchor="middle" fill="#fff" font-size="18" font-weight="bold">2</text>
+<text x="200" y="270" text-anchor="middle" fill="#4fc3f7" font-size="24" font-family="Arial" font-weight="bold">HEX MERGE</text>
+</svg>

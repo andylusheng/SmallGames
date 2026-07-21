@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Sand Fall</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:14px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none;cursor:crosshair}
+#tools{display:flex;gap:8px;margin-top:8px}
+#tools button{padding:6px 12px;border:2px solid #555;border-radius:6px;background:#16213e;color:#fff;cursor:pointer;font-size:12px}
+#tools button.sel{border-color:#4fc3f7;background:#0f3460}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Particles: <span id="pc">0</span> | FPS: <span id="fps">0</span></div>
+<canvas id="c"></canvas>
+<div id="tools">
+<button data-t="sand" class="sel">🟡 Sand</button>
+<button data-t="water">🔵 Water</button>
+<button data-t="stone">⚪ Stone</button>
+<button data-t="fire">🔴 Fire</button>
+<button data-t="erase">⬛ Erase</button>
+<button id="clearBtn">Clear All</button>
+</div>
+<div id="msg">Click/drag to pour particles. Watch them interact!</div>
+<script>
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-130);
+const c=document.getElementById('c');c.width=W;c.height=H;const ctx=c.getContext('2d');
+const CELL=4,COLS=Math.floor(W/CELL),ROWS=Math.floor(H/CELL);
+let grid=new Uint8Array(COLS*ROWS);
+let tool='sand',mouseDown=false,mx=0,my=0,frameCount=0,lastFps=0,fpsTime=Date.now();
+const EMPTY=0,SAND=1,WATER=2,STONE=3,FIRE=4;
+const colors={[EMPTY]:'#0f3460',[SAND]:'#e8c547',[WATER]:'#2196f3',[STONE]:'#888',[FIRE]:'#ff5722'};
+document.querySelectorAll('#tools button[data-t]').forEach(b=>{b.addEventListener('click',()=>{tool=b.dataset.t;document.querySelectorAll('#tools button[data-t]').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');});});
+document.getElementById('clearBtn').addEventListener('click',()=>{grid.fill(0);});
+c.addEventListener('pointerdown',e=>{mouseDown=true;const r=c.getBoundingClientRect();mx=e.clientX-r.left;my=e.clientY-r.top;});
+c.addEventListener('pointermove',e=>{if(!mouseDown)return;const r=c.getBoundingClientRect();mx=e.clientX-r.left;my=e.clientY-r.top;});
+c.addEventListener('pointerup',()=>mouseDown=false);
+c.addEventListener('pointerleave',()=>mouseDown=false);
+function idx(x,y){return y*COLS+x;}
+function inBounds(x,y){return x>=0&&x<COLS&&y>=0&&y<ROWS;}
+function swap(x1,y1,x2,y2){const t=grid[idx(x1,y1)];grid[idx(x1,y1)]=grid[idx(x2,y2)];grid[idx(x2,y2)]=t;}
+function addParticles(){if(!mouseDown)return;const cx=Math.floor(mx/CELL),cy=Math.floor(my/CELL);
+const t=tool==='sand'?SAND:tool==='water'?WATER:tool==='stone'?STONE:tool==='fire'?FIRE:EMPTY;
+for(let dx=-2;dx<=2;dx++){for(let dy=-2;dy<=2;dy++){const px=cx+dx,py=cy+dy;if(!inBounds(px,py))continue;
+if(t===EMPTY){grid[idx(px,py)]=EMPTY;}else if(grid[idx(px,py)]===EMPTY&&Math.random()<0.6){grid[idx(px,py)]=t;}}}}
+function simulate(){for(let y=ROWS-2;y>=0;y--){for(let x=0;x<COLS;x++){const cell=grid[idx(x,y)];if(cell===EMPTY||cell===STONE)continue;
+if(cell===SAND){if(grid[idx(x,y+1)]===EMPTY||grid[idx(x,y+1)]===WATER){swap(x,y,x,y+1);}
+else if(x>0&&(grid[idx(x-1,y+1)]===EMPTY||grid[idx(x-1,y+1)]===WATER)){swap(x,y,x-1,y+1);}
+else if(x<COLS-1&&(grid[idx(x+1,y+1)]===EMPTY||grid[idx(x+1,y+1)]===WATER)){swap(x,y,x+1,y+1);}}
+else if(cell===WATER){if(grid[idx(x,y+1)]===EMPTY){swap(x,y,x,y+1);}
+else if(x>0&&grid[idx(x-1,y+1)]===EMPTY){swap(x,y,x-1,y+1);}
+else if(x<COLS-1&&grid[idx(x+1,y+1)]===EMPTY){swap(x,y,x+1,y+1);}
+else if(x>0&&grid[idx(x-1,y)]===EMPTY){swap(x,y,x-1,y);}
+else if(x<COLS-1&&grid[idx(x+1,y)]===EMPTY){swap(x,y,x+1,y);}}
+else if(cell===FIRE){if(Math.random()<0.05){grid[idx(x,y)]=EMPTY;continue;}
+if(y>0&&grid[idx(x,y-1)]===EMPTY&&Math.random()<0.3){grid[idx(x,y-1)]=FIRE;}
+if(x>0&&grid[idx(x-1,y)]===EMPTY&&Math.random()<0.1){grid[idx(x-1,y)]=FIRE;}
+if(x<COLS-1&&grid[idx(x+1,y)]===EMPTY&&Math.random()<0.1){grid[idx(x+1,y)]=FIRE;}}}}}
+function draw(){ctx.fillStyle=colors[EMPTY];ctx.fillRect(0,0,W,H);
+let count=0;
+for(let y=0;y<ROWS;y++){for(let x=0;x<COLS;x++){const cell=grid[idx(x,y)];if(cell===EMPTY)continue;count++;
+if(cell===FIRE){ctx.fillStyle=Math.random()>0.5?'#ff5722':'#ffc107';}else{ctx.fillStyle=colors[cell];}
+ctx.fillRect(x*CELL,y*CELL,CELL,CELL);}}
+document.getElementById('pc').textContent=count;
+frameCount++;const now=Date.now();if(now-fpsTime>1000){lastFps=frameCount;frameCount=0;fpsTime=now;document.getElementById('fps').textContent=lastFps;}}
+function loop(){addParticles();simulate();draw();requestAnimationFrame(loop);}
+loop();
+</script>
+</body>
+</html>

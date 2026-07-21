@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#0a0a1a"/>
+<circle cx="100" cy="60" r="2" fill="#fff" opacity="0.5"/>
+<circle cx="250" cy="40" r="1.5" fill="#fff" opacity="0.4"/>
+<circle cx="320" cy="90" r="2" fill="#fff" opacity="0.6"/>
+<circle cx="180" cy="30" r="1" fill="#fff" opacity="0.3"/>
+<circle cx="150" cy="100" r="22" fill="#78909c"/>
+<circle cx="155" cy="95" r="6" fill="#546e7a"/>
+<circle cx="280" cy="150" r="18" fill="#78909c"/>
+<circle cx="100" cy="200" r="28" fill="#78909c"/>
+<circle cx="108" cy="192" r="8" fill="#546e7a"/>
+<polygon points="200,220 188,250 212,250" fill="#4fc3f7"/>
+<polygon points="194,250 200,262 206,250" fill="#ff9800"/>
+<text x="200" y="285" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">☄️ ASTEROID DODGE</text>
+</svg>

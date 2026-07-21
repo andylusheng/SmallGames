@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#16213e"/>
+<rect x="80" y="40" width="240" height="200" rx="16" fill="#0f3460" stroke="#4fc3f7" stroke-width="2"/>
+<circle cx="180" cy="120" r="25" fill="#e94560"/>
+<text x="180" y="128" font-size="18" fill="#fff" text-anchor="middle">👆</text>
+<text x="200" y="200" font-size="14" fill="#4fc3f7" font-family="Arial" text-anchor="middle">Time: 18.5s | Taps: 24</text>
+<text x="200" y="280" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">⚡ QUICK TAP</text>
+</svg>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#1a1a2e"/>
+<rect x="100" y="40" width="200" height="200" rx="12" fill="#16213e"/>
+<line x1="167" y1="50" x2="167" y2="230" stroke="#0f3460" stroke-width="4"/>
+<line x1="233" y1="50" x2="233" y2="230" stroke="#0f3460" stroke-width="4"/>
+<line x1="110" y1="107" x2="290" y2="107" stroke="#0f3460" stroke-width="4"/>
+<line x1="110" y1="173" x2="290" y2="173" stroke="#0f3460" stroke-width="4"/>
+<text x="133" y="95" font-size="36" fill="#4fc3f7" font-family="Arial" font-weight="bold" text-anchor="middle">X</text>
+<text x="200" y="160" font-size="36" fill="#e94560" font-family="Arial" font-weight="bold" text-anchor="middle">O</text>
+<text x="267" y="95" font-size="36" fill="#4fc3f7" font-family="Arial" font-weight="bold" text-anchor="middle">X</text>
+<text x="133" y="220" font-size="36" fill="#e94560" font-family="Arial" font-weight="bold" text-anchor="middle">O</text>
+<text x="267" y="220" font-size="36" fill="#4fc3f7" font-family="Arial" font-weight="bold" text-anchor="middle">X</text>
+<text x="200" y="280" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">TIC TAC TOE</text>
+</svg>

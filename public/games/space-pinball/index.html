@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Space Pinball</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:14px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Score: <span id="sc">0</span> | Balls: <span id="bl">3</span> | Best: <span id="bs">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">← → or tap left/right to control flippers. Space/tap center to launch!</div>
+<script>
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80);
+const c=document.getElementById('c');c.width=W;c.height=H;const ctx=c.getContext('2d');
+let score=0,balls=3,best=+localStorage.getItem('space-pinball-best')||0,gameOver=false;
+document.getElementById('bs').textContent=best;
+let ball={x:W-15,y:H-60,vx:0,vy:0,r:7,active:false};
+let leftFlip={x:W*0.3,y:H-35,angle:0.4,len:45},rightFlip={x:W*0.7,y:H-35,angle:Math.PI-0.4,len:45};
+let bumpers=[{x:W*0.3,y:H*0.3,r:20},{x:W*0.7,y:H*0.3,r:20},{x:W*0.5,y:H*0.2,r:18},{x:W*0.2,y:H*0.55,r:15},{x:W*0.8,y:H*0.55,r:15}];
+let keys={},launching=false;
+document.addEventListener('keydown',e=>{keys[e.key]=true;if(e.key===' '){e.preventDefault();if(!ball.active&&!gameOver)launch();}if(gameOver&&e.key==='Enter')resetGame();});
+document.addEventListener('keyup',e=>keys[e.key]=false);
+c.addEventListener('pointerdown',e=>{if(gameOver){resetGame();return;}const r=c.getBoundingClientRect();const x=e.clientX-r.left;
+if(!ball.active){launch();return;}
+if(x<W*0.4)keys['ArrowLeft']=true;else if(x>W*0.6)keys['ArrowRight']=true;else launch();});
+c.addEventListener('pointerup',()=>{keys['ArrowLeft']=false;keys['ArrowRight']=false;});
+function launch(){ball.active=true;ball.vx=(Math.random()-0.5)*2;ball.vy=-8-Math.random()*3;}
+function resetGame(){score=0;balls=3;gameOver=false;ball={x:W-15,y:H-60,vx:0,vy:0,r:7,active:false};document.getElementById('sc').textContent=0;document.getElementById('bl').textContent=3;}
+function loseBall(){balls--;document.getElementById('bl').textContent=balls;
+if(balls<=0){gameOver=true;if(score>best){best=score;localStorage.setItem('space-pinball-best',best);document.getElementById('bs').textContent=best;}}
+else{ball={x:W-15,y:H-60,vx:0,vy:0,r:7,active:false};}}
+function update(){if(gameOver||!ball.active)return;
+ball.vy+=0.15;ball.x+=ball.vx;ball.y+=ball.vy;
+if(ball.x<ball.r+5){ball.x=ball.r+5;ball.vx*=-0.8;}
+if(ball.x>W-ball.r-5){ball.x=W-ball.r-5;ball.vx*=-0.8;}
+if(ball.y<ball.r+5){ball.y=ball.r+5;ball.vy*=-0.8;}
+const la=keys['ArrowLeft']||keys['a']?-0.6:0.4;
+const ra=keys['ArrowRight']||keys['d']?Math.PI+0.6:Math.PI-0.4;
+leftFlip.angle+=(la-leftFlip.angle)*0.3;
+rightFlip.angle+=(ra-rightFlip.angle)*0.3;
+[leftFlip,rightFlip].forEach(f=>{const ex=f.x+Math.cos(f.angle)*f.len,ey=f.y+Math.sin(f.angle)*f.len;
+const dx=ex-f.x,dy=ey-f.y;const t=Math.max(0,Math.min(1,((ball.x-f.x)*dx+(ball.y-f.y)*dy)/(dx*dx+dy*dy)));
+const cx=f.x+t*dx,cy=f.y+t*dy;const dist=Math.hypot(ball.x-cx,ball.y-cy);
+if(dist<ball.r+5){const nx=(ball.x-cx)/dist,ny=(ball.y-cy)/dist;ball.x=cx+nx*(ball.r+6);ball.y=cy+ny*(ball.r+6);
+const power=(f===leftFlip&&keys['ArrowLeft'])||(f===rightFlip&&keys['ArrowRight'])?10:5;
+ball.vx=nx*power*0.7;ball.vy=ny*power-3;score+=5;document.getElementById('sc').textContent=score;}});
+bumpers.forEach(b=>{const dist=Math.hypot(ball.x-b.x,ball.y-b.y);if(dist<ball.r+b.r){
+const nx=(ball.x-b.x)/dist,ny=(ball.y-b.y)/dist;ball.x=b.x+nx*(ball.r+b.r+1);ball.y=b.y+ny*(ball.r+b.r+1);
+ball.vx=nx*6;ball.vy=ny*6;score+=10;document.getElementById('sc').textContent=score;}});
+if(ball.y>H+20)loseBall();}
+function draw(){ctx.fillStyle='#0a0a2a';ctx.fillRect(0,0,W,H);
+ctx.strokeStyle='#333';ctx.lineWidth=5;ctx.strokeRect(3,3,W-6,H-6);
+ctx.fillStyle='#1a1a3e';ctx.fillRect(W-25,H-80,20,80);
+bumpers.forEach(b=>{const grad=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r);grad.addColorStop(0,'#e94560');grad.addColorStop(1,'#7b1fa2');ctx.fillStyle=grad;ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#ffc107';ctx.lineWidth=2;ctx.stroke();});
+[leftFlip,rightFlip].forEach(f=>{const ex=f.x+Math.cos(f.angle)*f.len,ey=f.y+Math.sin(f.angle)*f.len;
+ctx.strokeStyle='#4fc3f7';ctx.lineWidth=8;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(f.x,f.y);ctx.lineTo(ex,ey);ctx.stroke();});
+if(ball.active||!gameOver){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);ctx.fill();
+ctx.fillStyle='rgba(255,255,255,0.3)';ctx.beginPath();ctx.arc(ball.x-2,ball.y-2,ball.r*0.4,0,Math.PI*2);ctx.fill();}
+if(!ball.active&&!gameOver){ctx.fillStyle='#aaa';ctx.font='12px Arial';ctx.textAlign='center';ctx.fillText('Press Space or Tap to launch!',W/2,H/2);}
+if(gameOver){ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#e94560';ctx.font='bold 22px Arial';ctx.textAlign='center';ctx.fillText('GAME OVER',W/2,H/2-15);ctx.fillStyle='#fff';ctx.font='14px Arial';ctx.fillText('Score: '+score+' | Best: '+best,W/2,H/2+15);ctx.fillText('Tap to play again',W/2,H/2+40);}}
+function loop(){update();draw();requestAnimationFrame(loop);}
+loop();
+</script>
+</body>
+</html>

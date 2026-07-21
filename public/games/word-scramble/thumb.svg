@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#1a1a2e"/>
+<rect x="60" y="60" width="42" height="48" rx="8" fill="#0f3460" stroke="#4fc3f7" stroke-width="2"/>
+<text x="81" y="92" font-size="24" fill="#4fc3f7" text-anchor="middle" font-weight="bold">G</text>
+<rect x="112" y="60" width="42" height="48" rx="8" fill="#0f3460" stroke="#4fc3f7" stroke-width="2"/>
+<text x="133" y="92" font-size="24" fill="#4fc3f7" text-anchor="middle" font-weight="bold">A</text>
+<rect x="164" y="60" width="42" height="48" rx="8" fill="#0f3460" stroke="#4fc3f7" stroke-width="2"/>
+<text x="185" y="92" font-size="24" fill="#4fc3f7" text-anchor="middle" font-weight="bold">M</text>
+<rect x="216" y="60" width="42" height="48" rx="8" fill="#0f3460" stroke="#4fc3f7" stroke-width="2"/>
+<text x="237" y="92" font-size="24" fill="#4fc3f7" text-anchor="middle" font-weight="bold">E</text>
+<rect x="268" y="60" width="42" height="48" rx="8" fill="#16213e" stroke="#333" stroke-width="2" stroke-dasharray="4,4"/>
+<text x="120" y="160" font-size="20" fill="#aaa" text-anchor="middle" font-family="Arial">Letters: E M G A E</text>
+<rect x="80" y="180" width="50" height="44" rx="8" fill="#4caf50"/>
+<text x="105" y="209" font-size="20" fill="#fff" text-anchor="middle" font-weight="bold">E</text>
+<rect x="140" y="180" width="50" height="44" rx="8" fill="#4caf50"/>
+<text x="165" y="209" font-size="20" fill="#fff" text-anchor="middle" font-weight="bold">M</text>
+<rect x="200" y="180" width="50" height="44" rx="8" fill="#ff9800"/>
+<text x="225" y="209" font-size="20" fill="#fff" text-anchor="middle" font-weight="bold">G</text>
+<rect x="260" y="180" width="50" height="44" rx="8" fill="#ff9800"/>
+<text x="285" y="209" font-size="20" fill="#fff" text-anchor="middle" font-weight="bold">A</text>
+<text x="200" y="275" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">📝 WORD SCRAMBLE</text>
+</svg>

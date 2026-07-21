@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#1a1a2e"/>
+<rect x="80" y="30" width="240" height="210" rx="12" fill="#0f3460"/>
+<circle cx="120" cy="65" r="14" fill="#e94560"/>
+<circle cx="160" cy="65" r="14" fill="#16213e"/>
+<circle cx="200" cy="65" r="14" fill="#ffc107"/>
+<circle cx="240" cy="65" r="14" fill="#16213e"/>
+<circle cx="280" cy="65" r="14" fill="#e94560"/>
+<circle cx="120" cy="105" r="14" fill="#ffc107"/>
+<circle cx="160" cy="105" r="14" fill="#e94560"/>
+<circle cx="200" cy="105" r="14" fill="#e94560"/>
+<circle cx="240" cy="105" r="14" fill="#ffc107"/>
+<circle cx="280" cy="105" r="14" fill="#16213e"/>
+<circle cx="120" cy="145" r="14" fill="#16213e"/>
+<circle cx="160" cy="145" r="14" fill="#ffc107"/>
+<circle cx="200" cy="145" r="14" fill="#e94560"/>
+<circle cx="240" cy="145" r="14" fill="#e94560"/>
+<circle cx="280" cy="145" r="14" fill="#ffc107"/>
+<circle cx="120" cy="185" r="14" fill="#e94560"/>
+<circle cx="160" cy="185" r="14" fill="#e94560"/>
+<circle cx="200" cy="185" r="14" fill="#ffc107"/>
+<circle cx="240" cy="185" r="14" fill="#16213e"/>
+<circle cx="280" cy="185" r="14" fill="#e94560"/>
+<text x="200" y="278" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">🔴 CONNECT FOUR</text>
+</svg>

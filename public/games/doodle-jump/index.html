@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Doodle Jump</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:8px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;border:2px solid #0f3460}
+#msg{color:#aaa;margin-top:8px;font-size:13px}
+</style>
+</head>
+<body>
+<div id="ui">Score: <span id="sc">0</span> | Best: <span id="bs">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">← → or tilt/swipe to move • Tap to restart</div>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80);c.width=W;c.height=H;
+let player,platforms,score,best=0,gameOver,vy,keys={};
+
+function init(){
+  player={x:W/2-15,y:H-100,w:30,h:30,vy:-12,vx:0};
+  platforms=[];score=0;gameOver=false;vy=0;
+  for(let i=0;i<8;i++){
+    platforms.push({x:Math.random()*(W-70),y:H-i*75,w:70,h:12,type:Math.random()<0.15?'moving':'normal',dir:1});
+  }
+  document.getElementById('sc').textContent='0';
+  loop();
+}
+
+function loop(){
+  if(gameOver)return;
+  update();draw();requestAnimationFrame(loop);
+}
+
+function update(){
+  // Player physics
+  player.vy+=0.5;
+  player.y+=player.vy;
+  
+  // Horizontal movement
+  if(keys.left)player.vx=-5;
+  else if(keys.right)player.vx=5;
+  else player.vx*=0.8;
+  player.x+=player.vx;
+  
+  // Wrap around
+  if(player.x>W)player.x=-player.w;
+  if(player.x<-player.w)player.x=W;
+  
+  // Platform collision (only when falling)
+  if(player.vy>0){
+    for(let p of platforms){
+      if(player.x+player.w>p.x&&player.x<p.x+p.w&&
+         player.y+player.h>p.y&&player.y+player.h<p.y+p.h+player.vy){
+        player.vy=-13;
+        player.y=p.y-player.h;
+      }
+    }
+  }
+  
+  // Move platforms & scroll
+  if(player.y<H/2){
+    const diff=H/2-player.y;
+    player.y=H/2;
+    score+=Math.floor(diff);
+    document.getElementById('sc').textContent=score;
+    for(let p of platforms){p.y+=diff;}
+    // Remove off-screen & add new
+    platforms=platforms.filter(p=>p.y<H+20);
+    while(platforms.length<8){
+      const topY=Math.min(...platforms.map(p=>p.y));
+      platforms.push({x:Math.random()*(W-70),y:topY-60-Math.random()*30,w:70,h:12,type:Math.random()<0.2?'moving':'normal',dir:Math.random()<0.5?1:-1});
+    }
+  }
+  
+  // Moving platforms
+  for(let p of platforms){
+    if(p.type==='moving'){p.x+=p.dir*2;if(p.x<=0||p.x>=W-p.w)p.dir*=-1;}
+  }
+  
+  // Game over
+  if(player.y>H+50){
+    gameOver=true;
+    if(score>best){best=score;document.getElementById('bs').textContent=best;}
+  }
+}
+
+function draw(){
+  ctx.fillStyle='#16213e';ctx.fillRect(0,0,W,H);
+  
+  // Platforms
+  for(let p of platforms){
+    ctx.fillStyle=p.type==='moving'?'#ff9800':'#4caf50';
+    ctx.beginPath();ctx.roundRect(p.x,p.y,p.w,p.h,6);ctx.fill();
+  }
+  
+  // Player (cute character)
+  ctx.fillStyle='#4fc3f7';
+  ctx.beginPath();ctx.roundRect(player.x,player.y,player.w,player.h,8);ctx.fill();
+  // Eyes
+  ctx.fillStyle='#fff';
+  ctx.beginPath();ctx.arc(player.x+10,player.y+12,5,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(player.x+22,player.y+12,5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#1a1a2e';
+  ctx.beginPath();ctx.arc(player.x+11,player.y+13,2.5,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(player.x+23,player.y+13,2.5,0,Math.PI*2);ctx.fill();
+  
+  if(gameOver){
+    ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#fff';ctx.font='bold 28px Arial';ctx.textAlign='center';
+    ctx.fillText('Game Over!',W/2,H/2-20);
+    ctx.font='18px Arial';ctx.fillStyle='#4fc3f7';
+    ctx.fillText('Score: '+score,W/2,H/2+15);
+    ctx.fillStyle='#aaa';ctx.font='14px Arial';
+    ctx.fillText('Tap to restart',W/2,H/2+50);
+  }
+}
+
+// Controls
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowLeft'||e.key==='a')keys.left=true;
+  if(e.key==='ArrowRight'||e.key==='d')keys.right=true;
+});
+document.addEventListener('keyup',e=>{
+  if(e.key==='ArrowLeft'||e.key==='a')keys.left=false;
+  if(e.key==='ArrowRight'||e.key==='d')keys.right=false;
+});
+
+// Touch controls
+let touchX=null;
+c.addEventListener('touchstart',e=>{
+  if(gameOver){init();return;}
+  touchX=e.touches[0].clientX;
+});
+c.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  if(touchX!==null){
+    const dx=e.touches[0].clientX-touchX;
+    if(dx<-10)keys.left=true,keys.right=false;
+    else if(dx>10)keys.right=true,keys.left=false;
+    touchX=e.touches[0].clientX;
+  }
+},{passive:false});
+c.addEventListener('touchend',()=>{keys.left=false;keys.right=false;touchX=null;});
+c.addEventListener('click',()=>{if(gameOver)init();});
+
+// Device tilt
+window.addEventListener('deviceorientation',e=>{
+  if(e.gamma!==null){
+    if(e.gamma<-5)keys.left=true,keys.right=false;
+    else if(e.gamma>5)keys.right=true,keys.left=false;
+    else keys.left=false,keys.right=false;
+  }
+});
+
+init();
+</script>
+</body>
+</html>

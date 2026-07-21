@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#1a1a2e"/>
+<rect x="110" y="30" width="180" height="180" rx="10" fill="#0f3460"/>
+<rect x="120" y="40" width="38" height="38" rx="6" fill="#16213e"/>
+<text x="139" y="66" font-size="18" fill="#4fc3f7" text-anchor="middle" font-weight="bold">1</text>
+<rect x="163" y="40" width="38" height="38" rx="6" fill="#16213e"/>
+<text x="182" y="66" font-size="18" fill="#4fc3f7" text-anchor="middle" font-weight="bold">2</text>
+<rect x="206" y="40" width="38" height="38" rx="6" fill="#16213e"/>
+<text x="225" y="66" font-size="18" fill="#4fc3f7" text-anchor="middle" font-weight="bold">3</text>
+<rect x="249" y="40" width="38" height="38" rx="6" fill="#16213e"/>
+<text x="268" y="66" font-size="18" fill="#4caf50" text-anchor="middle" font-weight="bold">4</text>
+<rect x="120" y="83" width="38" height="38" rx="6" fill="#16213e"/>
+<text x="139" y="109" font-size="18" fill="#4fc3f7" text-anchor="middle" font-weight="bold">5</text>
+<rect x="163" y="83" width="38" height="38" rx="6" fill="#16213e"/>
+<text x="182" y="109" font-size="18" fill="#4caf50" text-anchor="middle" font-weight="bold">6</text>
+<rect x="206" y="83" width="38" height="38" rx="6" fill="#16213e"/>
+<text x="225" y="109" font-size="18" fill="#4fc3f7" text-anchor="middle" font-weight="bold">8</text>
+<rect x="249" y="83" width="38" height="38" rx="6" fill="#16213e"/>
+<text x="268" y="109" font-size="18" fill="#4fc3f7" text-anchor="middle" font-weight="bold">7</text>
+<rect x="120" y="126" width="38" height="38" rx="6" fill="#16213e"/>
+<text x="139" y="152" font-size="18" fill="#4fc3f7" text-anchor="middle" font-weight="bold">9</text>
+<rect x="163" y="126" width="38" height="38" rx="6" fill="transparent"/>
+<rect x="206" y="126" width="38" height="38" rx="6" fill="#16213e"/>
+<text x="225" y="152" font-size="18" fill="#4fc3f7" text-anchor="middle" font-weight="bold">11</text>
+<rect x="249" y="126" width="38" height="38" rx="6" fill="#16213e"/>
+<text x="268" y="152" font-size="18" fill="#4fc3f7" text-anchor="middle" font-weight="bold">12</text>
+<text x="200" y="270" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">🔢 NUMBER PUZZLE</text>
+</svg>

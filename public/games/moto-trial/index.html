@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Moto Trial</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Distance: <span id="dist">0</span>m | Best: <span id="bs">0</span>m</div>
+<canvas id="c"></canvas>
+<div id="msg">LEFT=lean back RIGHT=lean forward | Balance the bike!</div>
+<script>
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-100);
+const cv=document.getElementById('c');cv.width=W;cv.height=H;
+const ctx=cv.getContext('2d');
+let dist=0,best=+localStorage.getItem('moto_best')||0,gameOver=false;
+document.getElementById('bs').textContent=best;
+let terrain=[];
+function genTerrain(){terrain=[];let y=H*0.6;for(let i=0;i<3000;i++){y+=Math.sin(i*0.015)*3+Math.sin(i*0.04)*2+(Math.random()-0.5)*2;y=Math.max(H*0.25,Math.min(H*0.85,y));terrain.push(y)}}
+genTerrain();
+const bike={x:80,y:0,angle:0,angVel:0,speed:3};
+let leanL=false,leanR=false,camX=0;
+cv.addEventListener('pointerdown',e=>{const r=cv.getBoundingClientRect();if(e.clientX-r.left<W/2)leanL=true;else leanR=true});
+cv.addEventListener('pointerup',()=>{leanL=false;leanR=false});
+cv.addEventListener('pointerleave',()=>{leanL=false;leanR=false});
+document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')leanL=true;if(e.key==='ArrowRight')leanR=true});
+document.addEventListener('keyup',e=>{if(e.key==='ArrowLeft')leanL=false;if(e.key==='ArrowRight')leanR=false});
+function getTY(x){const i=Math.floor(x/3);if(i<0||i>=terrain.length-1)return H*0.6;const t=x/3-i;return terrain[i]*(1-t)+terrain[i+1]*t}
+function loop(){
+  if(gameOver)return;
+  ctx.clearRect(0,0,W,H);
+  const grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'#1a0533');grad.addColorStop(1,'#16213e');
+  ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+  // Physics
+  bike.speed=Math.min(5,bike.speed+0.01);
+  bike.x+=bike.speed;
+  const gy=getTY(bike.x);
+  const gy2=getTY(bike.x+20);
+  const slopeAngle=Math.atan2(gy2-gy,20);
+  bike.y+=(gy-bike.y)*0.4;
+  // Lean control
+  if(leanL)bike.angVel-=0.003;
+  if(leanR)bike.angVel+=0.003;
+  // Gravity effect on angle based on slope
+  bike.angVel+=slopeAngle*0.01;
+  bike.angVel*=0.96;
+  bike.angle+=bike.angVel;
+  // Crash if flipped
+  if(Math.abs(bike.angle)>Math.PI*0.55){
+    gameOver=true;
+    dist=Math.floor(bike.x/15);
+    if(dist>best){best=dist;localStorage.setItem('moto_best',best);document.getElementById('bs').textContent=best}
+  }
+  camX+=(bike.x-W*0.3-camX)*0.08;
+  // Draw terrain
+  ctx.beginPath();ctx.moveTo(0,H);
+  for(let sx=0;sx<=W;sx+=3){ctx.lineTo(sx,getTY(camX+sx))}
+  ctx.lineTo(W,H);ctx.closePath();
+  ctx.fillStyle='#3e2723';ctx.fill();
+  ctx.strokeStyle='#8d6e63';ctx.lineWidth=2;ctx.stroke();
+  // Draw bike
+  const sx=bike.x-camX,sy=bike.y;
+  ctx.save();ctx.translate(sx,sy);ctx.rotate(bike.angle+slopeAngle*0.5);
+  // Wheels
+  ctx.fillStyle='#333';
+  ctx.beginPath();ctx.arc(-12,2,9,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(12,2,9,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#666';ctx.lineWidth=2;
+  ctx.beginPath();ctx.arc(-12,2,9,0,Math.PI*2);ctx.stroke();
+  ctx.beginPath();ctx.arc(12,2,9,0,Math.PI*2);ctx.stroke();
+  // Frame
+  ctx.strokeStyle='#e94560';ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(-12,2);ctx.lineTo(0,-10);ctx.lineTo(12,2);ctx.stroke();
+  // Rider
+  ctx.fillStyle='#4fc3f7';
+  ctx.beginPath();ctx.arc(0,-18,6,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#4fc3f7';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(0,-12);ctx.lineTo(0,-4);ctx.stroke();
+  ctx.restore();
+  dist=Math.floor(bike.x/15);
+  document.getElementById('dist').textContent=dist;
+  if(gameOver){
+    ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#fff';ctx.font='bold 24px Arial';ctx.textAlign='center';
+    ctx.fillText('CRASHED!',W/2,H/2-15);
+    ctx.font='16px Arial';ctx.fillText('Distance: '+dist+'m',W/2,H/2+15);
+    ctx.font='13px Arial';ctx.fillStyle='#4fc3f7';ctx.fillText('Tap to restart',W/2,H/2+45);
+    cv.addEventListener('pointerdown',restart,{once:true});
+    return;
+  }
+  requestAnimationFrame(loop);
+}
+function restart(){
+  dist=0;gameOver=false;bike.x=80;bike.speed=3;bike.angle=0;bike.angVel=0;camX=0;
+  genTerrain();bike.y=getTY(80);
+  document.getElementById('dist').textContent=0;
+  loop();
+}
+bike.y=getTY(bike.x);
+loop();
+</script>
+</body>
+</html>

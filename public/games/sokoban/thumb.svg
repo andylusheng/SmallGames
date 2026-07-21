@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#1a1a2e"/>
+<rect x="80" y="40" width="40" height="40" fill="#37474f"/>
+<rect x="120" y="40" width="40" height="40" fill="#37474f"/>
+<rect x="160" y="40" width="40" height="40" fill="#37474f"/>
+<rect x="200" y="40" width="40" height="40" fill="#37474f"/>
+<rect x="240" y="40" width="40" height="40" fill="#37474f"/>
+<rect x="80" y="80" width="40" height="40" fill="#16213e"/>
+<rect x="120" y="80" width="40" height="40" fill="#ff8f00"/>
+<rect x="160" y="80" width="40" height="40" fill="#16213e"/>
+<rect x="200" y="80" width="40" height="40" fill="#1b5e20"/>
+<rect x="240" y="80" width="40" height="40" fill="#37474f"/>
+<rect x="80" y="120" width="40" height="40" fill="#37474f"/>
+<rect x="120" y="120" width="40" height="40" fill="#16213e"/>
+<rect x="160" y="120" width="40" height="40" fill="#4fc3f7"/>
+<rect x="200" y="120" width="40" height="40" fill="#16213e"/>
+<rect x="240" y="120" width="40" height="40" fill="#37474f"/>
+<text x="200" y="220" font-size="16" fill="#4fc3f7" font-family="Arial" text-anchor="middle">Level 3 • Moves: 12</text>
+<text x="200" y="280" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">📦 SOKOBAN</text>
+</svg>

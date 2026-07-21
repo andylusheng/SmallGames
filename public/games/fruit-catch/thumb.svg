@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#1a1a2e"/>
+<text x="100" y="70" font-size="30">🍎</text>
+<text x="200" y="50" font-size="30">🍊</text>
+<text x="280" y="80" font-size="30">🍇</text>
+<text x="150" y="120" font-size="30">🍓</text>
+<text x="250" y="130" font-size="30">🍌</text>
+<path d="M140 220 Q200 250 260 220 L250 240 Q200 260 150 240 Z" fill="#8d6e63"/>
+<rect x="190" y="240" width="20" height="30" fill="#5d4037"/>
+<text x="200" y="285" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">🧺 FRUIT CATCH</text>
+</svg>

@@ -1,0 +1,3 @@
+/category/* /:splat 301
+/zh/category/* /zh/:splat 301
+/en/* /:splat 301

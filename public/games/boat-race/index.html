@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Boat Race</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Distance: <span id="ds">0</span>m | Best: <span id="bs">0</span>m</div>
+<canvas id="c"></canvas>
+<div id="msg">← → or Touch sides to steer | Avoid rocks and banks!</div>
+<script>
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80);
+const c=document.getElementById('c');c.width=W;c.height=H;
+const ctx=c.getContext('2d');
+let dist=0,gameOver=false,best=+localStorage.getItem('boat-race-best')||0;
+document.getElementById('bs').textContent=best;
+let boat={x:W/2,y:H-80,w:20,h:30},obstacles=[],speed=3,spawnT=0,riverL=60,riverR=W-60,keys={};
+document.addEventListener('keydown',e=>{keys[e.key]=true;if(gameOver&&e.key===' ')reset();});
+document.addEventListener('keyup',e=>keys[e.key]=false);
+c.addEventListener('pointerdown',e=>{if(gameOver){reset();return;}const r=c.getBoundingClientRect();const x=e.clientX-r.left;if(x<W/2)keys['ArrowLeft']=true;else keys['ArrowRight']=true;});
+c.addEventListener('pointerup',()=>{keys['ArrowLeft']=false;keys['ArrowRight']=false;});
+function reset(){dist=0;gameOver=false;obstacles=[];speed=3;boat.x=W/2;riverL=60;riverR=W-60;document.getElementById('ds').textContent=0;}
+function update(){if(gameOver)return;dist++;speed=3+dist*0.003;document.getElementById('ds').textContent=Math.floor(dist/10);
+if(keys['ArrowLeft']||keys['a'])boat.x-=4;
+if(keys['ArrowRight']||keys['d'])boat.x+=4;
+riverL+=Math.sin(dist*0.02)*1.5;riverR+=Math.sin(dist*0.02+1)*1.5;
+riverL=Math.max(30,Math.min(W/2-50,riverL));riverR=Math.max(W/2+50,Math.min(W-30,riverR));
+if(boat.x-boat.w/2<riverL||boat.x+boat.w/2>riverR){endGame();return;}
+spawnT++;if(spawnT>40){spawnT=0;const rx=riverL+20+Math.random()*(riverR-riverL-40);obstacles.push({x:rx,y:-30,r:12+Math.random()*10});}
+obstacles.forEach((o,i)=>{o.y+=speed;if(o.y>H+30){obstacles.splice(i,1);return;}
+if(Math.hypot(boat.x-o.x,boat.y-o.y)<o.r+12){endGame();}});}
+function endGame(){gameOver=true;if(Math.floor(dist/10)>best){best=Math.floor(dist/10);localStorage.setItem('boat-race-best',best);document.getElementById('bs').textContent=best;}}
+function draw(){ctx.fillStyle='#1b5e20';ctx.fillRect(0,0,W,H);
+ctx.fillStyle='#1565c0';ctx.beginPath();ctx.moveTo(riverL,0);ctx.lineTo(riverR,0);ctx.lineTo(riverR,H);ctx.lineTo(riverL,H);ctx.fill();
+ctx.fillStyle='#1976d2';for(let i=0;i<H;i+=30){ctx.fillRect(riverL+10,i+(dist*speed%30),riverR-riverL-20,2);}
+ctx.fillStyle='#5d4037';obstacles.forEach(o=>{ctx.beginPath();ctx.arc(o.x,o.y,o.r,0,Math.PI*2);ctx.fill();ctx.fillStyle='#4e342e';ctx.beginPath();ctx.arc(o.x-3,o.y-3,o.r*0.4,0,Math.PI*2);ctx.fill();ctx.fillStyle='#5d4037';});
+ctx.save();ctx.translate(boat.x,boat.y);ctx.fillStyle='#fff';ctx.beginPath();ctx.moveTo(0,-boat.h/2);ctx.lineTo(-boat.w/2,boat.h/2);ctx.lineTo(boat.w/2,boat.h/2);ctx.closePath();ctx.fill();ctx.fillStyle='#e94560';ctx.fillRect(-2,-boat.h/2,4,boat.h*0.6);ctx.restore();
+if(gameOver){ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#e94560';ctx.font='bold 28px Arial';ctx.textAlign='center';ctx.fillText('CRASHED!',W/2,H/2-20);ctx.fillStyle='#fff';ctx.font='16px Arial';ctx.fillText(Math.floor(dist/10)+'m | Tap to retry',W/2,H/2+20);}}
+function loop(){update();draw();requestAnimationFrame(loop);}
+loop();
+</script>
+</body>
+</html>

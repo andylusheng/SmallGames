@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Number Puzzle</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:10px}
+h1{color:#fff;font-size:20px;margin-bottom:6px}
+.hud{display:flex;gap:16px;margin-bottom:12px;color:#fff;font-size:14px}
+.hud span{color:#4fc3f7;font-weight:bold}
+#board{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-width:320px;width:85vw}
+.tile{aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:bold;cursor:pointer;transition:transform .1s;user-select:none}
+.tile.num{background:#0f3460;color:#4fc3f7}
+.tile.num:hover{transform:scale(1.05);background:#163a6e}
+.tile.empty{background:transparent;cursor:default}
+.tile.correct{color:#4caf50}
+#win{display:none;color:#4caf50;font-size:20px;font-weight:bold;margin-top:12px}
+#shuffle{margin-top:12px;padding:8px 20px;border:none;border-radius:8px;background:#4fc3f7;color:#1a1a2e;font-weight:bold;font-size:14px;cursor:pointer}
+#shuffle:hover{background:#81d4fa}
+</style>
+</head>
+<body>
+<h1>🔢 Number Puzzle</h1>
+<div class="hud">Moves: <span id="mv">0</span> | Time: <span id="tm">0s</span></div>
+<div id="board"></div>
+<div id="win">🎉 Solved!</div>
+<button id="shuffle">Shuffle</button>
+<script>
+const N=4;
+let tiles,moves,timer,seconds,solved;
+const boardEl=document.getElementById('board');
+function init(){
+  tiles=[...Array(N*N).keys()]; // 0 = empty (last)
+  moves=0;seconds=0;solved=false;
+  clearInterval(timer);
+  document.getElementById('mv').textContent=0;
+  document.getElementById('tm').textContent='0s';
+  document.getElementById('win').style.display='none';
+  shuffle();
+}
+function shuffle(){
+  // do random valid moves to ensure solvable
+  let empty=tiles.indexOf(0);
+  for(let i=0;i<200;i++){
+    const neighbors=getNeighbors(empty);
+    const pick=neighbors[Math.floor(Math.random()*neighbors.length)];
+    [tiles[empty],tiles[pick]]=[tiles[pick],tiles[empty]];
+    empty=pick;
+  }
+  moves=0;seconds=0;solved=false;
+  document.getElementById('mv').textContent=0;
+  document.getElementById('win').style.display='none';
+  clearInterval(timer);
+  timer=setInterval(()=>{if(!solved){seconds++;document.getElementById('tm').textContent=seconds+'s';}},1000);
+  render();
+}
+function getNeighbors(idx){
+  const r=Math.floor(idx/N),c=idx%N,n=[];
+  if(r>0)n.push(idx-N);
+  if(r<N-1)n.push(idx+N);
+  if(c>0)n.push(idx-1);
+  if(c<N-1)n.push(idx+1);
+  return n;
+}
+function render(){
+  boardEl.innerHTML='';
+  for(let i=0;i<N*N;i++){
+    const div=document.createElement('div');
+    if(tiles[i]===0){
+      div.className='tile empty';
+    }else{
+      div.className='tile num'+(tiles[i]===i+1?' correct':'');
+      div.textContent=tiles[i];
+      div.addEventListener('click',()=>move(i));
+    }
+    boardEl.appendChild(div);
+  }
+}
+function move(idx){
+  if(solved)return;
+  const empty=tiles.indexOf(0);
+  if(getNeighbors(empty).includes(idx)){
+    [tiles[empty],tiles[idx]]=[tiles[idx],tiles[empty]];
+    moves++;
+    document.getElementById('mv').textContent=moves;
+    render();
+    checkWin();
+  }
+}
+function checkWin(){
+  for(let i=0;i<N*N-1;i++){
+    if(tiles[i]!==i+1)return;
+  }
+  solved=true;
+  clearInterval(timer);
+  document.getElementById('win').style.display='block';
+}
+document.getElementById('shuffle').addEventListener('click',shuffle);
+init();
+</script>
+<script>
+(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
+</script>
+</body>
+</html>

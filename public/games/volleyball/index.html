@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Volleyball</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">You: <span id="p1">0</span> | CPU: <span id="p2">0</span> | First to 7!</div>
+<canvas id="c"></canvas>
+<div id="msg">← → to move | Space/Tap to jump | Hit the ball over the net!</div>
+<script>
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80);
+const c=document.getElementById('c');c.width=W;c.height=H;
+const ctx=c.getContext('2d');
+let s1=0,s2=0,gameOver=false;
+const ground=H-20,netH=80,netX=W/2;
+let p1={x:W*0.25,y:ground,vy:0,r:18},p2={x:W*0.75,y:ground,vy:0,r:18};
+let ball={x:W*0.25,y:100,vx:2,vy:0,r:10};
+let keys={};
+document.addEventListener('keydown',e=>{keys[e.key]=true;if(e.key===' ')e.preventDefault();});
+document.addEventListener('keyup',e=>keys[e.key]=false);
+c.addEventListener('pointerdown',e=>{if(gameOver){reset();return;}const r=c.getBoundingClientRect();const x=e.clientX-r.left;if(x<W/2){p1.vy=-10;}else{keys['ArrowRight']=true;setTimeout(()=>keys['ArrowRight']=false,100);}});
+function reset(){s1=0;s2=0;gameOver=false;document.getElementById('p1').textContent=0;document.getElementById('p2').textContent=0;serve(1);}
+function serve(side){ball.x=side===1?W*0.25:W*0.75;ball.y=80;ball.vx=side===1?2:-2;ball.vy=0;p1.x=W*0.25;p2.x=W*0.75;p1.y=ground;p2.y=ground;}
+serve(1);
+function update(){if(gameOver)return;
+if(keys['ArrowLeft']||keys['a'])p1.x-=4;
+if(keys['ArrowRight']||keys['d'])p1.x+=4;
+if((keys[' ']||keys['ArrowUp']||keys['w'])&&p1.y>=ground)p1.vy=-10;
+p1.x=Math.max(p1.r,Math.min(netX-p1.r,p1.x));
+p1.vy+=0.5;p1.y+=p1.vy;if(p1.y>ground){p1.y=ground;p1.vy=0;}
+const targetX=ball.x>netX?ball.x:W*0.75;
+p2.x+=(targetX-p2.x)*0.04;p2.x=Math.max(netX+p2.r,Math.min(W-p2.r,p2.x));
+if(ball.x>netX&&ball.y<ground-40&&p2.y>=ground&&Math.random()<0.03)p2.vy=-9;
+p2.vy+=0.5;p2.y+=p2.vy;if(p2.y>ground){p2.y=ground;p2.vy=0;}
+ball.vy+=0.25;ball.x+=ball.vx;ball.y+=ball.vy;
+if(ball.x<ball.r||ball.x>W-ball.r)ball.vx*=-1;
+if(ball.y<ball.r){ball.y=ball.r;ball.vy*=-0.8;}
+[p1,p2].forEach(p=>{const dx=ball.x-p.x,dy=ball.y-(p.y-p.r);const dist=Math.hypot(dx,dy);if(dist<ball.r+p.r){const angle=Math.atan2(dy,dx);ball.vx=Math.cos(angle)*5;ball.vy=Math.sin(angle)*5-2;ball.x=p.x+Math.cos(angle)*(ball.r+p.r+1);ball.y=(p.y-p.r)+Math.sin(angle)*(ball.r+p.r+1);}});
+if(ball.x<netX+3&&ball.x>netX-3&&ball.y>ground-netH){ball.vx*=-1;}
+if(ball.y>ground-ball.r){if(ball.x<netX){s2++;document.getElementById('p2').textContent=s2;serve(1);}else{s1++;document.getElementById('p1').textContent=s1;serve(2);}
+if(s1>=7||s2>=7){gameOver=true;}}}
+function draw(){ctx.fillStyle='#0f3460';ctx.fillRect(0,0,W,H);
+ctx.fillStyle='#2d5a27';ctx.fillRect(0,ground,W,H-ground);
+ctx.fillStyle='#fff';ctx.fillRect(netX-2,ground-netH,4,netH);ctx.fillStyle='#ccc';for(let i=0;i<netH;i+=10)ctx.fillRect(netX-2,ground-netH+i,4,1);
+ctx.fillStyle='#4fc3f7';ctx.beginPath();ctx.arc(p1.x,p1.y-p1.r,p1.r,Math.PI,0);ctx.fill();ctx.fillRect(p1.x-p1.r,p1.y-p1.r,p1.r*2,p1.r);
+ctx.fillStyle='#e94560';ctx.beginPath();ctx.arc(p2.x,p2.y-p2.r,p2.r,Math.PI,0);ctx.fill();ctx.fillRect(p2.x-p2.r,p2.y-p2.r,p2.r*2,p2.r);
+ctx.fillStyle='#ffc107';ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#ff8f00';ctx.stroke();
+if(gameOver){ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);ctx.fillStyle=s1>=7?'#4fc3f7':'#e94560';ctx.font='bold 24px Arial';ctx.textAlign='center';ctx.fillText(s1>=7?'YOU WIN! 🎉':'CPU WINS!',W/2,H/2-15);ctx.fillStyle='#fff';ctx.font='16px Arial';ctx.fillText(s1+' - '+s2+' | Tap to play again',W/2,H/2+15);}}
+function loop(){update();draw();requestAnimationFrame(loop);}
+loop();
+</script>
+</body>
+</html>

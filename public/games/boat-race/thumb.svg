@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#0a2a4a"/>
+<rect x="0" y="200" width="400" height="100" fill="#1565c0"/>
+<path d="M0 210 Q50 200 100 210 Q150 220 200 210 Q250 200 300 210 Q350 220 400 210 V300 H0 Z" fill="#1976d2"/>
+<polygon points="180,120 220,120 230,180 170,180" fill="#8b4513"/>
+<polygon points="200,60 200,120 240,120" fill="#fff"/>
+<polygon points="200,70 200,120 165,120" fill="#e94560"/>
+<circle cx="100" cy="230" r="15" fill="#4caf50"/>
+<circle cx="320" cy="240" r="12" fill="#ffc107"/>
+<text x="200" y="285" text-anchor="middle" fill="#4fc3f7" font-size="24" font-family="Arial" font-weight="bold">BOAT RACE</text>
+</svg>

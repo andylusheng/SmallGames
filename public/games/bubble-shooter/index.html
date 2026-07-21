@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Bubble Shooter</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;border:2px solid #0f3460;touch-action:none}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Score: <span id="sc">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">Aim and tap to shoot • Match 3+ same colors to pop</div>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80),R=16,COLS=11;
+c.width=W;c.height=H;
+const COLORS=['#e94560','#4fc3f7','#4caf50','#ffc107','#9c27b0','#ff9800'];
+let grid=[],score=0,gameOver=false;
+let shooter={x:W/2,y:H-30,angle:-Math.PI/2,color:0,nextColor:0};
+let bullet=null,aimAngle=-Math.PI/2;
+
+function init(){
+  grid=[];score=0;gameOver=false;bullet=null;
+  document.getElementById('sc').textContent='0';
+  for(let row=0;row<6;row++){
+    grid[row]=[];
+    const cols=row%2===0?COLS:COLS-1;
+    for(let col=0;col<cols;col++){
+      grid[row][col]=Math.random()<0.75?Math.floor(Math.random()*5):-1;
+    }
+  }
+  shooter.color=randColor();shooter.nextColor=randColor();
+  loop();
+}
+
+function randColor(){return Math.floor(Math.random()*5);}
+
+function getXY(row,col){
+  const offset=row%2===0?R:R*2;
+  return{x:col*R*2+offset,y:row*R*1.8+R};
+}
+
+function loop(){
+  if(gameOver)return;
+  update();draw();requestAnimationFrame(loop);
+}
+
+function update(){
+  if(bullet){
+    bullet.x+=Math.cos(bullet.angle)*8;
+    bullet.y+=Math.sin(bullet.angle)*8;
+    if(bullet.x<R||bullet.x>W-R)bullet.angle=Math.PI-bullet.angle;
+    if(bullet.y<R){snapBubble();return;}
+    // Check collision with grid
+    for(let row=0;row<grid.length;row++){
+      const cols=grid[row].length;
+      for(let col=0;col<cols;col++){
+        if(grid[row][col]===-1)continue;
+        const{x,y}=getXY(row,col);
+        if(Math.sqrt((bullet.x-x)**2+(bullet.y-y)**2)<R*1.8){snapBubble();return;}
+      }
+    }
+  }
+}
+
+function snapBubble(){
+  const row=Math.max(0,Math.round((bullet.y-R)/(R*1.8)));
+  const cols=row%2===0?COLS:COLS-1;
+  const offset=row%2===0?R:R*2;
+  let col=Math.round((bullet.x-offset)/(R*2));
+  col=Math.max(0,Math.min(cols-1,col));
+  
+  while(grid.length<=row)grid.push([]);
+  while(grid[row].length<cols)grid[row].push(-1);
+  grid[row][col]=bullet.color;
+  
+  // Find matches
+  const matches=findConnected(row,col,bullet.color);
+  if(matches.length>=3){
+    matches.forEach(([r,c2])=>grid[r][c2]=-1);
+    score+=matches.length*10;
+    document.getElementById('sc').textContent=score;
+    dropFloating();
+  }
+  
+  bullet=null;
+  shooter.color=shooter.nextColor;
+  shooter.nextColor=randColor();
+  
+  // Check game over
+  if(grid.length>14){gameOver=true;draw();}
+}
+
+function findConnected(row,col,color){
+  const visited=new Set();
+  const result=[];
+  const stack=[[row,col]];
+  while(stack.length){
+    const[r,c2]=stack.pop();
+    const key=r+','+c2;
+    if(visited.has(key))continue;
+    visited.add(key);
+    if(r<0||r>=grid.length||c2<0||c2>=(grid[r]||[]).length)continue;
+    if(grid[r][c2]!==color)continue;
+    result.push([r,c2]);
+    const neighbors=getNeighbors(r,c2);
+    neighbors.forEach(n=>stack.push(n));
+  }
+  return result;
+}
+
+function getNeighbors(row,col){
+  const even=row%2===0;
+  const dirs=even?[[-1,-1],[-1,0],[0,-1],[0,1],[1,-1],[1,0]]:[[-1,0],[-1,1],[0,-1],[0,1],[1,0],[1,1]];
+  return dirs.map(([dr,dc])=>[row+dr,col+dc]);
+}
+
+function dropFloating(){
+  // BFS from top row to find connected
+  const connected=new Set();
+  const stack=[];
+  if(grid[0])grid[0].forEach((v,i)=>{if(v!==-1){stack.push([0,i]);connected.add('0,'+i);}});
+  while(stack.length){
+    const[r,c2]=stack.pop();
+    getNeighbors(r,c2).forEach(([nr,nc])=>{
+      const key=nr+','+nc;
+      if(!connected.has(key)&&nr>=0&&nr<grid.length&&nc>=0&&nc<(grid[nr]||[]).length&&grid[nr][nc]!==-1){
+        connected.add(key);stack.push([nr,nc]);
+      }
+    });
+  }
+  // Remove unconnected
+  let dropped=0;
+  for(let r=0;r<grid.length;r++)for(let c2=0;c2<grid[r].length;c2++){
+    if(grid[r][c2]!==-1&&!connected.has(r+','+c2)){grid[r][c2]=-1;dropped++;}
+  }
+  if(dropped>0){score+=dropped*15;document.getElementById('sc').textContent=score;}
+}
+
+function draw(){
+  ctx.fillStyle='#16213e';ctx.fillRect(0,0,W,H);
+  
+  // Grid bubbles
+  for(let row=0;row<grid.length;row++){
+    for(let col=0;col<(grid[row]||[]).length;col++){
+      if(grid[row][col]===-1)continue;
+      const{x,y}=getXY(row,col);
+      ctx.fillStyle=COLORS[grid[row][col]];
+      ctx.beginPath();ctx.arc(x,y,R-1,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='rgba(255,255,255,0.2)';
+      ctx.beginPath();ctx.arc(x-4,y-4,R/3,0,Math.PI*2);ctx.fill();
+    }
+  }
+  
+  // Aim line
+  ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.setLineDash([5,5]);ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(shooter.x,shooter.y);
+  ctx.lineTo(shooter.x+Math.cos(aimAngle)*100,shooter.y+Math.sin(aimAngle)*100);
+  ctx.stroke();ctx.setLineDash([]);
+  
+  // Bullet
+  if(bullet){
+    ctx.fillStyle=COLORS[bullet.color];
+    ctx.beginPath();ctx.arc(bullet.x,bullet.y,R-1,0,Math.PI*2);ctx.fill();
+  }
+  
+  // Shooter
+  ctx.fillStyle=COLORS[shooter.color];
+  ctx.beginPath();ctx.arc(shooter.x,shooter.y,R,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=COLORS[shooter.nextColor];
+  ctx.beginPath();ctx.arc(shooter.x+30,shooter.y,R*0.7,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#aaa';ctx.font='10px Arial';ctx.textAlign='center';
+  ctx.fillText('next',shooter.x+30,shooter.y+R+10);
+  
+  if(gameOver){
+    ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#fff';ctx.font='bold 26px Arial';ctx.textAlign='center';
+    ctx.fillText('Game Over!',W/2,H/2-15);
+    ctx.fillStyle='#4fc3f7';ctx.font='18px Arial';
+    ctx.fillText('Score: '+score,W/2,H/2+15);
+    ctx.fillStyle='#aaa';ctx.font='14px Arial';
+    ctx.fillText('Tap to restart',W/2,H/2+45);
+  }
+}
+
+function shoot(){
+  if(bullet||gameOver)return;
+  bullet={x:shooter.x,y:shooter.y-20,angle:aimAngle,color:shooter.color};
+}
+
+c.addEventListener('mousemove',e=>{
+  const rect=c.getBoundingClientRect();
+  const mx=(e.clientX-rect.left)*(W/rect.width);
+  const my=(e.clientY-rect.top)*(H/rect.height);
+  aimAngle=Math.atan2(my-shooter.y,mx-shooter.x);
+  if(aimAngle>-0.1)aimAngle=-0.1;
+  if(aimAngle<-Math.PI+0.1)aimAngle=-Math.PI+0.1;
+});
+c.addEventListener('click',()=>{if(gameOver){init();return;}shoot();});
+c.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  if(gameOver){init();return;}
+  const rect=c.getBoundingClientRect();
+  const mx=(e.touches[0].clientX-rect.left)*(W/rect.width);
+  const my=(e.touches[0].clientY-rect.top)*(H/rect.height);
+  aimAngle=Math.atan2(my-shooter.y,mx-shooter.x);
+  if(aimAngle>-0.1)aimAngle=-0.1;
+  if(aimAngle<-Math.PI+0.1)aimAngle=-Math.PI+0.1;
+  shoot();
+});
+
+init();
+</script>
+</body>
+</html>

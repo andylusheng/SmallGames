@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#1a1a2e"/>
+<rect x="0" y="250" width="400" height="50" fill="#3d2b1f"/>
+<circle cx="140" cy="160" r="20" fill="#4fc3f7"/>
+<rect x="130" y="180" width="20" height="50" fill="#4fc3f7"/>
+<line x1="155" y1="190" x2="200" y2="150" stroke="#ccc" stroke-width="4"/>
+<circle cx="260" cy="160" r="20" fill="#e94560"/>
+<rect x="250" y="180" width="20" height="50" fill="#e94560"/>
+<line x1="245" y1="190" x2="200" y2="150" stroke="#aaa" stroke-width="4"/>
+<line x1="180" y1="120" x2="220" y2="180" stroke="#ffc107" stroke-width="3"/>
+<line x1="220" y1="120" x2="180" y2="180" stroke="#ffc107" stroke-width="3"/>
+<text x="200" y="280" text-anchor="middle" fill="#4fc3f7" font-size="24" font-family="Arial" font-weight="bold">SWORD FIGHT</text>
+</svg>

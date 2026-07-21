@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Tap Tycoon</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:16px;color:#fff}
+h1{font-size:20px;margin-bottom:8px}
+.hud{display:flex;gap:16px;margin-bottom:12px;font-size:14px}
+.hud span{color:#4fc3f7;font-weight:bold}
+#tapBtn{width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,#4fc3f7,#0288d1);border:none;color:#fff;font-size:18px;font-weight:bold;cursor:pointer;margin:16px 0;transition:transform .1s;box-shadow:0 6px 20px rgba(79,195,247,0.4)}
+#tapBtn:active{transform:scale(0.92)}
+#upgrades{display:flex;flex-direction:column;gap:8px;width:100%;max-width:320px}
+.upg{display:flex;justify-content:space-between;align-items:center;background:#16213e;padding:10px 14px;border-radius:8px;cursor:pointer;transition:background .15s}
+.upg:hover{background:#1a4a7a}
+.upg .info{font-size:13px}
+.upg .cost{color:#ffc107;font-size:12px;font-weight:bold}
+.upg.locked{opacity:0.5;cursor:not-allowed}
+#stats{margin-top:12px;font-size:12px;color:#aaa;text-align:center}
+</style>
+</head>
+<body>
+<h1>💰 Tap Tycoon</h1>
+<div class="hud">Cash: $<span id="cash">0</span> | Per sec: $<span id="ps">0</span></div>
+<button id="tapBtn">TAP!<br><small>+$<span id="tp">1</span></small></button>
+<div id="upgrades"></div>
+<div id="stats">Total earned: $<span id="te">0</span> | Best: $<span id="bs">0</span></div>
+<script>
+let cash=0,totalEarned=0,tapPower=1,perSec=0,best=+localStorage.getItem('tap-tycoon-best')||0;
+document.getElementById('bs').textContent=fmt(best);
+const upgrades=[
+{name:'Auto Clicker',desc:'+1/sec',baseCost:15,type:'ps',val:1,level:0},
+{name:'Better Tap',desc:'+1 per tap',baseCost:50,type:'tap',val:1,level:0},
+{name:'Worker',desc:'+5/sec',baseCost:200,type:'ps',val:5,level:0},
+{name:'Factory',desc:'+25/sec',baseCost:1000,type:'ps',val:25,level:0},
+{name:'Golden Touch',desc:'+10 per tap',baseCost:2500,type:'tap',val:10,level:0},
+{name:'Corporation',desc:'+100/sec',baseCost:10000,type:'ps',val:100,level:0},
+{name:'Mega Tap',desc:'+50 per tap',baseCost:25000,type:'tap',val:50,level:0},
+{name:'Empire',desc:'+500/sec',baseCost:100000,type:'ps',val:500,level:0}
+];
+function fmt(n){if(n>=1e9)return(n/1e9).toFixed(1)+'B';if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(1)+'K';return Math.floor(n)+'';}
+function getCost(u){return Math.floor(u.baseCost*Math.pow(1.15,u.level));}
+function render(){document.getElementById('cash').textContent=fmt(cash);document.getElementById('ps').textContent=fmt(perSec);document.getElementById('tp').textContent=fmt(tapPower);document.getElementById('te').textContent=fmt(totalEarned);
+const el=document.getElementById('upgrades');el.innerHTML='';
+upgrades.forEach((u,i)=>{const cost=getCost(u);const div=document.createElement('div');div.className='upg'+(cash<cost?' locked':'');
+div.innerHTML=`<div class="info"><b>${u.name}</b> Lv${u.level}<br><small>${u.desc}</small></div><div class="cost">$${fmt(cost)}</div>`;
+div.addEventListener('click',()=>buy(i));el.appendChild(div);});}
+function buy(i){const u=upgrades[i],cost=getCost(u);if(cash<cost)return;cash-=cost;u.level++;
+if(u.type==='ps')perSec+=u.val;else tapPower+=u.val;render();}
+document.getElementById('tapBtn').addEventListener('click',()=>{cash+=tapPower;totalEarned+=tapPower;if(totalEarned>best){best=totalEarned;localStorage.setItem('tap-tycoon-best',best);document.getElementById('bs').textContent=fmt(best);}render();});
+setInterval(()=>{if(perSec>0){cash+=perSec/10;totalEarned+=perSec/10;if(totalEarned>best){best=totalEarned;localStorage.setItem('tap-tycoon-best',best);document.getElementById('bs').textContent=fmt(best);}render();}},100);
+render();
+</script>
+<script>
+(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
+</script>
+</body>
+</html>

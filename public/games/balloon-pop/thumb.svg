@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#1a1a2e"/>
+<ellipse cx="120" cy="120" rx="30" ry="38" fill="#e94560"/>
+<path d="M120 82 L120 70" stroke="#4caf50" stroke-width="3"/>
+<ellipse cx="220" cy="100" rx="25" ry="32" fill="#4fc3f7"/>
+<path d="M220 68 L220 58" stroke="#4caf50" stroke-width="3"/>
+<ellipse cx="300" cy="140" rx="28" ry="35" fill="#ffc107"/>
+<path d="M300 105 L300 93" stroke="#4caf50" stroke-width="3"/>
+<ellipse cx="170" cy="180" rx="22" ry="28" fill="#9c27b0"/>
+<text x="260" y="200" font-size="28" text-anchor="middle">💥</text>
+<text x="200" y="280" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">🎈 BALLOON POP</text>
+</svg>

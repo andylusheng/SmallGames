@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#1a1a2e"/>
+<line x1="80" y1="240" x2="180" y2="240" stroke="#4fc3f7" stroke-width="3"/>
+<line x1="100" y1="240" x2="100" y2="40" stroke="#4fc3f7" stroke-width="3"/>
+<line x1="100" y1="40" x2="170" y2="40" stroke="#4fc3f7" stroke-width="3"/>
+<line x1="170" y1="40" x2="170" y2="60" stroke="#4fc3f7" stroke-width="3"/>
+<circle cx="170" cy="78" r="16" fill="none" stroke="#e94560" stroke-width="3"/>
+<line x1="170" y1="94" x2="170" y2="140" stroke="#e94560" stroke-width="3"/>
+<line x1="170" y1="105" x2="150" y2="125" stroke="#e94560" stroke-width="3"/>
+<line x1="170" y1="105" x2="190" y2="125" stroke="#e94560" stroke-width="3"/>
+<line x1="170" y1="140" x2="155" y2="170" stroke="#e94560" stroke-width="3"/>
+<line x1="170" y1="140" x2="185" y2="170" stroke="#e94560" stroke-width="3"/>
+<text x="280" y="100" font-size="24" fill="#fff" font-family="monospace" text-anchor="middle">D _ A G _ N</text>
+<text x="280" y="140" font-size="13" fill="#aaa" font-family="Arial" text-anchor="middle">Hint: Mythical creature</text>
+<text x="200" y="280" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">💀 HANGMAN</text>
+</svg>

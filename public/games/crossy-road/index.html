@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Crossy Road</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Score: <span id="sc">0</span> | Best: <span id="bs">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">Tap/↑ to hop forward | ← → to move sideways | Cross safely!</div>
+<script>
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80);
+const c=document.getElementById('c');c.width=W;c.height=H;
+const ctx=c.getContext('2d');
+const ROWS=11,RH=Math.floor(H/ROWS),COLS=9,CW=Math.floor(W/COLS);
+let score=0,gameOver=false,best=+localStorage.getItem('crossy-road-best')||0;
+document.getElementById('bs').textContent=best;
+let player={col:4,row:ROWS-1},rows=[],maxRow=ROWS-1;
+function genRow(r){const type=r%5===0?'safe':(Math.random()>0.4?'road':'water');const row={type,items:[],speed:0};
+if(type==='road'){row.speed=(Math.random()>0.5?1:-1)*(1+Math.random()*1.5+score*0.02);const n=2+Math.floor(Math.random()*2);for(let i=0;i<n;i++)row.items.push({x:i*(W/n)+Math.random()*40,w:CW*(0.8+Math.random()*0.5)});}
+if(type==='water'){row.speed=(Math.random()>0.5?1:-1)*(0.8+Math.random());const n=3;for(let i=0;i<n;i++)row.items.push({x:i*(W/n)+Math.random()*30,w:CW*(1+Math.random()*0.8)});}
+return row;}
+function init(){rows=[];for(let r=0;r<ROWS;r++){rows[r]=r===ROWS-1?{type:'safe',items:[]}:genRow(r);}player={col:4,row:ROWS-1};maxRow=ROWS-1;}
+init();
+function move(dc,dr){if(gameOver)return;player.col=Math.max(0,Math.min(COLS-1,player.col+dc));player.row+=dr;
+if(player.row<0){score++;document.getElementById('sc').textContent=score;if(score>best){best=score;localStorage.setItem('crossy-road-best',best);document.getElementById('bs').textContent=best;}
+rows.shift();rows.push(genRow(0));player.row=0;maxRow=0;}
+if(player.row>=ROWS){die();}}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowUp'||e.key==='w')move(0,-1);if(e.key==='ArrowDown')move(0,1);if(e.key==='ArrowLeft'||e.key==='a')move(-1,0);if(e.key==='ArrowRight'||e.key==='d')move(1,0);e.preventDefault();});
+let sx=0,sy=0;
+c.addEventListener('pointerdown',e=>{if(gameOver){reset();return;}sx=e.clientX;sy=e.clientY;});
+c.addEventListener('pointerup',e=>{const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.abs(dx)<15&&Math.abs(dy)<15){move(0,-1);return;}if(Math.abs(dx)>Math.abs(dy)){move(dx>0?1:-1,0);}else{move(0,dy>0?1:-1);}});
+function reset(){score=0;gameOver=false;document.getElementById('sc').textContent=0;init();}
+function die(){gameOver=true;}
+function update(){if(gameOver)return;const px=player.col*CW+CW/2;
+const row=rows[player.row];if(!row)return;
+if(row.type==='road'){row.items.forEach(item=>{item.x+=row.speed;if(item.x>W+60)item.x=-60;if(item.x<-60)item.x=W+60;
+if(px>item.x-5&&px<item.x+item.w+5){die();}});}
+else if(row.type==='water'){let onLog=false;row.items.forEach(item=>{item.x+=row.speed;if(item.x>W+60)item.x=-60;if(item.x<-60)item.x=W+60;
+if(px>item.x&&px<item.x+item.w){onLog=true;player.col=Math.max(0,Math.min(COLS-1,player.col+row.speed/CW));}});
+if(!onLog)die();}}
+function draw(){for(let r=0;r<ROWS;r++){const y=r*RH;const row=rows[r];if(row.type==='safe'){ctx.fillStyle='#4caf50';ctx.fillRect(0,y,W,RH);}else if(row.type==='road'){ctx.fillStyle='#37474f';ctx.fillRect(0,y,W,RH);}else{ctx.fillStyle='#1565c0';ctx.fillRect(0,y,W,RH);}}
+rows.forEach((row,r)=>{if(row.type==='safe')return;row.items.forEach(item=>{const y=r*RH;if(row.type==='road'){ctx.fillStyle='#e94560';ctx.fillRect(item.x,y+4,item.w,RH-8);ctx.fillStyle='#ffc107';ctx.fillRect(item.x+(row.speed>0?item.w-5:2),y+RH/2-2,3,4);}else{ctx.fillStyle='#6d4c41';ctx.fillRect(item.x,y+3,item.w,RH-6);}});});
+const px=player.col*CW+CW/2,py=player.row*RH+RH/2;
+ctx.font=(RH-4)+'px Arial';ctx.textAlign='center';ctx.fillText('🐔',px,py+RH/3);
+if(gameOver){ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#e94560';ctx.font='bold 24px Arial';ctx.textAlign='center';ctx.fillText('GAME OVER',W/2,H/2-15);ctx.fillStyle='#fff';ctx.font='16px Arial';ctx.fillText('Score: '+score+' | Tap to retry',W/2,H/2+15);}}
+function loop(){update();draw();requestAnimationFrame(loop);}
+loop();
+</script>
+</body>
+</html>

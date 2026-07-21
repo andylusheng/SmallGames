@@ -1,0 +1,58 @@
+{
+  "site": {
+    "name": "PlayFree Games",
+    "tagline": "Play Free Online Games - No Download Required"
+  },
+  "nav": {
+    "home": "Home",
+    "categories": "Categories",
+    "search": "Search games...",
+    "newGames": "New Games",
+    "popular": "Popular"
+  },
+  "categories": {
+    "all": "All Games",
+    "action": "Action",
+    "puzzle": "Puzzle",
+    "arcade": "Arcade",
+    "racing": "Racing",
+    "sports": "Sports",
+    "shooting": "Shooting",
+    "strategy": "Strategy",
+    "casual": "Casual",
+    "adventure": "Adventure"
+  },
+  "home": {
+    "featured": "Featured Games",
+    "newGames": "New Games",
+    "popularGames": "Popular Games",
+    "allGames": "All Games",
+    "playNow": "Play Now",
+    "loadMore": "Load More"
+  },
+  "game": {
+    "play": "Play Game",
+    "fullscreen": "Fullscreen",
+    "share": "Share",
+    "relatedGames": "You May Also Like",
+    "loading": "Loading Game...",
+    "clickToPlay": "Click to Play",
+    "about": "About This Game",
+    "instructions": "How to Play",
+    "tips": "Rotate your device for a better experience"
+  },
+  "footer": {
+    "about": "About Us",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "dmca": "DMCA",
+    "contact": "Contact",
+    "copyright": "All rights reserved.",
+    "description": "Play thousands of free online games on your browser. No downloads, no sign-ups. Just click and play!"
+  },
+  "search": {
+    "placeholder": "Search games...",
+    "noResults": "No games found",
+    "results": "games found"
+  }
+}

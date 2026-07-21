@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Fruit Slash</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a0a2e;overflow:hidden;touch-action:none;font-family:Arial,sans-serif}
+canvas{display:block;margin:0 auto}
+#ui{position:absolute;top:10px;left:10px;color:#fff;font-size:16px;text-shadow:1px 1px 2px rgba(0,0,0,.5)}
+#over{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;text-align:center;display:none}
+#over h1{font-size:32px;color:#ff6b6b;margin-bottom:10px}
+#over button{padding:12px 30px;font-size:16px;background:#6366f1;color:#fff;border:none;border-radius:8px;cursor:pointer}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="ui"><div>Score: <span id="sc">0</span></div><div>Lives: <span id="lv">3</span></div></div>
+<div id="over"><h1>GAME OVER</h1><p style="font-size:18px;margin-bottom:15px">Score: <span id="fs">0</span></p><button onclick="restart()">Play Again</button></div>
+<script>
+const c=document.getElementById('c'),x=c.getContext('2d');
+let W,H;function resize(){W=c.width=Math.min(innerWidth-16,860);H=c.height=Math.min(innerHeight-80,640)}
+resize();addEventListener('resize',resize);
+let score=0,lives=3,running=true,fruits=[],slices=[],particles=[];
+const colors=['#ff6b6b','#feca57','#48dbfb','#ff9ff3','#54a0ff','#5f27cd'];
+const emojis=['🍎','🍊','🍋','🍉','🍇','🍓','🥝','🍑'];
+let spawnT=0,mouseDown=false,lastX=0,lastY=0;
+
+function spawnFruit(){
+  const r=20+Math.random()*15;
+  fruits.push({x:Math.random()*(W-80)+40,y:H+r,vy:-(8+Math.random()*4),vx:(Math.random()-.5)*4,r,
+    color:colors[Math.floor(Math.random()*colors.length)],emoji:emojis[Math.floor(Math.random()*emojis.length)],sliced:false});
+}
+function slice(mx,my){
+  fruits.forEach(f=>{
+    if(!f.sliced&&Math.hypot(mx-f.x,my-f.y)<f.r+15){
+      f.sliced=true;score+=10;document.getElementById('sc').textContent=score;
+      for(let i=0;i<6;i++)particles.push({x:f.x,y:f.y,vx:(Math.random()-.5)*8,vy:(Math.random()-.5)*8,life:25,color:f.color,r:3+Math.random()*4});
+      slices.push({x:f.x,y:f.y,life:20,emoji:f.emoji});
+    }
+  });
+}
+c.addEventListener('pointerdown',e=>{mouseDown=true;lastX=e.offsetX;lastY=e.offsetY;slice(e.offsetX,e.offsetY)});
+c.addEventListener('pointermove',e=>{if(mouseDown){slice(e.offsetX,e.offsetY);
+  slices.push({x:e.offsetX,y:e.offsetY,life:8,emoji:''});lastX=e.offsetX;lastY=e.offsetY}});
+c.addEventListener('pointerup',()=>mouseDown=false);
+c.addEventListener('pointerleave',()=>mouseDown=false);
+
+function update(){
+  if(!running)return;
+  spawnT++;if(spawnT>Math.max(25,50-score/20)){spawnFruit();spawnT=0}
+  fruits=fruits.filter(f=>{
+    if(f.sliced)return false;
+    f.x+=f.vx;f.y+=f.vy;f.vy+=0.25;
+    if(f.y>H+50){lives--;document.getElementById('lv').textContent=lives;if(lives<=0)gameOver();return false}
+    return true;
+  });
+  particles=particles.filter(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=0.3;p.life--;return p.life>0});
+  slices=slices.filter(s=>{s.life--;return s.life>0});
+}
+function draw(){
+  x.fillStyle='#1a0a2e';x.fillRect(0,0,W,H);
+  // slice trail
+  slices.forEach(s=>{if(s.emoji===''){x.globalAlpha=s.life/8;x.fillStyle='#fff';x.beginPath();x.arc(s.x,s.y,3,0,7);x.fill();x.globalAlpha=1}});
+  // fruits
+  fruits.forEach(f=>{x.font=f.r*1.5+'px serif';x.textAlign='center';x.textBaseline='middle';x.fillText(f.emoji,f.x,f.y)});
+  // particles
+  particles.forEach(p=>{x.globalAlpha=p.life/25;x.fillStyle=p.color;x.beginPath();x.arc(p.x,p.y,p.r,0,7);x.fill()});
+  x.globalAlpha=1;
+}
+function gameOver(){running=false;document.getElementById('fs').textContent=score;document.getElementById('over').style.display='block'}
+function restart(){score=0;lives=3;running=true;fruits=[];particles=[];slices=[];
+  document.getElementById('sc').textContent='0';document.getElementById('lv').textContent='3';document.getElementById('over').style.display='none'}
+function loop(){update();draw();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#16213e"/>
+<rect x="60" y="30" width="55" height="20" rx="4" fill="#e94560"/>
+<rect x="120" y="30" width="55" height="20" rx="4" fill="#ff9800"/>
+<rect x="180" y="30" width="55" height="20" rx="4" fill="#ffc107"/>
+<rect x="240" y="30" width="55" height="20" rx="4" fill="#4caf50"/>
+<rect x="300" y="30" width="55" height="20" rx="4" fill="#4fc3f7"/>
+<rect x="60" y="55" width="55" height="20" rx="4" fill="#9c27b0"/>
+<rect x="120" y="55" width="55" height="20" rx="4" fill="#e94560"/>
+<rect x="180" y="55" width="55" height="20" rx="4" fill="#4fc3f7"/>
+<rect x="240" y="55" width="55" height="20" rx="4" fill="#ff9800"/>
+<rect x="300" y="55" width="55" height="20" rx="4" fill="#ffc107"/>
+<rect x="90" y="80" width="55" height="20" rx="4" fill="#4caf50"/>
+<rect x="150" y="80" width="55" height="20" rx="4" fill="#9c27b0"/>
+<rect x="210" y="80" width="55" height="20" rx="4" fill="#e94560"/>
+<circle cx="200" cy="180" r="8" fill="#fff"/>
+<circle cx="200" cy="180" r="11" fill="none" stroke="#4fc3f744" stroke-width="2"/>
+<rect x="160" y="240" width="80" height="14" rx="7" fill="#4fc3f7"/>
+<text x="200" y="285" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">🧱 BRICK BREAKER</text>
+</svg>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Color Fill</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:10px;color:#fff}
+h1{font-size:20px;margin-bottom:6px}
+.hud{display:flex;gap:16px;margin-bottom:10px;font-size:14px}
+.hud span{color:#4fc3f7;font-weight:bold}
+#board{display:grid;gap:1px;border-radius:8px;overflow:hidden;margin-bottom:14px}
+.cell{width:28px;height:28px;transition:background .2s}
+#palette{display:flex;gap:10px;margin-bottom:10px}
+.color-btn{width:40px;height:40px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .15s}
+.color-btn:active{transform:scale(.9)}
+.color-btn.active{border-color:#fff;transform:scale(1.1)}
+#msg{font-size:14px;color:#aaa;min-height:20px}
+#msg.win{color:#4caf50;font-weight:bold}
+button{margin-top:8px;padding:10px 24px;border-radius:20px;border:none;background:#4fc3f7;color:#1a1a2e;font-weight:bold;font-size:15px;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>🎨 Color Fill</h1>
+<div class="hud">Moves: <span id="mv">0</span>/25 | Filled: <span id="pc">0</span>%</div>
+<div id="board"></div>
+<div id="palette"></div>
+<div id="msg">Fill the entire board from top-left!</div>
+<button onclick="init()">New Game</button>
+<script>
+const SIZE=10,MAX_MOVES=25;
+const COLORS=['#e94560','#4fc3f7','#ffc107','#4caf50','#9c27b0','#ff9800'];
+let board=[],moves=0,gameOver=false;
+function init(){
+  moves=0;gameOver=false;
+  document.getElementById('mv').textContent=0;
+  document.getElementById('msg').textContent='Fill the entire board from top-left!';
+  document.getElementById('msg').className='';
+  board=Array.from({length:SIZE},()=>Array.from({length:SIZE},()=>Math.floor(Math.random()*COLORS.length)));
+  render();renderPalette();updatePercent();
+}
+function render(){
+  const b=document.getElementById('board');
+  b.style.gridTemplateColumns=`repeat(${SIZE},28px)`;
+  b.innerHTML='';
+  for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
+    const cell=document.createElement('div');
+    cell.className='cell';
+    cell.style.background=COLORS[board[r][c]];
+    b.appendChild(cell);
+  }
+}
+function renderPalette(){
+  const p=document.getElementById('palette');
+  p.innerHTML='';
+  COLORS.forEach((color,i)=>{
+    const btn=document.createElement('div');
+    btn.className='color-btn';
+    btn.style.background=color;
+    btn.addEventListener('pointerdown',()=>fill(i));
+    p.appendChild(btn);
+  });
+}
+function fill(colorIdx){
+  if(gameOver)return;
+  const oldColor=board[0][0];
+  if(oldColor===colorIdx)return;
+  moves++;document.getElementById('mv').textContent=moves;
+  // Flood fill from 0,0
+  const visited=Array.from({length:SIZE},()=>Array(SIZE).fill(false));
+  const q=[[0,0]];visited[0][0]=true;
+  const dirs=[[0,1],[0,-1],[1,0],[-1,0]];
+  while(q.length){
+    const [r,c]=q.shift();
+    board[r][c]=colorIdx;
+    for(const [dr,dc] of dirs){
+      const nr=r+dr,nc=c+dc;
+      if(nr>=0&&nr<SIZE&&nc>=0&&nc<SIZE&&!visited[nr][nc]&&board[nr][nc]===oldColor){
+        visited[nr][nc]=true;q.push([nr,nc]);
+      }
+    }
+  }
+  render();updatePercent();
+  // Check win
+  const allFilled=board.every(row=>row.every(c=>c===colorIdx));
+  if(allFilled){
+    gameOver=true;
+    document.getElementById('msg').textContent='🎉 Board filled in '+moves+' moves!';
+    document.getElementById('msg').className='win';
+  }else if(moves>=MAX_MOVES){
+    gameOver=true;
+    document.getElementById('msg').textContent='❌ Out of moves! Try again.';
+    document.getElementById('msg').className='';
+  }
+}
+function updatePercent(){
+  const target=board[0][0];
+  let count=0;
+  board.forEach(row=>row.forEach(c=>{if(c===target)count++}));
+  document.getElementById('pc').textContent=Math.round(count/(SIZE*SIZE)*100);
+}
+init();
+</script>
+<script>
+(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#1a1a2e"/>
+<circle cx="120" cy="80" r="22" fill="#e94560"/>
+<circle cx="170" cy="60" r="22" fill="#4fc3f7"/>
+<circle cx="220" cy="80" r="22" fill="#ffc107"/>
+<circle cx="270" cy="60" r="22" fill="#4caf50"/>
+<circle cx="145" cy="120" r="22" fill="#9c27b0"/>
+<circle cx="195" cy="110" r="22" fill="#ff9800"/>
+<circle cx="245" cy="120" r="22" fill="#e94560"/>
+<circle cx="200" cy="220" r="18" fill="#4fc3f7"/>
+<path d="M200 220 L200 260" stroke="#4fc3f7" stroke-width="3"/>
+<path d="M200 220 L160 160" stroke="#aaa" stroke-width="1" stroke-dasharray="4,4"/>
+<text x="200" y="285" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">🫧 BUBBLE SHOOTER</text>
+</svg>

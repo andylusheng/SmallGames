@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Color Switch</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{touch-action:none}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Score: <span id="sc">0</span> | Best: <span id="bs">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">Tap to jump • Pass through matching color gaps!</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80);
+cv.width=W;cv.height=H;
+const COLORS=['#e94560','#ffc107','#4fc3f7','#4caf50'];
+let ball,obstacles,score,best=+localStorage.getItem('cs-best')||0;
+let gameOver=false,started=false,camY=0;
+document.getElementById('bs').textContent=best;
+function init(){
+  ball={x:W/2,y:H-80,vy:0,r:10,color:0};
+  obstacles=[];score=0;camY=0;gameOver=false;started=false;
+  for(let i=0;i<5;i++)spawnObstacle(H-200-i*160);
+  document.getElementById('sc').textContent=0;
+}
+function spawnObstacle(y){
+  const type=Math.random()>0.5?'circle':'bars';
+  obstacles.push({y,type,rot:Math.random()*Math.PI*2,speed:0.02+Math.random()*0.02,scored:false});
+}
+function update(){
+  if(!started||gameOver)return;
+  ball.vy+=0.35;
+  ball.y+=ball.vy;
+  camY=Math.min(camY,ball.y-H*0.6);
+  // floor death
+  if(ball.y>H+camY+50){die();return;}
+  for(let o of obstacles){
+    o.rot+=o.speed;
+    const sy=o.y-camY;
+    if(!o.scored&&ball.y<o.y-30){
+      o.scored=true;score++;
+      document.getElementById('sc').textContent=score;
+      ball.color=Math.floor(Math.random()*4);
+      spawnObstacle(Math.min(...obstacles.map(ob=>ob.y))-160);
+    }
+    // collision check
+    const dy=Math.abs(ball.y-o.y);
+    if(dy<30){
+      if(o.type==='circle'){
+        const dist=Math.sqrt((ball.x-W/2)**2+(ball.y-o.y)**2);
+        const ringR=50;
+        if(Math.abs(dist-ringR)<ball.r+6){
+          const angle=Math.atan2(ball.y-o.y,ball.x-W/2)-o.rot;
+          const seg=Math.floor(((angle%(Math.PI*2))+Math.PI*2)%(Math.PI*2)/(Math.PI/2));
+          if(seg!==ball.color){die();return;}
+        }
+      }else{
+        if(dy<ball.r+5){
+          const relX=ball.x-W/2;
+          const seg=relX<0?(ball.y<o.y?0:1):(ball.y<o.y?2:3);
+          if(Math.abs(relX)<60&&seg!==ball.color){die();return;}
+        }
+      }
+    }
+  }
+  obstacles=obstacles.filter(o=>o.y-camY<H+100);
+}
+function die(){
+  gameOver=true;
+  if(score>best){best=score;localStorage.setItem('cs-best',best);}
+  document.getElementById('bs').textContent=best;
+}
+function draw(){
+  ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,W,H);
+  for(let o of obstacles){
+    const sy=o.y-camY;
+    if(sy<-80||sy>H+80)continue;
+    ctx.save();ctx.translate(W/2,sy);ctx.rotate(o.rot);
+    if(o.type==='circle'){
+      for(let i=0;i<4;i++){
+        ctx.beginPath();
+        ctx.arc(0,0,50,i*Math.PI/2,(i+1)*Math.PI/2);
+        ctx.strokeStyle=COLORS[i];ctx.lineWidth=10;ctx.stroke();
+      }
+    }else{
+      for(let i=0;i<4;i++){
+        ctx.fillStyle=COLORS[i];
+        const a=i*Math.PI/2;
+        ctx.save();ctx.rotate(a);
+        ctx.fillRect(-5,-60,10,50);
+        ctx.restore();
+      }
+    }
+    ctx.restore();
+  }
+  // ball
+  const by=ball.y-camY;
+  ctx.beginPath();ctx.arc(ball.x,by,ball.r,0,Math.PI*2);
+  ctx.fillStyle=COLORS[ball.color];ctx.fill();
+  ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
+  if(!started&&!gameOver){
+    ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#fff';ctx.font='bold 22px Arial';ctx.textAlign='center';
+    ctx.fillText('TAP TO START',W/2,H/2);
+  }
+  if(gameOver){
+    ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#e94560';ctx.font='bold 26px Arial';ctx.textAlign='center';
+    ctx.fillText('GAME OVER',W/2,H/2-15);
+    ctx.fillStyle='#fff';ctx.font='16px Arial';
+    ctx.fillText('Score: '+score+' | Tap to retry',W/2,H/2+20);
+  }
+}
+function loop(){update();draw();requestAnimationFrame(loop);}
+cv.addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  if(!started){started=true;ball.vy=-8;return;}
+  if(gameOver){init();started=true;ball.vy=-8;return;}
+  ball.vy=-8;
+});
+document.addEventListener('keydown',e=>{
+  if(e.code==='Space'){
+    e.preventDefault();
+    if(!started){started=true;ball.vy=-8;return;}
+    if(gameOver){init();started=true;ball.vy=-8;return;}
+    ball.vy=-8;
+  }
+});
+init();loop();
+</script>
+</body>
+</html>

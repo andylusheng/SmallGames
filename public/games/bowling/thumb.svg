@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#5d4037"/>
+<rect x="120" y="0" width="160" height="300" fill="#6d4c41"/>
+<circle cx="180" cy="60" r="10" fill="#fff"/>
+<circle cx="200" cy="55" r="10" fill="#fff"/>
+<circle cx="220" cy="60" r="10" fill="#fff"/>
+<circle cx="190" cy="80" r="10" fill="#fff"/>
+<circle cx="210" cy="80" r="10" fill="#fff"/>
+<circle cx="180" cy="60" r="4" fill="#e94560"/>
+<circle cx="200" cy="55" r="4" fill="#e94560"/>
+<circle cx="220" cy="60" r="4" fill="#e94560"/>
+<circle cx="200" cy="220" r="16" fill="#1a237e"/>
+<circle cx="195" cy="215" r="2.5" fill="#000"/>
+<circle cx="202" cy="213" r="2.5" fill="#000"/>
+<circle cx="199" cy="220" r="2.5" fill="#000"/>
+<path d="M200 220 L200 100" stroke="rgba(255,255,255,0.2)" stroke-width="2" stroke-dasharray="4,4"/>
+<text x="200" y="285" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">🎳 BOWLING</text>
+</svg>

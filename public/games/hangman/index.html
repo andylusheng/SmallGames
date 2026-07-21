@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Hangman</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:20px;color:#fff}
+h1{font-size:22px;margin-bottom:8px}
+.hud{display:flex;gap:16px;margin-bottom:12px;font-size:14px}
+.hud span{color:#4fc3f7;font-weight:bold}
+#hangman{margin-bottom:12px}
+#word{font-size:28px;letter-spacing:8px;margin-bottom:8px;font-weight:bold;min-height:36px}
+#hint{font-size:13px;color:#aaa;margin-bottom:16px}
+#keys{display:grid;grid-template-columns:repeat(9,1fr);gap:6px;max-width:360px}
+.key{width:34px;height:38px;border-radius:8px;border:none;background:#0f3460;color:#fff;font-size:15px;font-weight:bold;cursor:pointer;transition:all .15s}
+.key:active{transform:scale(.9)}
+.key.used{opacity:.3;pointer-events:none}
+.key.correct{background:#1b5e20;color:#4caf50}
+.key.wrong{background:#4a1020;color:#e94560}
+#msg{margin-top:12px;font-size:16px;min-height:24px}
+#msg.win{color:#4caf50;font-weight:bold}
+#msg.lose{color:#e94560;font-weight:bold}
+button{margin-top:10px;padding:10px 24px;border-radius:20px;border:none;background:#4fc3f7;color:#1a1a2e;font-weight:bold;font-size:15px;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>💀 Hangman</h1>
+<div class="hud">Wins: <span id="wn">0</span> | Losses: <span id="ls">0</span></div>
+<canvas id="hangman" width="160" height="180"></canvas>
+<div id="word"></div>
+<div id="hint"></div>
+<div id="keys"></div>
+<div id="msg"></div>
+<button onclick="init()">New Word</button>
+<script>
+const WORDS=[
+  {w:'JAVASCRIPT',h:'Programming language'},
+  {w:'PYTHON',h:'Snake-named language'},
+  {w:'GALAXY',h:'Collection of stars'},
+  {w:'PUZZLE',h:'Brain teaser'},
+  {w:'ROCKET',h:'Space vehicle'},
+  {w:'DRAGON',h:'Mythical fire creature'},
+  {w:'CASTLE',h:'Medieval fortress'},
+  {w:'JUNGLE',h:'Dense forest'},
+  {w:'PIRATE',h:'Sea adventurer'},
+  {w:'WIZARD',h:'Magic user'},
+  {w:'PLANET',h:'Orbits a star'},
+  {w:'GUITAR',h:'String instrument'},
+  {w:'CAMERA',h:'Takes photos'},
+  {w:'ISLAND',h:'Land surrounded by water'},
+  {w:'FROZEN',h:'Turned to ice'},
+  {w:'BREEZE',h:'Gentle wind'},
+  {w:'CANYON',h:'Deep valley'},
+  {w:'TEMPLE',h:'Place of worship'},
+  {w:'SPHINX',h:'Egyptian statue'},
+  {w:'QUARTZ',h:'Mineral crystal'}
+];
+let word='',hint='',guessed=[],wrong=0,wins=0,losses=0,gameOver=false;
+const MAX_WRONG=6;
+const hc=document.getElementById('hangman').getContext('2d');
+function init(){
+  const item=WORDS[Math.floor(Math.random()*WORDS.length)];
+  word=item.w;hint=item.h;
+  guessed=[];wrong=0;gameOver=false;
+  document.getElementById('msg').textContent='';
+  document.getElementById('msg').className='';
+  document.getElementById('hint').textContent='Hint: '+hint;
+  renderWord();renderKeys();drawHangman();
+}
+function renderWord(){
+  document.getElementById('word').textContent=word.split('').map(l=>guessed.includes(l)?l:'_').join(' ');
+}
+function renderKeys(){
+  const k=document.getElementById('keys');
+  k.innerHTML='';
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(l=>{
+    const btn=document.createElement('button');
+    btn.className='key';btn.textContent=l;
+    if(guessed.includes(l)){
+      btn.classList.add('used');
+      btn.classList.add(word.includes(l)?'correct':'wrong');
+    }
+    btn.addEventListener('pointerdown',()=>guess(l));
+    k.appendChild(btn);
+  });
+}
+function guess(l){
+  if(gameOver||guessed.includes(l))return;
+  guessed.push(l);
+  if(!word.includes(l))wrong++;
+  renderWord();renderKeys();drawHangman();
+  // Check win/lose
+  if(word.split('').every(c=>guessed.includes(c))){
+    gameOver=true;wins++;document.getElementById('wn').textContent=wins;
+    document.getElementById('msg').textContent='🎉 You won!';
+    document.getElementById('msg').className='win';
+  }else if(wrong>=MAX_WRONG){
+    gameOver=true;losses++;document.getElementById('ls').textContent=losses;
+    document.getElementById('msg').textContent='💀 Word was: '+word;
+    document.getElementById('msg').className='lose';
+  }
+}
+function drawHangman(){
+  hc.clearRect(0,0,160,180);
+  hc.strokeStyle='#4fc3f7';hc.lineWidth=3;hc.lineCap='round';
+  // Gallows
+  hc.beginPath();hc.moveTo(20,170);hc.lineTo(100,170);hc.stroke();
+  hc.beginPath();hc.moveTo(40,170);hc.lineTo(40,20);hc.stroke();
+  hc.beginPath();hc.moveTo(40,20);hc.lineTo(100,20);hc.stroke();
+  hc.beginPath();hc.moveTo(100,20);hc.lineTo(100,40);hc.stroke();
+  hc.strokeStyle='#e94560';
+  if(wrong>=1){hc.beginPath();hc.arc(100,55,15,0,Math.PI*2);hc.stroke()}
+  if(wrong>=2){hc.beginPath();hc.moveTo(100,70);hc.lineTo(100,110);hc.stroke()}
+  if(wrong>=3){hc.beginPath();hc.moveTo(100,80);hc.lineTo(80,100);hc.stroke()}
+  if(wrong>=4){hc.beginPath();hc.moveTo(100,80);hc.lineTo(120,100);hc.stroke()}
+  if(wrong>=5){hc.beginPath();hc.moveTo(100,110);hc.lineTo(85,140);hc.stroke()}
+  if(wrong>=6){hc.beginPath();hc.moveTo(100,110);hc.lineTo(115,140);hc.stroke()}
+}
+document.addEventListener('keydown',e=>{
+  const l=e.key.toUpperCase();
+  if(l.length===1&&l>='A'&&l<='Z')guess(l);
+});
+init();
+</script>
+<script>
+(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
+</script>
+</body>
+</html>

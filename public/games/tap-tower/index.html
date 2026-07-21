@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Tap Tower</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{touch-action:none}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Score: <span id="sc">0</span> | Best: <span id="bs">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">Tap to drop blocks • Stack them perfectly!</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80);
+cv.width=W;cv.height=H;
+let blocks,current,score,best=+localStorage.getItem('tt-best')||0;
+let gameOver=false,speed,dir,particles;
+const COLORS=['#e94560','#ff9800','#ffc107','#4caf50','#4fc3f7','#9c27b0','#00bcd4'];
+document.getElementById('bs').textContent=best;
+function init(){
+  blocks=[{x:W/2-50,y:H-40,w:100,h:24}];
+  score=0;speed=2.5;dir=1;gameOver=false;particles=[];
+  spawnBlock();updateUI();
+}
+function updateUI(){
+  document.getElementById('sc').textContent=score;
+  document.getElementById('bs').textContent=best;
+}
+function spawnBlock(){
+  const prev=blocks[blocks.length-1];
+  const y=prev.y-26;
+  current={x:0,y,w:prev.w,h:24,moving:true};
+  speed=2.5+score*0.15;
+  dir=Math.random()>0.5?1:-1;
+  current.x=dir>0?-current.w:W;
+}
+function drop(){
+  if(gameOver||!current)return;
+  const prev=blocks[blocks.length-1];
+  const overlap=Math.min(current.x+current.w,prev.x+prev.w)-Math.max(current.x,prev.x);
+  if(overlap<=0){
+    // missed completely
+    gameOver=true;
+    if(score>best){best=score;localStorage.setItem('tt-best',best);}
+    updateUI();return;
+  }
+  const newX=Math.max(current.x,prev.x);
+  const newW=overlap;
+  // perfect bonus
+  if(Math.abs(current.x-prev.x)<5){
+    blocks.push({x:prev.x,y:current.y,w:prev.w,h:24,perfect:true});
+    score+=2;
+    for(let i=0;i<8;i++)particles.push({x:prev.x+prev.w/2,y:current.y,vx:(Math.random()-0.5)*5,vy:-Math.random()*4,life:25,color:'#ffc107'});
+  }else{
+    blocks.push({x:newX,y:current.y,w:newW,h:24});
+    score++;
+    // falling piece
+    const cutW=current.w-overlap;
+    if(cutW>2){
+      const cutX=current.x<prev.x?current.x:prev.x+prev.w;
+      particles.push({x:cutX+cutW/2,y:current.y,vx:dir*2,vy:1,life:40,color:'#666',w:cutW,h:24,falling:true});
+    }
+  }
+  updateUI();
+  // scroll down if too high
+  if(blocks[blocks.length-1].y<H*0.35){
+    for(let b of blocks)b.y+=26;
+  }
+  if(blocks.length>1&&blocks[blocks.length-1].w<8){
+    gameOver=true;
+    if(score>best){best=score;localStorage.setItem('tt-best',best);}
+    updateUI();return;
+  }
+  spawnBlock();
+}
+function update(){
+  if(gameOver)return;
+  if(current&&current.moving){
+    current.x+=speed*dir;
+    if(current.x+current.w>W+20)dir=-1;
+    if(current.x<-20)dir=1;
+  }
+  for(let p of particles){
+    if(p.falling){p.vy+=0.3;p.y+=p.vy;p.x+=p.vx;}
+    else{p.x+=p.vx;p.y+=p.vy;p.vy+=0.15;}
+    p.life--;
+  }
+  particles=particles.filter(p=>p.life>0);
+}
+function draw(){
+  const g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#0f3460');g.addColorStop(1,'#1a1a2e');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  // blocks
+  for(let i=0;i<blocks.length;i++){
+    const b=blocks[i];
+    ctx.fillStyle=b.perfect?'#ffc107':COLORS[i%COLORS.length];
+    ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,4);ctx.fill();
+    if(b.perfect){ctx.strokeStyle='#fff';ctx.lineWidth=1;ctx.stroke();}
+  }
+  // current moving block
+  if(current&&!gameOver){
+    ctx.fillStyle=COLORS[blocks.length%COLORS.length];
+    ctx.globalAlpha=0.9;
+    ctx.beginPath();ctx.roundRect(current.x,current.y,current.w,current.h,4);ctx.fill();
+    ctx.globalAlpha=1;
+    // guide line
+    ctx.setLineDash([4,4]);ctx.strokeStyle='#ffffff33';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(current.x,current.y+current.h);ctx.lineTo(current.x,H);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(current.x+current.w,current.y+current.h);ctx.lineTo(current.x+current.w,H);ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  // particles
+  for(let p of particles){
+    ctx.globalAlpha=p.life/(p.falling?40:25);
+    ctx.fillStyle=p.color;
+    if(p.falling){ctx.fillRect(p.x-p.w/2,p.y,p.w,p.h);}
+    else{ctx.fillRect(p.x-3,p.y-3,6,6);}
+  }
+  ctx.globalAlpha=1;
+  if(gameOver){
+    ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#e94560';ctx.font='bold 26px Arial';ctx.textAlign='center';
+    ctx.fillText('TOWER FELL!',W/2,H/2-15);
+    ctx.fillStyle='#fff';ctx.font='16px Arial';
+    ctx.fillText('Score: '+score+' | Tap to retry',W/2,H/2+20);
+  }
+}
+function loop(){update();draw();requestAnimationFrame(loop);}
+cv.addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  if(gameOver){init();return;}
+  drop();
+});
+document.addEventListener('keydown',e=>{
+  if(e.code==='Space'){e.preventDefault();if(gameOver){init();return;}drop();}
+});
+init();loop();
+</script>
+</body>
+</html>

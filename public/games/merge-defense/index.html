@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Merge Defense</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:10px;color:#fff}
+h1{font-size:20px;margin-bottom:6px}
+.hud{display:flex;gap:16px;margin-bottom:8px;font-size:13px}
+.hud span{color:#4fc3f7;font-weight:bold}
+#grid{display:grid;grid-template-columns:repeat(5,56px);gap:4px;margin-bottom:10px}
+.slot{width:56px;height:56px;background:#16213e;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;border:2px solid #0f3460;transition:all .15s;position:relative}
+.slot.filled{border-color:#4fc3f7}
+.slot .lvl{position:absolute;bottom:2px;right:4px;font-size:9px;color:#ffc107}
+#buy{padding:10px 24px;background:#4fc3f7;border:none;border-radius:8px;color:#1a1a2e;font-weight:bold;cursor:pointer;font-size:14px;margin-bottom:8px}
+#buy:disabled{background:#555;cursor:not-allowed}
+#msg{font-size:12px;color:#aaa;text-align:center}
+#wave-info{font-size:13px;margin-bottom:6px;color:#e94560}
+</style>
+</head>
+<body>
+<h1>🛡️ Merge Defense</h1>
+<div class="hud">Gold: <span id="gold">50</span> | Wave: <span id="wv">1</span> | HP: <span id="hp">20</span> | Best: <span id="bs">0</span></div>
+<div id="wave-info">Enemies incoming...</div>
+<div id="grid"></div>
+<button id="buy">Buy Tower (20g)</button>
+<div id="msg">Merge same-level towers to upgrade! Towers auto-attack enemies.</div>
+<script>
+const gridEl=document.getElementById('grid');
+let gold=50,wave=1,hp=20,towers=Array(10).fill(null),enemies=[],selected=null,waveTimer=0,gameOver=false,best=+localStorage.getItem('merge-defense-best')||0;
+document.getElementById('bs').textContent=best;
+const emojis=['🔫','🔫','💥','💥','⚡','⚡','🌟','🌟','☄️','☄️'];
+function render(){gridEl.innerHTML='';towers.forEach((t,i)=>{const slot=document.createElement('div');slot.className='slot'+(t?' filled':'');if(t){slot.innerHTML=emojis[t-1]+'<span class="lvl">L'+t+'</span>';}
+slot.addEventListener('click',()=>onSlot(i));gridEl.appendChild(slot);});
+document.getElementById('gold').textContent=gold;document.getElementById('wv').textContent=wave;document.getElementById('hp').textContent=hp;
+document.getElementById('buy').disabled=gold<20;}
+function onSlot(i){if(gameOver)return;if(selected===null){if(towers[i]){selected=i;gridEl.children[i].style.borderColor='#ffc107';}}else{if(i===selected){selected=null;render();return;}
+if(towers[i]&&towers[i]===towers[selected]&&towers[i]<10){towers[i]=towers[i]+1;towers[selected]=null;gold+=5;selected=null;render();}else if(!towers[i]){towers[i]=towers[selected];towers[selected]=null;selected=null;render();}else{selected=null;render();}}}
+document.getElementById('buy').addEventListener('click',()=>{if(gold<20||gameOver)return;gold-=20;const empty=towers.indexOf(null);if(empty===-1){gold+=20;return;}towers[empty]=1;render();});
+function spawnWave(){const n=3+wave*2;for(let i=0;i<n;i++){setTimeout(()=>{if(!gameOver)enemies.push({hp:2+wave,maxHp:2+wave,x:100,y:-20-i*40,speed:0.3+wave*0.05});},i*500);}}
+spawnWave();
+function update(){if(gameOver)return;waveTimer++;
+enemies.forEach((en,i)=>{en.y+=en.speed;
+towers.forEach(t=>{if(!t)return;if(waveTimer%(30-t*2)===0){en.hp-=t;}});
+if(en.hp<=0){enemies.splice(i,1);gold+=3+wave;render();}
+if(en.y>100){enemies.splice(i,1);hp--;document.getElementById('hp').textContent=hp;if(hp<=0){gameOver=true;if(wave>best){best=wave;localStorage.setItem('merge-defense-best',best);document.getElementById('bs').textContent=best;}document.getElementById('wave-info').textContent='💀 Game Over! Wave '+wave+' reached. Tap Buy to restart.';}}});
+if(enemies.length===0&&waveTimer>60){wave++;waveTimer=0;document.getElementById('wave-info').textContent='⚔️ Wave '+wave+' incoming!';spawnWave();render();}
+document.getElementById('wave-info').textContent='⚔️ Wave '+wave+' | Enemies: '+enemies.length;}
+function drawEnemies(){const info=document.getElementById('wave-info');let bar='';enemies.slice(0,8).forEach(en=>{const pct=Math.round(en.hp/en.maxHp*100);bar+='👾';});if(enemies.length>0)info.textContent='⚔️ Wave '+wave+' | '+bar+' ('+enemies.length+' left)';}
+setInterval(()=>{update();drawEnemies();},50);
+document.getElementById('buy').addEventListener('dblclick',()=>{if(gameOver){gameOver=false;gold=50;wave=1;hp=20;towers=Array(10).fill(null);enemies=[];waveTimer=0;document.getElementById('wave-info').textContent='Enemies incoming...';spawnWave();render();}});
+render();
+</script>
+<script>
+(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
+</script>
+</body>
+</html>

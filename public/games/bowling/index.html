@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Bowling</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Frame: <span id="fr">1</span>/10 | Score: <span id="sc">0</span> | Best: <span id="bs">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">Swipe up to roll! Aim by where you start the swipe.</div>
+<script>
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80);
+const c=document.getElementById('c');c.width=W;c.height=H;
+const ctx=c.getContext('2d');
+let score=0,frame=1,roll=0,pins=[],ball=null,swipeStart=null,particles=[],animating=false,best=+localStorage.getItem('bowling-best')||0;
+document.getElementById('bs').textContent=best;
+function setupPins(){pins=[];const rows=[[0],[- 1,1],[-2,0,2],[-3,-1,1,3]];const startY=80;rows.forEach((row,ri)=>{row.forEach(offset=>{pins.push({x:W/2+offset*22,y:startY+ri*30,standing:true,vx:0,vy:0});});});}
+setupPins();
+c.addEventListener('pointerdown',e=>{if(animating)return;const r=c.getBoundingClientRect();swipeStart={x:e.clientX-r.left,y:e.clientY-r.top,t:Date.now()};});
+c.addEventListener('pointerup',e=>{if(!swipeStart||animating)return;const r=c.getBoundingClientRect();const mx=e.clientX-r.left,my=e.clientY-r.top;const dy=swipeStart.y-my;const dx=mx-swipeStart.x;if(dy<30){swipeStart=null;return;}
+const power=Math.min(dy/8,12);const curve=dx*0.02;ball={x:swipeStart.x,y:H-40,vx:curve,vy:-power};animating=true;swipeStart=null;});
+function update(){if(!animating||!ball)return;ball.x+=ball.vx;ball.y+=ball.vy;
+pins.forEach(p=>{if(!p.standing)return;if(Math.hypot(ball.x-p.x,ball.y-p.y)<18){p.standing=false;p.vx=(p.x-ball.x)*0.3+ball.vx*0.5;p.vy=(p.y-ball.y)*0.3-3;for(let i=0;i<4;i++){particles.push({x:p.x,y:p.y,vx:(Math.random()-.5)*4,vy:(Math.random()-.5)*4,life:15,color:'#fff'});}}});
+pins.forEach(p=>{if(p.standing)return;p.x+=p.vx;p.y+=p.vy;p.vx*=0.95;p.vy*=0.95;
+pins.forEach(q=>{if(q===p||!q.standing)return;if(Math.hypot(p.x-q.x,p.y-q.y)<20){q.standing=false;q.vx=(q.x-p.x)*0.4;q.vy=(q.y-p.y)*0.4-2;}});});
+if(ball.y<-20||ball.x<-20||ball.x>W+20){endRoll();}
+function endRoll(){animating=false;ball=null;const knocked=pins.filter(p=>!p.standing).length;score+=knocked;document.getElementById('sc').textContent=score;if(score>best){best=score;localStorage.setItem('bowling-best',best);document.getElementById('bs').textContent=best;}
+roll++;if(roll>=2||knocked===10){frame++;roll=0;document.getElementById('fr').textContent=Math.min(frame,10);if(frame>10){frame=1;score=0;document.getElementById('sc').textContent=0;document.getElementById('fr').textContent=1;}setupPins();}else{const standing=pins.filter(p=>p.standing);pins=standing.map(p=>({...p}));}}
+particles.forEach((p,i)=>{p.x+=p.vx;p.y+=p.vy;p.life--;if(p.life<=0)particles.splice(i,1);});}
+function draw(){ctx.fillStyle='#5d4037';ctx.fillRect(0,0,W,H);
+ctx.fillStyle='#6d4c41';ctx.fillRect(W/2-80,0,160,H);
+ctx.fillStyle='#4e342e';for(let i=0;i<H;i+=40){ctx.fillRect(W/2-80,i,160,2);}
+ctx.fillStyle='#3e2723';ctx.fillRect(W/2-85,0,5,H);ctx.fillRect(W/2+80,0,5,H);
+pins.forEach(p=>{if(p.standing){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(p.x,p.y,8,0,Math.PI*2);ctx.fill();ctx.fillStyle='#e94560';ctx.beginPath();ctx.arc(p.x,p.y-3,4,0,Math.PI*2);ctx.fill();}else{ctx.fillStyle='rgba(255,255,255,0.4)';ctx.beginPath();ctx.ellipse(p.x,p.y,8,4,0.5,0,Math.PI*2);ctx.fill();}});
+if(ball){ctx.beginPath();ctx.arc(ball.x,ball.y,12,0,Math.PI*2);ctx.fillStyle='#1a237e';ctx.fill();ctx.beginPath();ctx.arc(ball.x-3,ball.y-3,2,0,Math.PI*2);ctx.fillStyle='#000';ctx.fill();ctx.beginPath();ctx.arc(ball.x+2,ball.y-4,2,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(ball.x,ball.y+1,2,0,Math.PI*2);ctx.fill();}
+if(!animating){ctx.beginPath();ctx.arc(W/2,H-40,12,0,Math.PI*2);ctx.fillStyle='#1a237e';ctx.fill();}
+particles.forEach(p=>{ctx.globalAlpha=p.life/15;ctx.fillStyle=p.color;ctx.fillRect(p.x-2,p.y-2,4,4);ctx.globalAlpha=1;});}
+function loop(){update();draw();requestAnimationFrame(loop);}
+loop();
+</script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Reaction Speed Test</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:20px}
+h1{color:#fff;font-size:24px;margin-bottom:8px}
+.sub{color:#aaa;font-size:14px;margin-bottom:20px}
+#zone{width:min(400px,90vw);height:300px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:background .2s;user-select:none}
+#zone.waiting{background:#e94560}
+#zone.ready{background:#4caf50}
+#zone.idle{background:#16213e;border:2px solid #0f3460}
+#zone.result{background:#16213e;border:2px solid #0f3460}
+#zone.early{background:#ff9800}
+#zone h2{color:#fff;font-size:28px;margin-bottom:8px}
+#zone p{color:rgba(255,255,255,.8);font-size:16px}
+#zone .time{font-size:56px;font-weight:bold;color:#4fc3f7}
+.stats{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;justify-content:center}
+.stat{background:#16213e;padding:10px 18px;border-radius:10px;text-align:center;color:#fff}
+.stat .label{font-size:12px;color:#aaa;margin-bottom:4px}
+.stat .value{font-size:20px;font-weight:bold;color:#4fc3f7}
+.history{margin-top:16px;color:#aaa;font-size:13px;text-align:center}
+.rank{margin-top:12px;padding:8px 16px;border-radius:8px;font-size:15px;font-weight:bold}
+.rank.fast{background:#4caf5022;color:#4caf50}
+.rank.avg{background:#ff980022;color:#ff9800}
+.rank.slow{background:#e9456022;color:#e94560}
+</style>
+</head>
+<body>
+<h1>⚡ Reaction Speed Test</h1>
+<p class="sub">How fast can you react?</p>
+<div id="zone" class="idle" onclick="handleClick()">
+  <h2>Tap to Start</h2>
+  <p>Wait for green, then tap as fast as you can!</p>
+</div>
+<div class="stats">
+  <div class="stat"><div class="label">Last</div><div class="value" id="last">-</div></div>
+  <div class="stat"><div class="label">Best</div><div class="value" id="best">-</div></div>
+  <div class="stat"><div class="label">Average</div><div class="value" id="avg">-</div></div>
+  <div class="stat"><div class="label">Attempts</div><div class="value" id="tries">0</div></div>
+</div>
+<div id="rank"></div>
+<div class="history" id="history"></div>
+<script>
+let state='idle',startTime=0,timeout=null,results=[];
+const zone=document.getElementById('zone');
+
+function handleClick(){
+  if(state==='idle'||state==='result'||state==='early'){
+    state='waiting';
+    zone.className='waiting';
+    zone.innerHTML='<h2>Wait for green...</h2><p>Don\'t tap yet!</p>';
+    const delay=1000+Math.random()*4000;
+    timeout=setTimeout(()=>{
+      state='ready';startTime=performance.now();
+      zone.className='ready';
+      zone.innerHTML='<h2>TAP NOW!</h2>';
+    },delay);
+  }else if(state==='waiting'){
+    clearTimeout(timeout);
+    state='early';
+    zone.className='early';
+    zone.innerHTML='<h2>Too early! 😅</h2><p>Tap to try again</p>';
+  }else if(state==='ready'){
+    const rt=Math.round(performance.now()-startTime);
+    state='result';results.push(rt);
+    zone.className='result';
+    zone.innerHTML=`<div class="time">${rt}ms</div><p>Tap to try again</p>`;
+    updateStats(rt);
+  }
+}
+
+function updateStats(rt){
+  document.getElementById('last').textContent=rt+'ms';
+  const best=Math.min(...results);
+  document.getElementById('best').textContent=best+'ms';
+  const avg=Math.round(results.reduce((a,b)=>a+b,0)/results.length);
+  document.getElementById('avg').textContent=avg+'ms';
+  document.getElementById('tries').textContent=results.length;
+  
+  const rankEl=document.getElementById('rank');
+  if(rt<200){rankEl.className='rank fast';rankEl.textContent='🏆 Lightning fast!';}
+  else if(rt<300){rankEl.className='rank fast';rankEl.textContent='⚡ Very fast!';}
+  else if(rt<400){rankEl.className='rank avg';rankEl.textContent='👍 Average';}
+  else{rankEl.className='rank slow';rankEl.textContent='🐢 Keep practicing!';}
+  
+  const last5=results.slice(-5).map(r=>r+'ms').join(' → ');
+  document.getElementById('history').textContent='Recent: '+last5;
+}
+</script>
+<script>
+(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
+</script>
+</body>
+</html>

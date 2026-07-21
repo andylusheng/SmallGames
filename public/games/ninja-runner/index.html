@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Ninja Runner</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Score: <span id="sc">0</span> | Best: <span id="bs">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">Tap/Space to jump | Swipe down/↓ to slide | Avoid obstacles!</div>
+<script>
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80);
+const c=document.getElementById('c');c.width=W;c.height=H;
+const ctx=c.getContext('2d');
+let score=0,gameOver=false,started=false,best=+localStorage.getItem('ninja-runner-best')||0;
+document.getElementById('bs').textContent=best;
+const ninja={x:60,y:H-60,vy:0,w:20,h:30,jumping:false,sliding:false,slideT:0};
+let obstacles=[],speed=4,spawnT=0,groundY=H-30;
+function jump(){if(!ninja.jumping&&!ninja.sliding){ninja.vy=-11;ninja.jumping=true;}}
+function slide(){if(!ninja.jumping){ninja.sliding=true;ninja.slideT=30;}}
+document.addEventListener('keydown',e=>{if(e.key===' '||e.key==='ArrowUp'){e.preventDefault();if(!started){started=true;}if(gameOver){reset();return;}jump();}if(e.key==='ArrowDown'){e.preventDefault();slide();}});
+let touchY=0;
+c.addEventListener('pointerdown',e=>{if(!started){started=true;return;}if(gameOver){reset();return;}touchY=e.clientY;jump();});
+c.addEventListener('pointermove',e=>{if(e.clientY-touchY>30){slide();touchY=e.clientY;}});
+function reset(){score=0;gameOver=false;obstacles=[];speed=4;ninja.y=groundY-ninja.h;ninja.vy=0;ninja.jumping=false;ninja.sliding=false;document.getElementById('sc').textContent=0;}
+ninja.y=groundY-ninja.h;
+function update(){if(!started||gameOver)return;score++;if(score%100===0)speed+=0.3;document.getElementById('sc').textContent=Math.floor(score/10);
+if(ninja.jumping){ninja.vy+=0.6;ninja.y+=ninja.vy;if(ninja.y>=groundY-ninja.h){ninja.y=groundY-ninja.h;ninja.jumping=false;ninja.vy=0;}}
+if(ninja.sliding){ninja.slideT--;if(ninja.slideT<=0)ninja.sliding=false;}
+spawnT++;if(spawnT>60-speed*3){spawnT=0;const type=Math.random()>0.5?'low':'high';obstacles.push({x:W+20,type,w:type==='low'?25:30,h:type==='low'?25:20,y:type==='low'?groundY-25:groundY-55});}
+obstacles.forEach((o,i)=>{o.x-=speed;if(o.x<-40){obstacles.splice(i,1);return;}
+const nh=ninja.sliding?15:ninja.h;const ny=ninja.sliding?groundY-15:ninja.y;
+if(ninja.x+ninja.w>o.x&&ninja.x<o.x+o.w&&ny+nh>o.y&&ny<o.y+o.h){gameOver=true;if(Math.floor(score/10)>best){best=Math.floor(score/10);localStorage.setItem('ninja-runner-best',best);document.getElementById('bs').textContent=best;}}});}
+function draw(){ctx.fillStyle='#16213e';ctx.fillRect(0,0,W,H);
+ctx.fillStyle='#2a2a4e';ctx.fillRect(0,groundY,W,H-groundY);
+for(let i=0;i<W;i+=40){ctx.fillStyle='#333355';ctx.fillRect(i-(score*speed%40),groundY,20,3);}
+const nh=ninja.sliding?15:ninja.h;const ny=ninja.sliding?groundY-15:ninja.y;
+ctx.fillStyle='#333';ctx.fillRect(ninja.x,ny,ninja.w,nh);
+ctx.fillStyle='#e94560';ctx.fillRect(ninja.x+2,ny+2,ninja.w-4,6);
+ctx.fillStyle='#fff';ctx.fillRect(ninja.x+12,ny+3,4,3);
+if(!ninja.sliding){ctx.fillStyle='#333';ctx.fillRect(ninja.x+5,ny-8,10,8);}
+obstacles.forEach(o=>{ctx.fillStyle=o.type==='low'?'#e94560':'#ff9800';ctx.fillRect(o.x,o.y,o.w,o.h);if(o.type==='high'){ctx.fillStyle='#ffc107';ctx.fillRect(o.x+5,o.y+5,o.w-10,4);}});
+if(!started){ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 24px Arial';ctx.textAlign='center';ctx.fillText('🥷 NINJA RUNNER',W/2,H/2-20);ctx.font='16px Arial';ctx.fillText('Tap to Start!',W/2,H/2+20);}
+if(gameOver){ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#e94560';ctx.font='bold 28px Arial';ctx.textAlign='center';ctx.fillText('GAME OVER',W/2,H/2-20);ctx.fillStyle='#fff';ctx.font='16px Arial';ctx.fillText('Score: '+Math.floor(score/10)+' | Tap to retry',W/2,H/2+20);}}
+function loop(){update();draw();requestAnimationFrame(loop);}
+loop();
+</script>
+</body>
+</html>

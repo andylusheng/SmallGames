@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#1a1a2e"/>
+  <!-- Play area -->
+  <rect x="140" y="20" width="120" height="260" fill="#16213e" stroke="#333" stroke-width="1"/>
+  <!-- Placed blocks -->
+  <g>
+    <rect x="140" y="250" width="30" height="30" fill="#00bcd4" stroke="#006064" stroke-width="1"/>
+    <rect x="170" y="250" width="30" height="30" fill="#00bcd4" stroke="#006064" stroke-width="1"/>
+    <rect x="200" y="250" width="30" height="30" fill="#9c27b0" stroke="#4a148c" stroke-width="1"/>
+    <rect x="230" y="250" width="30" height="30" fill="#9c27b0" stroke="#4a148c" stroke-width="1"/>
+    <rect x="140" y="220" width="30" height="30" fill="#ff9800" stroke="#e65100" stroke-width="1"/>
+    <rect x="170" y="220" width="30" height="30" fill="#ff9800" stroke="#e65100" stroke-width="1"/>
+    <rect x="200" y="220" width="30" height="30" fill="#4caf50" stroke="#1b5e20" stroke-width="1"/>
+    <rect x="230" y="220" width="30" height="30" fill="#4caf50" stroke="#1b5e20" stroke-width="1"/>
+    <rect x="140" y="190" width="30" height="30" fill="#f44336" stroke="#b71c1c" stroke-width="1"/>
+    <rect x="170" y="190" width="30" height="30" fill="#4caf50" stroke="#1b5e20" stroke-width="1"/>
+    <rect x="230" y="190" width="30" height="30" fill="#ff9800" stroke="#e65100" stroke-width="1"/>
+  </g>
+  <!-- Falling piece (T-shape) -->
+  <g>
+    <rect x="170" y="80" width="30" height="30" fill="#e91e63" stroke="#880e4f" stroke-width="1"/>
+    <rect x="140" y="110" width="30" height="30" fill="#e91e63" stroke="#880e4f" stroke-width="1"/>
+    <rect x="170" y="110" width="30" height="30" fill="#e91e63" stroke="#880e4f" stroke-width="1"/>
+    <rect x="200" y="110" width="30" height="30" fill="#e91e63" stroke="#880e4f" stroke-width="1"/>
+  </g>
+  <!-- Next piece preview -->
+  <rect x="280" y="40" width="80" height="70" fill="#16213e" stroke="#333" rx="4"/>
+  <text x="320" y="35" font-family="Arial" font-size="11" fill="#888" text-anchor="middle">NEXT</text>
+  <rect x="295" y="55" width="20" height="20" fill="#ffeb3b" stroke="#f57f17" stroke-width="1"/>
+  <rect x="315" y="55" width="20" height="20" fill="#ffeb3b" stroke="#f57f17" stroke-width="1"/>
+  <rect x="295" y="75" width="20" height="20" fill="#ffeb3b" stroke="#f57f17" stroke-width="1"/>
+  <rect x="315" y="75" width="20" height="20" fill="#ffeb3b" stroke="#f57f17" stroke-width="1"/>
+  <!-- Score -->
+  <text x="320" y="140" font-family="Arial" font-size="11" fill="#888" text-anchor="middle">SCORE</text>
+  <text x="320" y="160" font-family="Arial" font-size="16" font-weight="bold" fill="#fff" text-anchor="middle">1240</text>
+</svg>

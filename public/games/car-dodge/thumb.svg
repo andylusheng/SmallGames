@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#2d2d2d"/>
+<rect x="0" y="0" width="4" height="300" fill="#ffc107"/>
+<rect x="396" y="0" width="4" height="300" fill="#ffc107"/>
+<line x1="100" y1="0" x2="100" y2="300" stroke="#555" stroke-width="2" stroke-dasharray="20,15"/>
+<line x1="200" y1="0" x2="200" y2="300" stroke="#555" stroke-width="2" stroke-dasharray="20,15"/>
+<line x1="300" y1="0" x2="300" y2="300" stroke="#555" stroke-width="2" stroke-dasharray="20,15"/>
+<rect x="120" y="40" width="55" height="80" rx="10" fill="#e94560"/>
+<rect x="126" y="48" width="43" height="16" rx="4" fill="rgba(255,255,255,0.3)"/>
+<rect x="220" y="100" width="55" height="80" rx="10" fill="#9c27b0"/>
+<rect x="226" y="108" width="43" height="16" rx="4" fill="rgba(255,255,255,0.3)"/>
+<rect x="160" y="200" width="55" height="80" rx="10" fill="#4fc3f7"/>
+<rect x="166" y="208" width="43" height="16" rx="4" fill="#81d4fa"/>
+<text x="200" y="292" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">🚗 CAR DODGE</text>
+</svg>

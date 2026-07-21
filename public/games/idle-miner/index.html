@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Idle Miner</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:20px;color:#fff}
+h1{font-size:20px;margin-bottom:8px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;font-size:13px;width:min(320px,90vw)}
+.stat{background:#0f3460;padding:8px 12px;border-radius:8px;text-align:center}
+.stat span{color:#4fc3f7;font-weight:bold;font-size:16px;display:block}
+#mine{width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 40% 40%,#8d6e63,#5d4037,#3e2723);cursor:pointer;margin-bottom:16px;display:flex;align-items:center;justify-content:center;font-size:40px;transition:transform .1s;user-select:none;border:4px solid #4e342e}
+#mine:active{transform:scale(.92)}
+#upgrades{display:flex;flex-direction:column;gap:8px;width:min(320px,90vw)}
+.upg{display:flex;justify-content:space-between;align-items:center;background:#16213e;padding:10px 14px;border-radius:10px;cursor:pointer;transition:all .15s;border:1px solid #0f3460}
+.upg:hover{border-color:#4fc3f7}
+.upg.cant{opacity:.5}
+.upg-info{font-size:13px}
+.upg-info b{display:block;font-size:14px}
+.upg-cost{color:#ffc107;font-weight:bold;font-size:14px}
+#clickFx{position:fixed;pointer-events:none;font-size:18px;font-weight:bold;color:#ffc107;opacity:0;transition:all .5s}
+</style>
+</head>
+<body>
+<h1>⛏️ Idle Miner</h1>
+<div class="stats">
+<div class="stat">Gold<span id="gold">0</span></div>
+<div class="stat">Per Click<span id="ppc">1</span></div>
+<div class="stat">Per Second<span id="pps">0</span></div>
+<div class="stat">Total Mined<span id="tot">0</span></div>
+</div>
+<div id="mine" onclick="doMine(event)">⛏️</div>
+<div id="upgrades"></div>
+<div id="clickFx">+1</div>
+<script>
+let gold=0,total=0,perClick=1,perSec=0;
+const upgrades=[
+  {name:'Better Pickaxe',desc:'+1 per click',baseCost:10,cost:10,count:0,type:'click',val:1},
+  {name:'Hire Miner',desc:'+1 gold/sec',baseCost:50,cost:50,count:0,type:'auto',val:1},
+  {name:'Gold Drill',desc:'+5 per click',baseCost:200,cost:200,count:0,type:'click',val:5},
+  {name:'Mining Team',desc:'+5 gold/sec',baseCost:500,cost:500,count:0,type:'auto',val:5},
+  {name:'Dynamite',desc:'+25 per click',baseCost:2000,cost:2000,count:0,type:'click',val:25},
+  {name:'Excavator',desc:'+25 gold/sec',baseCost:5000,cost:5000,count:0,type:'auto',val:25},
+];
+// Load save
+try{const s=JSON.parse(localStorage.getItem('idleminer'));if(s){gold=s.g;total=s.t;perClick=s.pc;perSec=s.ps;upgrades.forEach((u,i)=>{if(s.u[i]){u.count=s.u[i].c;u.cost=s.u[i].co}})}}catch(e){}
+function save(){localStorage.setItem('idleminer',JSON.stringify({g:gold,t:total,pc:perClick,ps:perSec,u:upgrades.map(u=>({c:u.count,co:u.cost}))}))}
+function doMine(e){
+  gold+=perClick;total+=perClick;
+  const fx=document.getElementById('clickFx');
+  fx.style.left=e.clientX+'px';fx.style.top=e.clientY+'px';
+  fx.textContent='+'+perClick;fx.style.opacity=1;fx.style.transform='translateY(0)';
+  setTimeout(()=>{fx.style.opacity=0;fx.style.transform='translateY(-30px)'},50);
+  updateUI();
+}
+function buyUpg(i){
+  const u=upgrades[i];
+  if(gold<u.cost)return;
+  gold-=u.cost;u.count++;
+  if(u.type==='click')perClick+=u.val;else perSec+=u.val;
+  u.cost=Math.floor(u.baseCost*Math.pow(1.4,u.count));
+  updateUI();save();
+}
+function updateUI(){
+  document.getElementById('gold').textContent=format(gold);
+  document.getElementById('ppc').textContent=format(perClick);
+  document.getElementById('pps').textContent=format(perSec);
+  document.getElementById('tot').textContent=format(total);
+  const el=document.getElementById('upgrades');
+  el.innerHTML=upgrades.map((u,i)=>`<div class="upg${gold<u.cost?' cant':''}" onclick="buyUpg(${i})"><div class="upg-info"><b>${u.name} (${u.count})</b>${u.desc}</div><div class="upg-cost">💰${format(u.cost)}</div></div>`).join('');
+}
+function format(n){if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(1)+'K';return Math.floor(n)}
+// Auto income
+setInterval(()=>{if(perSec>0){gold+=perSec;total+=perSec;updateUI()}},1000);
+setInterval(save,5000);
+updateUI();
+</script>
+<script>
+(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
+</script>
+</body>
+</html>

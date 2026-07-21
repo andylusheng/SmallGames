@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#16213e"/>
+<rect x="80" y="40" width="40" height="40" rx="4" fill="#e94560"/>
+<rect x="180" y="60" width="50" height="50" rx="4" fill="#ff9800"/>
+<rect x="280" y="30" width="35" height="35" rx="4" fill="#9c27b0"/>
+<rect x="130" y="120" width="45" height="45" rx="4" fill="#4fc3f7"/>
+<rect x="250" y="130" width="55" height="55" rx="4" fill="#e94560"/>
+<rect x="100" y="200" width="38" height="38" rx="4" fill="#ffc107"/>
+<rect x="300" y="210" width="42" height="42" rx="4" fill="#4caf50"/>
+<polygon points="200,220 185,250 215,250" fill="#4fc3f7"/>
+<text x="200" y="285" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">🚫 AVOID BLOCKS</text>
+</svg>

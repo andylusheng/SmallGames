@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#1a1a2e"/>
+<rect x="60" y="40" width="280" height="220" rx="8" fill="#16213e"/>
+<g fill="#0f3460">
+<rect x="70" y="50" width="26" height="26" rx="3"/><rect x="100" y="50" width="26" height="26" rx="3"/><rect x="130" y="50" width="26" height="26" rx="3"/><rect x="160" y="50" width="26" height="26" rx="3"/><rect x="190" y="50" width="26" height="26" rx="3"/><rect x="220" y="50" width="26" height="26" rx="3"/><rect x="250" y="50" width="26" height="26" rx="3"/><rect x="280" y="50" width="26" height="26" rx="3"/><rect x="310" y="50" width="26" height="26" rx="3"/>
+<rect x="70" y="80" width="26" height="26" rx="3"/><rect x="130" y="80" width="26" height="26" rx="3"/><rect x="190" y="80" width="26" height="26" rx="3"/><rect x="250" y="80" width="26" height="26" rx="3"/><rect x="310" y="80" width="26" height="26" rx="3"/>
+<rect x="70" y="110" width="26" height="26" rx="3"/><rect x="100" y="110" width="26" height="26" rx="3"/><rect x="160" y="110" width="26" height="26" rx="3"/><rect x="220" y="110" width="26" height="26" rx="3"/><rect x="280" y="110" width="26" height="26" rx="3"/><rect x="310" y="110" width="26" height="26" rx="3"/>
+</g>
+<text x="103" y="100" font-size="16" fill="#4fc3f7" font-family="Arial" font-weight="bold">1</text>
+<text x="193" y="100" font-size="16" fill="#81c784" font-family="Arial" font-weight="bold">2</text>
+<text x="283" y="100" font-size="16" fill="#e57373" font-family="Arial" font-weight="bold">3</text>
+<text x="163" y="130" font-size="16" fill="#4fc3f7" font-family="Arial" font-weight="bold">1</text>
+<text x="145" y="195" font-size="28" fill="#e94560">💣</text>
+<text x="200" y="195" font-size="28">🚩</text>
+<text x="255" y="195" font-size="28" fill="#e94560">💣</text>
+<text x="200" y="280" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">MINESWEEPER</text>
+</svg>

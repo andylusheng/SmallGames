@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Breakout</title>
+<style>
+*{margin:0;padding:0}body{background:#1a1a2e;display:flex;align-items:center;justify-content:center;height:100vh;overflow:hidden}
+canvas{border-radius:8px;box-shadow:0 0 30px rgba(99,102,241,.2)}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+const c=document.getElementById('c'),x=c.getContext('2d');
+c.width=Math.min(860,innerWidth-16);c.height=Math.min(640,innerHeight-80);
+let paddle={x:200,w:80,h:10},ball={x:240,y:350,dx:3,dy:-3,r:6};
+let bricks=[],score=0,lives=3,running=false;
+const rows=5,cols=8,bw=52,bh=18,bp=4,colors=['#ef4444','#f97316','#eab308','#22c55e','#3b82f6'];
+
+function initBricks(){
+  bricks=[];
+  for(let r=0;r<rows;r++)for(let col=0;col<cols;col++)
+    bricks.push({x:col*(bw+bp)+12,y:r*(bh+bp)+40,w:bw,h:bh,color:colors[r],alive:true});
+}
+function reset(){ball={x:240,y:350,dx:3*(Math.random()>.5?1:-1),dy:-3,r:6};running=false}
+function init(){score=0;lives=3;initBricks();reset()}
+
+c.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect();paddle.x=e.clientX-r.left-paddle.w/2;
+  paddle.x=Math.max(0,Math.min(c.width-paddle.w,paddle.x))});
+c.addEventListener('touchmove',e=>{e.preventDefault();const r=c.getBoundingClientRect();paddle.x=e.touches[0].clientX-r.left-paddle.w/2;
+  paddle.x=Math.max(0,Math.min(c.width-paddle.w,paddle.x))});
+c.addEventListener('click',()=>{if(!running)running=true});
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowLeft')paddle.x=Math.max(0,paddle.x-25);
+  if(e.key==='ArrowRight')paddle.x=Math.min(c.width-paddle.w,paddle.x+25);
+  if(e.key===' '&&!running)running=true;
+});
+
+function update(){
+  if(!running)return;
+  ball.x+=ball.dx;ball.y+=ball.dy;
+  if(ball.x-ball.r<0||ball.x+ball.r>c.width)ball.dx*=-1;
+  if(ball.y-ball.r<0)ball.dy*=-1;
+  // paddle
+  if(ball.y+ball.r>c.height-paddle.h-5&&ball.x>paddle.x&&ball.x<paddle.x+paddle.w&&ball.dy>0){
+    ball.dy*=-1;ball.dx=((ball.x-(paddle.x+paddle.w/2))/(paddle.w/2))*4;
+  }
+  if(ball.y>c.height){lives--;if(lives<=0){init();return}reset()}
+  // bricks
+  bricks.forEach(b=>{
+    if(!b.alive)return;
+    if(ball.x>b.x&&ball.x<b.x+b.w&&ball.y>b.y&&ball.y<b.y+b.h){
+      b.alive=false;ball.dy*=-1;score+=10;
+    }
+  });
+  if(bricks.every(b=>!b.alive)){initBricks();ball.dy=-3;score+=100}
+}
+function draw(){
+  x.fillStyle='#1a1a2e';x.fillRect(0,0,c.width,c.height);
+  // bricks
+  bricks.forEach(b=>{if(b.alive){x.fillStyle=b.color;x.fillRect(b.x,b.y,b.w,b.h);
+    x.fillStyle='rgba(255,255,255,.2)';x.fillRect(b.x,b.y,b.w,bh/3)}});
+  // paddle
+  x.fillStyle='#6366f1';x.fillRect(paddle.x,c.height-paddle.h-5,paddle.w,paddle.h);
+  // ball
+  x.fillStyle='#fff';x.beginPath();x.arc(ball.x,ball.y,ball.r,0,7);x.fill();
+  // UI
+  x.fillStyle='#fff';x.font='14px Arial';x.textAlign='left';
+  x.fillText('Score: '+score,10,20);
+  x.textAlign='right';x.fillText('Lives: '+'♥'.repeat(lives),c.width-10,20);
+  if(!running){
+    x.fillStyle='rgba(0,0,0,.4)';x.fillRect(0,0,c.width,c.height);
+    x.fillStyle='#fff';x.font='18px Arial';x.textAlign='center';
+    x.fillText('Click or Space to launch',c.width/2,c.height/2);
+  }
+}
+function loop(){update();draw();requestAnimationFrame(loop)}
+init();loop();
+</script>
+</body>
+</html>

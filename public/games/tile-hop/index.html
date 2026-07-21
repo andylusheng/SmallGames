@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Tile Hop</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Score: <span id="sc">0</span> | Best: <span id="bs">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">Tap left/right to hop on tiles!</div>
+<script>
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80);
+const cv=document.getElementById('c');cv.width=W;cv.height=H;
+const ctx=cv.getContext('2d');
+let score=0,best=+localStorage.getItem('tilehop_best')||0,gameOver=false;
+document.getElementById('bs').textContent=best;
+const COLS=3,TILE_W=W/COLS,TILE_H=60;
+let tiles=[],ball={col:1,x:0,y:0,vy:0,jumping:false,targetY:0};
+let scrollSpeed=2,offset=0;
+function initTiles(){
+  tiles=[];
+  for(let i=0;i<10;i++){
+    const col=Math.floor(Math.random()*COLS);
+    tiles.push({col,y:H-i*80,active:true});
+  }
+  ball.col=tiles[0].col;
+  ball.y=tiles[0].y-15;
+  ball.x=ball.col*TILE_W+TILE_W/2;
+}
+function addTile(){
+  const lastY=Math.min(...tiles.map(t=>t.y));
+  const col=Math.floor(Math.random()*COLS);
+  tiles.push({col,y:lastY-80,active:true});
+}
+cv.addEventListener('pointerdown',e=>{
+  if(gameOver){restart();return}
+  const r=cv.getBoundingClientRect();
+  const x=e.clientX-r.left;
+  if(x<W/2&&ball.col>0)ball.col--;
+  else if(x>=W/2&&ball.col<COLS-1)ball.col++;
+});
+document.addEventListener('keydown',e=>{
+  if(gameOver){restart();return}
+  if(e.key==='ArrowLeft'&&ball.col>0)ball.col--;
+  if(e.key==='ArrowRight'&&ball.col<COLS-1)ball.col++;
+});
+function restart(){
+  score=0;gameOver=false;scrollSpeed=2;offset=0;
+  document.getElementById('sc').textContent=0;
+  initTiles();loop();
+}
+function loop(){
+  if(gameOver)return;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#16213e';ctx.fillRect(0,0,W,H);
+  // Scroll
+  offset+=scrollSpeed;
+  tiles.forEach(t=>t.y+=scrollSpeed);
+  // Remove off-screen, add new
+  tiles=tiles.filter(t=>t.y<H+80);
+  while(tiles.length<10)addTile();
+  // Draw tiles
+  tiles.forEach(t=>{
+    const x=t.col*TILE_W+4;
+    ctx.fillStyle=t.active?'#0f3460':'#37474f';
+    ctx.strokeStyle='#4fc3f7';ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.roundRect(x,t.y,TILE_W-8,TILE_H-8,8);
+    ctx.fill();ctx.stroke();
+  });
+  // Ball target
+  const targetX=ball.col*TILE_W+TILE_W/2;
+  ball.x+=(targetX-ball.x)*0.2;
+  // Find tile under ball
+  let onTile=null;
+  tiles.forEach(t=>{
+    if(t.col===ball.col&&Math.abs(ball.y-(t.y-15))<20)onTile=t;
+  });
+  if(onTile){
+    ball.y+=(onTile.y-15-ball.y)*0.3;
+  }else{
+    ball.y+=scrollSpeed; // Fall with scroll
+  }
+  // Draw ball
+  ctx.fillStyle='#e94560';
+  ctx.beginPath();ctx.arc(ball.x,ball.y,14,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#fff';
+  ctx.beginPath();ctx.arc(ball.x-4,ball.y-4,4,0,Math.PI*2);ctx.fill();
+  // Score
+  const newScore=Math.floor(offset/80);
+  if(newScore>score){score=newScore;document.getElementById('sc').textContent=score;scrollSpeed=2+score*0.1}
+  // Game over: ball falls off bottom
+  if(ball.y>H+20){
+    gameOver=true;
+    if(score>best){best=score;localStorage.setItem('tilehop_best',best);document.getElementById('bs').textContent=best}
+    ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#fff';ctx.font='bold 28px Arial';ctx.textAlign='center';
+    ctx.fillText('GAME OVER',W/2,H/2-20);
+    ctx.font='18px Arial';ctx.fillText('Score: '+score,W/2,H/2+15);
+    ctx.font='14px Arial';ctx.fillStyle='#4fc3f7';
+    ctx.fillText('Tap to restart',W/2,H/2+50);
+    return;
+  }
+  requestAnimationFrame(loop);
+}
+initTiles();loop();
+</script>
+</body>
+</html>

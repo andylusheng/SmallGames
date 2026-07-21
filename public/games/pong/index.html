@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Pong</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:8px;font-size:18px;font-weight:bold}
+#ui span{color:#4fc3f7}
+canvas{border-radius:8px;border:2px solid #0f3460;touch-action:none}
+#msg{color:#aaa;margin-top:8px;font-size:13px}
+</style>
+</head>
+<body>
+<div id="ui"><span id="ps">0</span> - <span id="cs">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">Move mouse / touch to control paddle • First to 7 wins</div>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80);c.width=W;c.height=H;
+const PW=12,PH=70,SPEED=5,WIN=7;
+let player,cpu,ball,pScore,cScore,running,serveTimer;
+
+function init(){
+  pScore=0;cScore=0;
+  document.getElementById('ps').textContent='0';
+  document.getElementById('cs').textContent='0';
+  resetPositions();running=true;loop();
+}
+
+function resetPositions(){
+  player={x:15,y:H/2-PH/2,w:PW,h:PH};
+  cpu={x:W-15-PW,y:H/2-PH/2,w:PW,h:PH};
+  ball={x:W/2,y:H/2,r:8,vx:(Math.random()<0.5?1:-1)*SPEED,vy:(Math.random()-0.5)*6};
+}
+
+function serve(){
+  ball.x=W/2;ball.y=H/2;
+  ball.vx=(Math.random()<0.5?1:-1)*SPEED;
+  ball.vy=(Math.random()-0.5)*6;
+}
+
+function loop(){
+  if(!running)return;
+  update();draw();requestAnimationFrame(loop);
+}
+
+function update(){
+  // Ball movement
+  ball.x+=ball.vx;ball.y+=ball.vy;
+  
+  // Top/bottom bounce
+  if(ball.y-ball.r<0||ball.y+ball.r>H){ball.vy*=-1;ball.y=Math.max(ball.r,Math.min(H-ball.r,ball.y));}
+  
+  // Player paddle collision
+  if(ball.x-ball.r<player.x+player.w&&ball.y>player.y&&ball.y<player.y+player.h&&ball.vx<0){
+    ball.vx=Math.abs(ball.vx)*1.05;
+    ball.vy+=((ball.y-(player.y+player.h/2))/player.h)*4;
+  }
+  
+  // CPU paddle collision
+  if(ball.x+ball.r>cpu.x&&ball.y>cpu.y&&ball.y<cpu.y+cpu.h&&ball.vx>0){
+    ball.vx=-Math.abs(ball.vx)*1.05;
+    ball.vy+=((ball.y-(cpu.y+cpu.h/2))/cpu.h)*4;
+  }
+  
+  // CPU AI
+  const cpuCenter=cpu.y+cpu.h/2;
+  const diff=ball.y-cpuCenter;
+  const cpuSpeed=3.5;
+  if(Math.abs(diff)>10)cpu.y+=Math.sign(diff)*Math.min(cpuSpeed,Math.abs(diff));
+  cpu.y=Math.max(0,Math.min(H-cpu.h,cpu.y));
+  
+  // Scoring
+  if(ball.x<0){cScore++;document.getElementById('cs').textContent=cScore;checkWin();serve();}
+  if(ball.x>W){pScore++;document.getElementById('ps').textContent=pScore;checkWin();serve();}
+  
+  // Speed cap
+  const maxV=12;
+  ball.vx=Math.max(-maxV,Math.min(maxV,ball.vx));
+  ball.vy=Math.max(-maxV,Math.min(maxV,ball.vy));
+}
+
+function checkWin(){
+  if(pScore>=WIN||cScore>=WIN){
+    running=false;
+    draw();
+    ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#fff';ctx.font='bold 28px Arial';ctx.textAlign='center';
+    ctx.fillText(pScore>=WIN?'🎉 You Win!':'🤖 CPU Wins!',W/2,H/2-10);
+    ctx.fillStyle='#aaa';ctx.font='16px Arial';
+    ctx.fillText('Tap to play again',W/2,H/2+30);
+  }
+}
+
+function draw(){
+  ctx.fillStyle='#16213e';ctx.fillRect(0,0,W,H);
+  
+  // Center line
+  ctx.setLineDash([8,8]);ctx.strokeStyle='#333';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(W/2,0);ctx.lineTo(W/2,H);ctx.stroke();
+  ctx.setLineDash([]);
+  
+  // Paddles
+  ctx.fillStyle='#4fc3f7';
+  ctx.beginPath();ctx.roundRect(player.x,player.y,player.w,player.h,6);ctx.fill();
+  ctx.fillStyle='#e94560';
+  ctx.beginPath();ctx.roundRect(cpu.x,cpu.y,cpu.w,cpu.h,6);ctx.fill();
+  
+  // Ball
+  ctx.fillStyle='#fff';
+  ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#4fc3f733';
+  ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r+4,0,Math.PI*2);ctx.fill();
+}
+
+// Controls
+c.addEventListener('mousemove',e=>{
+  const rect=c.getBoundingClientRect();
+  const y=(e.clientY-rect.top)*(H/rect.height);
+  player.y=Math.max(0,Math.min(H-player.h,y-player.h/2));
+});
+c.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  const rect=c.getBoundingClientRect();
+  const y=(e.touches[0].clientY-rect.top)*(H/rect.height);
+  player.y=Math.max(0,Math.min(H-player.h,y-player.h/2));
+},{passive:false});
+c.addEventListener('click',()=>{if(!running)init();});
+c.addEventListener('touchstart',()=>{if(!running)init();});
+
+init();
+</script>
+</body>
+</html>

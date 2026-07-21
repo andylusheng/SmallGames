@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Water Sort</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:16px;color:#fff}
+h1{font-size:20px;margin-bottom:6px}
+.hud{display:flex;gap:16px;margin-bottom:12px;font-size:14px}
+.hud span{color:#4fc3f7;font-weight:bold}
+#tubes{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:14px}
+.tube{width:40px;height:140px;border:3px solid #4fc3f7;border-top:none;border-radius:0 0 12px 12px;display:flex;flex-direction:column-reverse;cursor:pointer;overflow:hidden;transition:transform .15s;background:#16213e}
+.tube.sel{transform:translateY(-10px);border-color:#ffc107}
+.layer{width:100%;height:25%;transition:all .2s}
+#msg{font-size:13px;color:#aaa;margin-bottom:10px;text-align:center}
+#restart{padding:8px 20px;background:#4fc3f7;border:none;border-radius:6px;color:#1a1a2e;font-weight:bold;cursor:pointer;font-size:14px}
+</style>
+</head>
+<body>
+<h1>💧 Water Sort</h1>
+<div class="hud">Moves: <span id="mv">0</span> | Level: <span id="lv">1</span> | Best: <span id="bs">0</span></div>
+<div id="tubes"></div>
+<div id="msg">Tap a tube to select, tap another to pour. Sort all colors!</div>
+<button id="restart">New Puzzle</button>
+<script>
+const colors=['#e94560','#4fc3f7','#4caf50','#ffc107','#9c27b0','#ff9800'];
+let tubes=[],selected=-1,moves=0,level=1,best=+localStorage.getItem('water-sort-best')||0;
+document.getElementById('bs').textContent=best;
+const tubesEl=document.getElementById('tubes');
+function genPuzzle(){const numColors=Math.min(3+level,6);const numTubes=numColors+2;
+let pool=[];for(let c=0;c<numColors;c++){for(let i=0;i<4;i++)pool.push(c);}
+for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+tubes=[];for(let t=0;t<numTubes;t++){tubes.push(t<numColors?pool.slice(t*4,t*4+4):[]);}
+moves=0;selected=-1;document.getElementById('mv').textContent=0;document.getElementById('lv').textContent=level;render();}
+function render(){tubesEl.innerHTML='';tubes.forEach((tube,i)=>{const el=document.createElement('div');el.className='tube'+(i===selected?' sel':'');
+for(let l=0;l<4;l++){const layer=document.createElement('div');layer.className='layer';if(l<tube.length){layer.style.background=colors[tube[l]];}else{layer.style.background='transparent';}el.appendChild(layer);}
+el.addEventListener('click',()=>onTube(i));tubesEl.appendChild(el);});}
+function onTube(i){if(selected===-1){if(tubes[i].length>0){selected=i;render();}}else{if(i===selected){selected=-1;render();return;}
+const from=tubes[selected],to=tubes[i];
+if(to.length>=4){selected=-1;render();return;}
+if(to.length>0&&to[to.length-1]!==from[from.length-1]){selected=-1;render();return;}
+const color=from[from.length-1];let count=0;while(from.length>0&&from[from.length-1]===color&&to.length<4){to.push(from.pop());count++;}
+moves++;document.getElementById('mv').textContent=moves;selected=-1;render();checkWin();}}
+function checkWin(){const won=tubes.every(t=>t.length===0||(t.length===4&&t.every(c=>c===t[0])));
+if(won){if(moves>0&&(best===0||moves<best)){best=moves;localStorage.setItem('water-sort-best',best);document.getElementById('bs').textContent=best;}
+document.getElementById('msg').textContent='🎉 Solved in '+moves+' moves! Level up!';level++;setTimeout(genPuzzle,1500);}}
+document.getElementById('restart').addEventListener('click',genPuzzle);
+genPuzzle();
+</script>
+<script>
+(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
+</script>
+</body>
+</html>

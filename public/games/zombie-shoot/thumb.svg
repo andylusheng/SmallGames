@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#1a1a2e"/>
+<rect x="0" y="240" width="400" height="60" fill="#2d5a27"/>
+<circle cx="120" cy="160" r="25" fill="#4caf50"/>
+<circle cx="112" cy="152" r="5" fill="#1b5e20"/>
+<circle cx="128" cy="152" r="5" fill="#1b5e20"/>
+<rect x="110" y="168" width="20" height="4" rx="2" fill="#333"/>
+<circle cx="250" cy="120" r="20" fill="#4caf50"/>
+<circle cx="244" cy="114" r="4" fill="#1b5e20"/>
+<circle cx="256" cy="114" r="4" fill="#1b5e20"/>
+<circle cx="320" cy="180" r="22" fill="#2e7d32"/>
+<circle cx="313" cy="173" r="4" fill="#1b5e20"/>
+<circle cx="327" cy="173" r="4" fill="#1b5e20"/>
+<circle cx="180" cy="220" r="6" fill="#ff5722"/>
+<circle cx="200" cy="200" r="5" fill="#ff5722"/>
+<text x="200" y="285" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">🧟 ZOMBIE SHOOTER</text>
+</svg>

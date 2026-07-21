@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Pac-Man Lite</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Score: <span id="sc">0</span> | Lives: <span id="lv">3</span> | Best: <span id="bs">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">Arrows/Swipe to move | Eat all dots | Avoid ghosts!</div>
+<script>
+const COLS=11,ROWS=11,TS=Math.min(Math.floor((Math.min(860,innerWidth-16))/COLS),48);
+const W=COLS*TS,H=ROWS*TS;
+const c=document.getElementById('c');c.width=W;c.height=H;
+const ctx=c.getContext('2d');
+let score=0,lives=3,gameOver=false,best=+localStorage.getItem('pacman-best')||0;
+document.getElementById('bs').textContent=best;
+const map=[1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,0,1,1,0,1,1,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,1,0,1,1,1,1,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,0,1,1,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1];
+let dots=[],pac={x:5,y:5,dir:{x:0,y:0},next:{x:0,y:0},mouth:0},ghosts=[],dotsLeft=0;
+function init(){dots=[];dotsLeft=0;for(let i=0;i<ROWS*COLS;i++){if(map[i]===0){dots[i]=true;dotsLeft++;}else dots[i]=false;}
+pac={x:5,y:5,dir:{x:0,y:0},next:{x:0,y:0},mouth:0};
+ghosts=[{x:1,y:1,color:'#e94560',dir:{x:1,y:0}},{x:9,y:1,color:'#4fc3f7',dir:{x:-1,y:0}},{x:1,y:9,color:'#ffc107',dir:{x:0,y:1}}];}
+init();
+document.addEventListener('keydown',e=>{if(e.key==='ArrowUp')pac.next={x:0,y:-1};if(e.key==='ArrowDown')pac.next={x:0,y:1};if(e.key==='ArrowLeft')pac.next={x:-1,y:0};if(e.key==='ArrowRight')pac.next={x:1,y:0};e.preventDefault();});
+let tx=0,ty=0;
+c.addEventListener('pointerdown',e=>{if(gameOver){reset();return;}const r=c.getBoundingClientRect();tx=e.clientX;ty=e.clientY;});
+c.addEventListener('pointerup',e=>{const dx=e.clientX-tx,dy=e.clientY-ty;if(Math.abs(dx)>Math.abs(dy)){pac.next=dx>0?{x:1,y:0}:{x:-1,y:0};}else{pac.next=dy>0?{x:0,y:1}:{x:0,y:-1};}});
+function reset(){score=0;lives=3;gameOver=false;document.getElementById('sc').textContent=0;document.getElementById('lv').textContent=3;init();}
+function canMove(x,y){return x>=0&&x<COLS&&y>=0&&y<ROWS&&map[y*COLS+x]===0;}
+let tick=0;
+function update(){if(gameOver)return;tick++;pac.mouth+=0.2;
+if(tick%8===0){const nx=pac.x+pac.next.x,ny=pac.y+pac.next.y;if(canMove(nx,ny))pac.dir=pac.next;
+const mx=pac.x+pac.dir.x,my=pac.y+pac.dir.y;if(canMove(mx,my)){pac.x=mx;pac.y=my;}
+const idx=pac.y*COLS+pac.x;if(dots[idx]){dots[idx]=false;score+=10;dotsLeft--;document.getElementById('sc').textContent=score;if(score>best){best=score;localStorage.setItem('pacman-best',best);document.getElementById('bs').textContent=best;}if(dotsLeft<=0){init();}}}
+if(tick%12===0){ghosts.forEach(g=>{const dirs=[{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}];const valid=dirs.filter(d=>canMove(g.x+d.x,g.y+d.y)&&!(d.x===-g.dir.x&&d.y===-g.dir.y));
+if(valid.length>0){if(Math.random()<0.6){const toward=valid.sort((a,b)=>{const da=Math.hypot(g.x+a.x-pac.x,g.y+a.y-pac.y);const db=Math.hypot(g.x+b.x-pac.x,g.y+b.y-pac.y);return da-db;});g.dir=toward[0];}else{g.dir=valid[Math.floor(Math.random()*valid.length)];}}
+g.x+=g.dir.x;g.y+=g.dir.y;});}
+ghosts.forEach(g=>{if(g.x===pac.x&&g.y===pac.y){lives--;document.getElementById('lv').textContent=lives;if(lives<=0){gameOver=true;}else{pac.x=5;pac.y=5;pac.dir={x:0,y:0};}}});}
+function draw(){ctx.fillStyle='#111';ctx.fillRect(0,0,W,H);
+for(let y=0;y<ROWS;y++){for(let x=0;x<COLS;x++){if(map[y*COLS+x]===1){ctx.fillStyle='#1a237e';ctx.fillRect(x*TS,y*TS,TS,TS);}else if(dots[y*COLS+x]){ctx.fillStyle='#ffc107';ctx.beginPath();ctx.arc(x*TS+TS/2,y*TS+TS/2,3,0,Math.PI*2);ctx.fill();}}}
+const px=pac.x*TS+TS/2,py=pac.y*TS+TS/2;const angle=Math.atan2(pac.dir.y,pac.dir.x);const m=Math.abs(Math.sin(pac.mouth))*0.3;
+ctx.fillStyle='#ffc107';ctx.beginPath();ctx.moveTo(px,py);ctx.arc(px,py,TS/2-2,angle+m,angle+Math.PI*2-m);ctx.fill();
+ghosts.forEach(g=>{ctx.fillStyle=g.color;ctx.beginPath();ctx.arc(g.x*TS+TS/2,g.y*TS+TS/2,TS/2-2,Math.PI,0);ctx.lineTo(g.x*TS+TS-2,g.y*TS+TS-2);ctx.lineTo(g.x*TS+2,g.y*TS+TS-2);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(g.x*TS+TS/2-3,g.y*TS+TS/2-2,3,0,Math.PI*2);ctx.arc(g.x*TS+TS/2+3,g.y*TS+TS/2-2,3,0,Math.PI*2);ctx.fill();});
+if(gameOver){ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#e94560';ctx.font='bold 22px Arial';ctx.textAlign='center';ctx.fillText('GAME OVER',W/2,H/2-15);ctx.fillStyle='#fff';ctx.font='14px Arial';ctx.fillText('Score: '+score+' | Tap to retry',W/2,H/2+15);}}
+function loop(){update();draw();requestAnimationFrame(loop);}
+loop();
+</script>
+</body>
+</html>

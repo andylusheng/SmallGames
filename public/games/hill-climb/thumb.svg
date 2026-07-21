@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#0f3460"/>
+<path d="M0 200 Q50 160 100 190 Q150 220 200 180 Q250 140 300 170 Q350 200 400 160 L400 300 L0 300Z" fill="#2d5a27"/>
+<path d="M0 200 Q50 160 100 190 Q150 220 200 180 Q250 140 300 170 Q350 200 400 160" fill="none" stroke="#4caf50" stroke-width="3"/>
+<rect x="140" y="145" width="40" height="16" rx="4" fill="#e94560"/>
+<rect x="148" y="135" width="22" height="12" rx="3" fill="#4fc3f7"/>
+<circle cx="148" cy="165" r="8" fill="#333"/><circle cx="172" cy="165" r="8" fill="#333"/>
+<text x="200" y="285" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">🚗 HILL CLIMB</text>
+</svg>

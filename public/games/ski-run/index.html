@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Ski Run</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:14px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Score: <span id="sc">0</span> | Best: <span id="bs">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">← → or tap sides to steer. Dodge trees and rocks!</div>
+<script>
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80);
+const c=document.getElementById('c');c.width=W;c.height=H;const ctx=c.getContext('2d');
+let score=0,best=+localStorage.getItem('ski-run-best')||0,gameOver=false,speed=2;
+document.getElementById('bs').textContent=best;
+let player={x:W/2,y:H-60,w:16,h:20};
+let obstacles=[],particles=[];
+let keys={};
+document.addEventListener('keydown',e=>{keys[e.key]=true;if(gameOver&&e.key===' '){reset();}});
+document.addEventListener('keyup',e=>keys[e.key]=false);
+c.addEventListener('pointerdown',e=>{if(gameOver){reset();return;}const r=c.getBoundingClientRect();const x=e.clientX-r.left;if(x<W/2)keys['ArrowLeft']=true;else keys['ArrowRight']=true;});
+c.addEventListener('pointerup',()=>{keys['ArrowLeft']=false;keys['ArrowRight']=false;});
+function spawnObstacle(){const type=Math.random()<0.6?'tree':'rock';
+obstacles.push({x:Math.random()*(W-40)+20,y:-30,type,w:type==='tree'?20:24,h:type==='tree'?30:18});}
+function reset(){score=0;gameOver=false;speed=2;player.x=W/2;obstacles=[];particles=[];document.getElementById('sc').textContent=0;}
+let spawnTimer=0;
+function update(){if(gameOver)return;
+speed=2+score*0.005;
+if(keys['ArrowLeft']||keys['a'])player.x-=4;
+if(keys['ArrowRight']||keys['d'])player.x+=4;
+player.x=Math.max(10,Math.min(W-10,player.x));
+spawnTimer++;if(spawnTimer>Math.max(15,40-score*0.1)){spawnTimer=0;spawnObstacle();}
+obstacles.forEach(o=>o.y+=speed);
+obstacles=obstacles.filter(o=>{if(o.y>H+40)return false;
+if(Math.abs(o.x-player.x)<(o.w/2+player.w/2-4)&&Math.abs(o.y-player.y)<(o.h/2+player.h/2-4)){
+gameOver=true;if(score>best){best=score;localStorage.setItem('ski-run-best',best);document.getElementById('bs').textContent=best;}
+for(let i=0;i<10;i++)particles.push({x:player.x,y:player.y,vx:(Math.random()-0.5)*4,vy:(Math.random()-0.5)*4,life:30});}
+return true;});
+score++;document.getElementById('sc').textContent=score;
+particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.life--;});particles=particles.filter(p=>p.life>0);}
+function draw(){ctx.fillStyle='#e8e8e8';ctx.fillRect(0,0,W,H);
+ctx.strokeStyle='#ddd';ctx.lineWidth=1;for(let i=0;i<H;i+=30){ctx.beginPath();ctx.moveTo(0,i+(score*speed%30));ctx.lineTo(W,i+(score*speed%30));ctx.stroke();}
+obstacles.forEach(o=>{if(o.type==='tree'){ctx.fillStyle='#4a2f1a';ctx.fillRect(o.x-3,o.y,6,o.h*0.4);
+ctx.fillStyle='#2e7d32';ctx.beginPath();ctx.moveTo(o.x,o.y-o.h*0.6);ctx.lineTo(o.x-o.w/2,o.y+o.h*0.3);ctx.lineTo(o.x+o.w/2,o.y+o.h*0.3);ctx.closePath();ctx.fill();}
+else{ctx.fillStyle='#777';ctx.beginPath();ctx.ellipse(o.x,o.y,o.w/2,o.h/2,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#999';ctx.beginPath();ctx.ellipse(o.x-3,o.y-3,o.w/4,o.h/4,0,0,Math.PI*2);ctx.fill();}});
+if(!gameOver){ctx.fillStyle='#e94560';ctx.beginPath();ctx.moveTo(player.x,player.y-player.h/2);ctx.lineTo(player.x-player.w/2,player.y+player.h/2);ctx.lineTo(player.x+player.w/2,player.y+player.h/2);ctx.closePath();ctx.fill();
+ctx.fillStyle='#333';ctx.fillRect(player.x-player.w/2-2,player.y+player.h/2-3,4,8);ctx.fillRect(player.x+player.w/2-2,player.y+player.h/2-3,4,8);}
+particles.forEach(p=>{ctx.fillStyle=`rgba(233,69,96,${p.life/30})`;ctx.fillRect(p.x-2,p.y-2,4,4);});
+if(gameOver){ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 22px Arial';ctx.textAlign='center';ctx.fillText('CRASH! 💥',W/2,H/2-15);ctx.font='14px Arial';ctx.fillText('Score: '+score+' | Best: '+best,W/2,H/2+15);ctx.fillText('Tap or Space to restart',W/2,H/2+40);}}
+function loop(){update();draw();requestAnimationFrame(loop);}
+loop();
+</script>
+</body>
+</html>

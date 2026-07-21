@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Car Dodge</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Score: <span id="sc">0</span> | Best: <span id="bs">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">← → or swipe to dodge traffic!</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80);
+cv.width=W;cv.height=H;
+const lanes=4,laneW=W/lanes;
+let player,enemies,score,best=+localStorage.getItem('cd-best')||0;
+let speed,frame,gameOver=false,started=false;
+document.getElementById('bs').textContent=best;
+const colors=['#e94560','#ff9800','#9c27b0','#00bcd4','#ffc107'];
+function init(){
+  player={lane:1,y:H-70,w:laneW-16,h:50};
+  enemies=[];score=0;speed=3;frame=0;gameOver=false;started=false;
+  document.getElementById('sc').textContent=0;
+}
+function spawnEnemy(){
+  const lane=Math.floor(Math.random()*lanes);
+  enemies.push({lane,y:-60,w:laneW-16,h:50,color:colors[Math.floor(Math.random()*colors.length)],scored:false});
+}
+function update(){
+  if(!started||gameOver)return;
+  frame++;
+  speed=3+score*0.05;
+  if(frame%Math.max(30,60-score)===0)spawnEnemy();
+  for(let e of enemies){
+    e.y+=speed;
+    if(!e.scored&&e.y>player.y+player.h){e.scored=true;score++;document.getElementById('sc').textContent=score;}
+    // collision
+    const px=player.lane*laneW+8,ex=e.lane*laneW+8;
+    if(player.lane===e.lane&&player.y<e.y+e.h&&player.y+player.h>e.y){die();}
+  }
+  enemies=enemies.filter(e=>e.y<H+60);
+}
+function die(){
+  gameOver=true;
+  if(score>best){best=score;localStorage.setItem('cd-best',best);}
+  document.getElementById('bs').textContent=best;
+}
+function drawCar(x,y,w,h,color,isPlayer){
+  ctx.fillStyle=color;
+  ctx.beginPath();
+  ctx.roundRect(x,y,w,h,8);ctx.fill();
+  ctx.fillStyle=isPlayer?'#81d4fa':'rgba(255,255,255,0.3)';
+  ctx.fillRect(x+4,y+6,w-8,12);
+  ctx.fillStyle='rgba(0,0,0,0.3)';
+  ctx.fillRect(x+2,y+h-10,8,8);ctx.fillRect(x+w-10,y+h-10,8,8);
+}
+function draw(){
+  // road
+  ctx.fillStyle='#2d2d2d';ctx.fillRect(0,0,W,H);
+  // lane lines
+  ctx.setLineDash([20,15]);ctx.strokeStyle='#555';ctx.lineWidth=2;
+  for(let i=1;i<lanes;i++){ctx.beginPath();ctx.moveTo(i*laneW,0);ctx.lineTo(i*laneW,H);ctx.stroke();}
+  ctx.setLineDash([]);
+  // road edges
+  ctx.fillStyle='#ffc107';ctx.fillRect(0,0,4,H);ctx.fillRect(W-4,0,4,H);
+  // enemies
+  for(let e of enemies){
+    drawCar(e.lane*laneW+8,e.y,e.w,e.h,e.color,false);
+  }
+  // player
+  drawCar(player.lane*laneW+8,player.y,player.w,player.h,'#4fc3f7',true);
+  if(!started&&!gameOver){
+    ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#fff';ctx.font='bold 22px Arial';ctx.textAlign='center';
+    ctx.fillText('TAP TO START',W/2,H/2);
+  }
+  if(gameOver){
+    ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#e94560';ctx.font='bold 26px Arial';ctx.textAlign='center';
+    ctx.fillText('CRASH!',W/2,H/2-15);
+    ctx.fillStyle='#fff';ctx.font='16px Arial';
+    ctx.fillText('Score: '+score+' | Tap to retry',W/2,H/2+20);
+  }
+}
+function move(dir){
+  if(gameOver)return;
+  player.lane=Math.max(0,Math.min(lanes-1,player.lane+dir));
+}
+cv.addEventListener('pointerdown',e=>{
+  if(!started){started=true;return;}
+  if(gameOver){init();started=true;return;}
+  const r=cv.getBoundingClientRect();
+  const x=e.clientX-r.left;
+  move(x<W/2?-1:1);
+});
+document.addEventListener('keydown',e=>{
+  if(e.code==='ArrowLeft'){e.preventDefault();if(!started)started=true;move(-1);}
+  if(e.code==='ArrowRight'){e.preventDefault();if(!started)started=true;move(1);}
+  if(e.code==='Space'&&gameOver){init();started=true;}
+});
+function loop(){update();draw();requestAnimationFrame(loop);}
+init();loop();
+</script>
+</body>
+</html>

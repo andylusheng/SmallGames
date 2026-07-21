@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Memory Cards</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:10px}
+.hud{display:flex;gap:16px;margin-bottom:12px;color:#fff;font-size:15px}
+.hud span{color:#4fc3f7;font-weight:bold}
+#board{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:360px;width:90vw}
+.card{aspect-ratio:1;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:32px;cursor:pointer;transition:transform .3s;transform-style:preserve-3d;position:relative}
+.card .front,.card .back{position:absolute;inset:0;border-radius:12px;display:flex;align-items:center;justify-content:center;backface-visibility:hidden}
+.card .back{background:linear-gradient(135deg,#0f3460,#16213e);border:2px solid #4fc3f733;font-size:24px}
+.card .front{background:#16213e;border:2px solid #4fc3f7;transform:rotateY(180deg)}
+.card.flipped{transform:rotateY(180deg)}
+.card.matched{opacity:.6;pointer-events:none}
+.card.matched .front{border-color:#4caf50;background:#1a3a1a}
+.msg{color:#aaa;margin-top:12px;font-size:14px}
+.btn{margin-top:10px;padding:8px 20px;background:#e94560;color:#fff;border:none;border-radius:6px;font-size:14px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="hud">
+  <div>Moves: <span id="moves">0</span></div>
+  <div>Pairs: <span id="pairs">0</span>/8</div>
+  <div>Best: <span id="best">-</span></div>
+</div>
+<div id="board"></div>
+<div class="msg" id="msg">Find all matching pairs!</div>
+<button class="btn" onclick="init()">New Game</button>
+<script>
+const EMOJIS=['🐶','🐱','🦊','🐼','🦁','🐸','🐵','🦄','🐙','🦋','🐢','🐬','🦜','🐝','🦀','🐞'];
+let cards=[],flipped=[],matched=0,moves=0,best=null,locked=false;
+
+function init(){
+  const chosen=EMOJIS.sort(()=>Math.random()-0.5).slice(0,8);
+  cards=[...chosen,...chosen].sort(()=>Math.random()-0.5);
+  flipped=[];matched=0;moves=0;locked=false;
+  document.getElementById('moves').textContent='0';
+  document.getElementById('pairs').textContent='0';
+  document.getElementById('msg').textContent='Find all matching pairs!';
+  render();
+}
+
+function render(){
+  const el=document.getElementById('board');el.innerHTML='';
+  cards.forEach((emoji,i)=>{
+    const card=document.createElement('div');
+    const isFlipped=flipped.includes(i);
+    const isMatched=document.querySelectorAll('.matched').length;
+    card.className='card'+(isFlipped?' flipped':'')+(card.dataset.matched==='true'?' matched':'');
+    card.innerHTML=`<div class="back">❓</div><div class="front">${emoji}</div>`;
+    card.addEventListener('click',()=>flip(i,card));
+    el.appendChild(card);
+  });
+}
+
+function flip(i,cardEl){
+  if(locked||flipped.includes(i)||cardEl.classList.contains('matched'))return;
+  flipped.push(i);
+  cardEl.classList.add('flipped');
+  
+  if(flipped.length===2){
+    moves++;document.getElementById('moves').textContent=moves;
+    locked=true;
+    const[a,b]=flipped;
+    if(cards[a]===cards[b]){
+      matched++;document.getElementById('pairs').textContent=matched;
+      setTimeout(()=>{
+        document.querySelectorAll('.card')[a].classList.add('matched');
+        document.querySelectorAll('.card')[b].classList.add('matched');
+        flipped=[];locked=false;
+        if(matched===8){
+          const msg=`🎉 You won in ${moves} moves!`;
+          document.getElementById('msg').textContent=msg;
+          if(!best||moves<best){best=moves;document.getElementById('best').textContent=best;}
+        }
+      },400);
+    }else{
+      setTimeout(()=>{
+        document.querySelectorAll('.card')[a].classList.remove('flipped');
+        document.querySelectorAll('.card')[b].classList.remove('flipped');
+        flipped=[];locked=false;
+      },800);
+    }
+  }
+}
+
+init();
+</script>
+<script>
+(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
+</script>
+</body>
+</html>

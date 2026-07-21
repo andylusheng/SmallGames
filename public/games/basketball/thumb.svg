@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#16213e"/>
+<rect x="270" y="60" width="6" height="80" fill="#fff"/>
+<line x1="240" y1="100" x2="300" y2="100" stroke="#e94560" stroke-width="4"/>
+<path d="M245 100 L255 130 M260 100 L265 130 M275 100 L270 130 M290 100 L280 130" stroke="#ffffff44" stroke-width="1"/>
+<circle cx="150" cy="200" r="20" fill="#ff9800" stroke="#e65100" stroke-width="2"/>
+<line x1="130" y1="200" x2="170" y2="200" stroke="#e65100" stroke-width="1.5"/>
+<line x1="150" y1="180" x2="150" y2="220" stroke="#e65100" stroke-width="1.5"/>
+<path d="M150 200 Q200 120 260 100" stroke="#4fc3f7" stroke-width="2" fill="none" stroke-dasharray="5,5"/>
+<text x="200" y="285" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">🏀 BASKETBALL</text>
+</svg>

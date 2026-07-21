@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#16213e"/>
+<circle cx="200" cy="150" r="12" fill="#e94560"/>
+<path d="M200 150 L160 200 L240 220 L180 250" stroke="#4fc3f7" stroke-width="2" fill="none" stroke-dasharray="4,4"/>
+<rect x="100" y="80" width="60" height="12" rx="4" fill="#ff9800"/>
+<rect x="220" y="120" width="60" height="12" rx="4" fill="#ff9800"/>
+<rect x="140" y="180" width="60" height="12" rx="4" fill="#ff9800"/>
+<rect x="280" y="220" width="40" height="40" rx="6" fill="#4caf50"/>
+<text x="300" y="246" font-size="16" fill="#fff" text-anchor="middle">🏁</text>
+<text x="200" y="285" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">⚽ BOUNCE BALL</text>
+</svg>

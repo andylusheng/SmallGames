@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Maze Runner</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:Arial,sans-serif;padding:10px}
+#ui{color:#fff;margin-bottom:8px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;border:2px solid #0f3460;touch-action:none}
+#msg{color:#aaa;margin-top:8px;font-size:13px}
+.btn{margin-top:10px;padding:8px 20px;background:#e94560;color:#fff;border:none;border-radius:6px;font-size:14px;cursor:pointer}
+</style>
+</head>
+<body>
+<div id="ui">Level: <span id="lv">1</span> | Time: <span id="tm">0</span>s</div>
+<canvas id="c"></canvas>
+<div id="msg">Arrow keys / WASD / Swipe to move • Reach the 🏁</div>
+<button class="btn" onclick="nextLevel()">Next Level</button>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+let COLS=11,ROWS=11;const CELL=Math.max(28,Math.floor(Math.min((innerWidth-16)/COLS,(innerHeight-100)/ROWS)));
+c.width=COLS*CELL;c.height=ROWS*CELL;
+let maze,player,goal,level=1,timer=0,timerInt=null,won=false;
+
+function generateMaze(cols,rows){
+  const grid=Array.from({length:rows},()=>Array(cols).fill(1));
+  const stack=[];
+  const startR=1,startC=1;
+  grid[startR][startC]=0;
+  stack.push([startR,startC]);
+  
+  while(stack.length>0){
+    const[r,cc]=stack[stack.length-1];
+    const neighbors=[];
+    const dirs=[[0,2],[0,-2],[2,0],[-2,0]];
+    for(const[dr,dc]of dirs){
+      const nr=r+dr,nc=cc+dc;
+      if(nr>0&&nr<rows-1&&nc>0&&nc<cols-1&&grid[nr][nc]===1){
+        neighbors.push([nr,nc,r+dr/2,cc+dc/2]);
+      }
+    }
+    if(neighbors.length>0){
+      const[nr,nc,wr,wc]=neighbors[Math.floor(Math.random()*neighbors.length)];
+      grid[wr][wc]=0;grid[nr][nc]=0;
+      stack.push([nr,nc]);
+    }else{stack.pop();}
+  }
+  return grid;
+}
+
+function initLevel(){
+  COLS=Math.min(21,9+level*2);
+  ROWS=Math.min(21,9+level*2);
+  if(COLS%2===0)COLS++;if(ROWS%2===0)ROWS++;
+  c.width=COLS*CELL;c.height=ROWS*CELL;
+  maze=generateMaze(COLS,ROWS);
+  player={r:1,c:1};
+  goal={r:ROWS-2,c:COLS-2};
+  maze[goal.r][goal.c]=0;
+  won=false;timer=0;
+  document.getElementById('lv').textContent=level;
+  document.getElementById('tm').textContent='0';
+  clearInterval(timerInt);
+  timerInt=setInterval(()=>{if(!won){timer++;document.getElementById('tm').textContent=timer;}},1000);
+  draw();
+}
+
+function draw(){
+  ctx.fillStyle='#16213e';ctx.fillRect(0,0,c.width,c.height);
+  
+  for(let r=0;r<ROWS;r++)for(let col=0;col<COLS;col++){
+    if(maze[r][col]===1){
+      ctx.fillStyle='#0f3460';
+      ctx.fillRect(col*CELL,r*CELL,CELL,CELL);
+    }
+  }
+  
+  // Goal
+  ctx.font=`${CELL-6}px Arial`;ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('🏁',goal.c*CELL+CELL/2,goal.r*CELL+CELL/2);
+  
+  // Player
+  ctx.fillStyle='#4fc3f7';
+  ctx.beginPath();
+  ctx.arc(player.c*CELL+CELL/2,player.r*CELL+CELL/2,CELL/3,0,Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle='#fff';
+  ctx.beginPath();
+  ctx.arc(player.c*CELL+CELL/2-3,player.r*CELL+CELL/2-3,3,0,Math.PI*2);
+  ctx.arc(player.c*CELL+CELL/2+3,player.r*CELL+CELL/2-3,3,0,Math.PI*2);
+  ctx.fill();
+  
+  if(won){
+    ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,c.width,c.height);
+    ctx.fillStyle='#fff';ctx.font='bold 24px Arial';
+    ctx.fillText('🎉 Level Complete!',c.width/2,c.height/2-10);
+    ctx.fillStyle='#4fc3f7';ctx.font='16px Arial';
+    ctx.fillText(`Time: ${timer}s`,c.width/2,c.height/2+20);
+  }
+}
+
+function move(dr,dc){
+  if(won)return;
+  const nr=player.r+dr,nc=player.c+dc;
+  if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&maze[nr][nc]===0){
+    player.r=nr;player.c=nc;
+    if(player.r===goal.r&&player.c===goal.c){
+      won=true;clearInterval(timerInt);
+    }
+    draw();
+  }
+}
+
+function nextLevel(){level++;initLevel();}
+
+// Keyboard
+document.addEventListener('keydown',e=>{
+  switch(e.key){
+    case'ArrowUp':case'w':move(-1,0);break;
+    case'ArrowDown':case's':move(1,0);break;
+    case'ArrowLeft':case'a':move(0,-1);break;
+    case'ArrowRight':case'd':move(0,1);break;
+  }
+});
+
+// Touch/swipe
+let tx,ty;
+c.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;});
+c.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;
+  if(Math.abs(dx)>Math.abs(dy)){move(0,dx>0?1:-1);}
+  else{move(dy>0?1:-1,0);}
+});
+
+initLevel();
+</script>
+</body>
+</html>

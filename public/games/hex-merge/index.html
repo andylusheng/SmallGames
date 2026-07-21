@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Hex Merge</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:8px;font-size:14px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none}
+#msg{color:#aaa;margin-top:8px;font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+<div id="ui">Score: <span id="sc">0</span> | Best: <span id="bs">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">Tap two adjacent hexes with the same number to merge them!<br>Higher numbers = more points. Game over when board is full.</div>
+<script>
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-100);
+const c=document.getElementById('c');c.width=W;c.height=H;const ctx=c.getContext('2d');
+const COLS=5,ROWS=5,hexR=Math.min(W/(COLS*1.8),H/(ROWS*1.6));
+let grid=[],selected=null,score=0,best=+localStorage.getItem('hex-merge-best')||0;
+document.getElementById('bs').textContent=best;
+const colors=['','#4fc3f7','#4caf50','#ffc107','#ff9800','#e94560','#9c27b0','#00bcd4','#ff5722','#8bc34a'];
+function hexCenter(col,row){const x=hexR*1.8*col+hexR*1.2+(row%2)*hexR*0.9;const y=hexR*1.6*row+hexR*1.2;return{x,y};}
+function init(){grid=[];for(let r=0;r<ROWS;r++){grid[r]=[];for(let col=0;col<COLS;col++){grid[r][col]=Math.random()<0.6?Math.ceil(Math.random()*3):0;}}ensureMoves();}
+function ensureMoves(){let has=false;for(let r=0;r<ROWS&&!has;r++){for(let col=0;col<COLS&&!has;col++){if(grid[r][col]>0){const nb=getNeighbors(col,r);for(const n of nb){if(grid[n.r][n.c]===grid[r][col]){has=true;break;}}}}}
+if(!has){for(let r=0;r<ROWS;r++){for(let col=0;col<COLS;col++){if(grid[r][col]===0)grid[r][col]=Math.ceil(Math.random()*2);}}}}
+function getNeighbors(col,row){const even=row%2===0;const dirs=even?[[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[-1,1]]:[[-1,0],[1,0],[0,-1],[0,1],[1,-1],[1,1]];
+return dirs.map(([dc,dr])=>({c:col+dc,r:row+dr})).filter(n=>n.c>=0&&n.c<COLS&&n.r>=0&&n.r<ROWS);}
+function isAdjacent(c1,r1,c2,r2){return getNeighbors(c1,r1).some(n=>n.c===c2&&n.r===r2);}
+function drawHex(x,y,r,fill,stroke){ctx.beginPath();for(let i=0;i<6;i++){const angle=Math.PI/6+i*Math.PI/3;const px=x+r*Math.cos(angle),py=y+r*Math.sin(angle);i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);}ctx.closePath();ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle=stroke;ctx.lineWidth=2;ctx.stroke();}
+function draw(){ctx.fillStyle='#0f3460';ctx.fillRect(0,0,W,H);
+for(let r=0;r<ROWS;r++){for(let col=0;col<COLS;col++){const{x,y}=hexCenter(col,r);const v=grid[r][col];
+const isSel=selected&&selected.c===col&&selected.r===r;
+if(v>0){drawHex(x,y,hexR*0.85,colors[Math.min(v,9)],isSel?'#fff':'#16213e');ctx.fillStyle='#fff';ctx.font='bold '+(hexR*0.6)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(v,x,y);}
+else{drawHex(x,y,hexR*0.85,'#16213e','#233');}}}
+document.getElementById('sc').textContent=score;}
+c.addEventListener('pointerdown',e=>{const rect=c.getBoundingClientRect();const mx=e.clientX-rect.left,my=e.clientY-rect.top;
+let clicked=null;for(let r=0;r<ROWS;r++){for(let col=0;col<COLS;col++){const{x,y}=hexCenter(col,r);if(Math.hypot(mx-x,my-y)<hexR*0.85){clicked={c:col,r};break;}}}
+if(!clicked)return;
+if(!selected){if(grid[clicked.r][clicked.c]>0){selected=clicked;draw();}}
+else{if(clicked.c===selected.c&&clicked.r===selected.r){selected=null;draw();return;}
+if(isAdjacent(selected.c,selected.r,clicked.c,clicked.r)&&grid[selected.r][selected.c]===grid[clicked.r][clicked.c]&&grid[clicked.r][clicked.c]>0){
+grid[clicked.r][clicked.c]++;grid[selected.r][selected.c]=0;score+=grid[clicked.r][clicked.c]*2;
+if(score>best){best=score;localStorage.setItem('hex-merge-best',best);document.getElementById('bs').textContent=best;}
+spawnRandom();selected=null;draw();checkGameOver();}
+else{selected=grid[clicked.r][clicked.c]>0?clicked:null;draw();}}});
+function spawnRandom(){const empty=[];for(let r=0;r<ROWS;r++){for(let col=0;col<COLS;col++){if(grid[r][col]===0)empty.push({r,c:col});}}
+if(empty.length>0){const s=empty[Math.floor(Math.random()*empty.length)];grid[s.r][s.c]=Math.ceil(Math.random()*3);}}
+function checkGameOver(){const empty=[];for(let r=0;r<ROWS;r++){for(let col=0;col<COLS;col++){if(grid[r][col]===0)empty.push(1);}}
+if(empty.length===0){let canMerge=false;for(let r=0;r<ROWS&&!canMerge;r++){for(let col=0;col<COLS&&!canMerge;col++){const nb=getNeighbors(col,r);for(const n of nb){if(grid[n.r][n.c]===grid[r][col]){canMerge=true;break;}}}}
+if(!canMerge){document.getElementById('msg').textContent='💀 Game Over! Score: '+score+'. Refresh to play again.';}}}
+init();draw();
+</script>
+</body>
+</html>

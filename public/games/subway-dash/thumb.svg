@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#1a1a2e"/>
+<rect x="100" y="0" width="60" height="300" fill="#333"/>
+<rect x="170" y="0" width="60" height="300" fill="#333"/>
+<rect x="240" y="0" width="60" height="300" fill="#333"/>
+<line x1="130" y1="0" x2="130" y2="300" stroke="#ffc107" stroke-width="2" stroke-dasharray="20,15"/>
+<line x1="200" y1="0" x2="200" y2="300" stroke="#ffc107" stroke-width="2" stroke-dasharray="20,15"/>
+<line x1="270" y1="0" x2="270" y2="300" stroke="#ffc107" stroke-width="2" stroke-dasharray="20,15"/>
+<rect x="175" y="200" width="50" height="70" rx="10" fill="#4fc3f7"/>
+<circle cx="200" cy="215" r="10" fill="#fff"/>
+<rect x="110" y="80" width="50" height="70" rx="10" fill="#e94560"/>
+<rect x="245" y="40" width="50" height="70" rx="10" fill="#4caf50"/>
+<text x="200" y="290" text-anchor="middle" fill="#4fc3f7" font-size="22" font-family="Arial" font-weight="bold">SUBWAY DASH</text>
+</svg>

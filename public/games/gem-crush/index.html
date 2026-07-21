@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Gem Crush</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:10px}
+.hud{display:flex;gap:16px;margin-bottom:10px;color:#fff;font-size:15px}
+.hud span{color:#4fc3f7;font-weight:bold}
+#board{display:grid;gap:3px;background:#0f3460;padding:8px;border-radius:12px;touch-action:manipulation}
+.gem{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;transition:transform .15s,opacity .2s;user-select:none}
+.gem:hover{transform:scale(1.1)}
+.gem.selected{transform:scale(1.15);box-shadow:0 0 12px #fff}
+.gem.removing{opacity:0;transform:scale(0)}
+.msg{color:#aaa;margin-top:10px;font-size:13px}
+.btn{margin-top:8px;padding:8px 20px;background:#e94560;color:#fff;border:none;border-radius:6px;font-size:14px;cursor:pointer}
+@media(max-width:420px){.gem{width:38px;height:38px;font-size:20px}}
+</style>
+</head>
+<body>
+<div class="hud">
+  <div>Score: <span id="score">0</span></div>
+  <div>Moves: <span id="moves">30</span></div>
+  <div>Best: <span id="best">0</span></div>
+</div>
+<div id="board"></div>
+<div class="msg" id="msg">Swap adjacent gems to match 3 or more!</div>
+<button class="btn" onclick="init()">New Game</button>
+<script>
+const ROWS=8,COLS=8;
+const GEMS=['💎','🔴','🟢','🟡','🟣','🔵'];
+let grid=[],score=0,moves=30,best=0,selected=null,animating=false;
+
+function init(){
+  score=0;moves=30;selected=null;animating=false;
+  document.getElementById('score').textContent='0';
+  document.getElementById('moves').textContent='30';
+  document.getElementById('msg').textContent='Swap adjacent gems to match 3 or more!';
+  do{generateBoard();}while(findMatches().length>0);
+  render();
+}
+
+function generateBoard(){
+  grid=[];
+  for(let r=0;r<ROWS;r++){grid[r]=[];for(let c=0;c<COLS;c++){grid[r][c]=Math.floor(Math.random()*GEMS.length);}}
+}
+
+function render(){
+  const el=document.getElementById('board');
+  el.style.gridTemplateColumns=`repeat(${COLS},1fr)`;
+  el.innerHTML='';
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const gem=document.createElement('div');
+    gem.className='gem'+(selected&&selected.r===r&&selected.c===c?' selected':'');
+    gem.textContent=GEMS[grid[r][c]];
+    gem.style.background='hsl('+(grid[r][c]*60)+',30%,20%)';
+    gem.addEventListener('click',()=>handleClick(r,c));
+    el.appendChild(gem);
+  }
+}
+
+function handleClick(r,c){
+  if(animating||moves<=0)return;
+  if(!selected){selected={r,c};render();return;}
+  const dr=Math.abs(selected.r-r),dc=Math.abs(selected.c-c);
+  if((dr===1&&dc===0)||(dr===0&&dc===1)){
+    swap(selected.r,selected.c,r,c);
+    const matches=findMatches();
+    if(matches.length>0){
+      moves--;document.getElementById('moves').textContent=moves;
+      selected=null;animating=true;
+      processMatches(matches);
+    }else{swap(selected.r,selected.c,r,c);selected=null;render();}
+  }else{selected={r,c};render();}
+}
+
+function swap(r1,c1,r2,c2){[grid[r1][c1],grid[r2][c2]]=[grid[r2][c2],grid[r1][c1]];}
+
+function findMatches(){
+  const matched=new Set();
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS-2;c++){
+    if(grid[r][c]===grid[r][c+1]&&grid[r][c]===grid[r][c+2]){matched.add(r+','+c);matched.add(r+','+(c+1));matched.add(r+','+(c+2));}
+  }
+  for(let c=0;c<COLS;c++)for(let r=0;r<ROWS-2;r++){
+    if(grid[r][c]===grid[r+1][c]&&grid[r][c]===grid[r+2][c]){matched.add(r+','+c);matched.add((r+1)+','+c);matched.add((r+2)+','+c);}
+  }
+  return[...matched].map(s=>{const[r,c]=s.split(',').map(Number);return{r,c};});
+}
+
+function processMatches(matches){
+  score+=matches.length*10;
+  document.getElementById('score').textContent=score;
+  if(score>best){best=score;document.getElementById('best').textContent=best;}
+  
+  // Remove matched
+  matches.forEach(({r,c})=>grid[r][c]=-1);
+  render();
+  
+  setTimeout(()=>{
+    // Gravity
+    for(let c=0;c<COLS;c++){
+      let empty=ROWS-1;
+      for(let r=ROWS-1;r>=0;r--){
+        if(grid[r][c]!==-1){grid[empty][c]=grid[r][c];if(empty!==r)grid[r][c]=-1;empty--;}
+      }
+      for(let r=empty;r>=0;r--)grid[r][c]=Math.floor(Math.random()*GEMS.length);
+    }
+    render();
+    
+    setTimeout(()=>{
+      const newMatches=findMatches();
+      if(newMatches.length>0){processMatches(newMatches);}
+      else{animating=false;if(moves<=0)document.getElementById('msg').textContent=`Game Over! Score: ${score}. Tap New Game.`;}
+    },200);
+  },250);
+}
+
+init();
+</script>
+<script>
+(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
+</script>
+</body>
+</html>

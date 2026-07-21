@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Memory Match</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:Arial,sans-serif}
+#ui{color:#fff;margin-bottom:15px;font-size:16px;display:flex;gap:20px}
+#grid{display:grid;grid-template-columns:repeat(4,70px);gap:10px}
+.card{width:70px;height:70px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:30px;cursor:pointer;
+  background:#2d2d5e;border:2px solid #444;transition:transform .3s;user-select:none}
+.card.flipped{background:#3b3b7a;border-color:#6366f1;transform:rotateY(180deg)}
+.card.matched{background:#166534;border-color:#22c55e;opacity:.7}
+#win{color:#4ade80;font-size:24px;margin-top:20px;display:none}
+#restart{margin-top:15px;padding:10px 25px;background:#6366f1;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px}
+</style>
+</head>
+<body>
+<div id="ui"><span>Moves: <b id="mv">0</b></span><span>Pairs: <b id="pr">0</b>/8</span></div>
+<div id="grid"></div>
+<div id="win">🎉 You Win!</div>
+<button id="restart" onclick="init()">New Game</button>
+<script>
+const emojis=['🎮','🎲','🎯','🏆','🚀','💎','🔥','⭐'];
+let cards=[],flipped=[],matched=0,moves=0,locked=false;
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function init(){
+  const pairs=shuffle([...emojis,...emojis]);
+  cards=pairs.map((e,i)=>({emoji:e,id:i,state:'hidden'}));
+  flipped=[];matched=0;moves=0;locked=false;
+  document.getElementById('mv').textContent='0';
+  document.getElementById('pr').textContent='0';
+  document.getElementById('win').style.display='none';
+  render();
+}
+function render(){
+  const grid=document.getElementById('grid');grid.innerHTML='';
+  cards.forEach((card,i)=>{
+    const el=document.createElement('div');
+    el.className='card'+(card.state==='flipped'?' flipped':'')+(card.state==='matched'?' matched':'');
+    el.textContent=card.state==='hidden'?'?':card.emoji;
+    el.onclick=()=>flip(i);
+    grid.appendChild(el);
+  });
+}
+function flip(i){
+  if(locked||cards[i].state!=='hidden'||flipped.length>=2)return;
+  cards[i].state='flipped';flipped.push(i);render();
+  if(flipped.length===2){
+    moves++;document.getElementById('mv').textContent=moves;
+    locked=true;
+    const[a,b]=flipped;
+    if(cards[a].emoji===cards[b].emoji){
+      setTimeout(()=>{cards[a].state='matched';cards[b].state='matched';
+        matched++;document.getElementById('pr').textContent=matched;
+        flipped=[];locked=false;render();
+        if(matched===8)document.getElementById('win').style.display='block';
+      },400);
+    }else{
+      setTimeout(()=>{cards[a].state='hidden';cards[b].state='hidden';
+        flipped=[];locked=false;render()},800);
+    }
+  }
+}
+init();
+</script>
+<script>
+(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
+</script>
+</body>
+</html>

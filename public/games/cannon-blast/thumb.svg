@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#1a1a2e"/>
+<rect x="0" y="240" width="400" height="60" fill="#2d5a27"/>
+<circle cx="60" cy="220" r="20" fill="#37474f"/>
+<rect x="60" y="210" width="50" height="14" rx="4" fill="#546e7a" transform="rotate(-30,60,220)"/>
+<circle cx="250" cy="100" r="20" fill="#e94560"/>
+<circle cx="250" cy="100" r="12" fill="#fff"/>
+<circle cx="250" cy="100" r="5" fill="#e94560"/>
+<circle cx="320" cy="160" r="16" fill="#e94560"/>
+<circle cx="320" cy="160" r="9" fill="#fff"/>
+<circle cx="320" cy="160" r="4" fill="#e94560"/>
+<circle cx="150" cy="150" r="8" fill="#333"/>
+<path d="M80 200 Q150 100 240 100" fill="none" stroke="#4fc3f7" stroke-width="2" stroke-dasharray="5,5"/>
+<text x="200" y="285" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">💣 CANNON BLAST</text>
+</svg>

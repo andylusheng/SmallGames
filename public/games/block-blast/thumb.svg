@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#1a1a2e"/>
+<rect x="100" y="50" width="200" height="200" rx="8" fill="#0f3460"/>
+<rect x="110" y="60" width="40" height="40" rx="4" fill="#e94560"/>
+<rect x="155" y="60" width="40" height="40" rx="4" fill="#4fc3f7"/>
+<rect x="200" y="60" width="40" height="40" rx="4" fill="#4caf50"/>
+<rect x="245" y="60" width="40" height="40" rx="4" fill="#16213e"/>
+<rect x="110" y="105" width="40" height="40" rx="4" fill="#ffc107"/>
+<rect x="155" y="105" width="40" height="40" rx="4" fill="#9c27b0"/>
+<rect x="200" y="105" width="40" height="40" rx="4" fill="#16213e"/>
+<rect x="245" y="105" width="40" height="40" rx="4" fill="#ff9800"/>
+<rect x="110" y="150" width="40" height="40" rx="4" fill="#16213e"/>
+<rect x="155" y="150" width="40" height="40" rx="4" fill="#e94560"/>
+<rect x="200" y="150" width="40" height="40" rx="4" fill="#4fc3f7"/>
+<rect x="245" y="150" width="40" height="40" rx="4" fill="#4caf50"/>
+<rect x="110" y="195" width="40" height="40" rx="4" fill="#9c27b0"/>
+<rect x="155" y="195" width="40" height="40" rx="4" fill="#16213e"/>
+<rect x="200" y="195" width="40" height="40" rx="4" fill="#ffc107"/>
+<rect x="245" y="195" width="40" height="40" rx="4" fill="#e94560"/>
+<text x="200" y="280" text-anchor="middle" fill="#4fc3f7" font-size="24" font-family="Arial" font-weight="bold">BLOCK BLAST</text>
+</svg>

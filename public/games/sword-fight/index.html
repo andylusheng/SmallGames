@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Sword Fight</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">You: <span id="hp1">100</span> | Enemy: <span id="hp2">100</span> | Wins: <span id="wn">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">Tap LEFT side to Attack | Tap RIGHT side to Block | Time your moves!</div>
+<script>
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80);
+const c=document.getElementById('c');c.width=W;c.height=H;
+const ctx=c.getContext('2d');
+let hp1=100,hp2=100,wins=+localStorage.getItem('sword-fight-wins')||0,round=1;
+document.getElementById('wn').textContent=wins;
+let player={attacking:false,blocking:false,animT:0},enemy={attacking:false,blocking:false,animT:0,thinkT:0};
+let msg='',msgT=0,particles=[],paused=false;
+c.addEventListener('pointerdown',e=>{if(paused){resetRound();return;}const r=c.getBoundingClientRect();const x=e.clientX-r.left;
+if(x<W/2){if(!player.attacking){player.attacking=true;player.animT=15;}}
+else{if(!player.blocking){player.blocking=true;player.animT=20;}}});
+document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='a'){player.attacking=true;player.animT=15;}if(e.key==='ArrowRight'||e.key==='d'){player.blocking=true;player.animT=20;}});
+function resetRound(){hp1=100;hp2=100;paused=false;msg='';document.getElementById('hp1').textContent=100;document.getElementById('hp2').textContent=100;}
+function update(){if(paused)return;
+if(player.animT>0){player.animT--;if(player.animT===0){player.attacking=false;player.blocking=false;}}
+if(enemy.animT>0){enemy.animT--;if(enemy.animT===0){enemy.attacking=false;enemy.blocking=false;}}
+enemy.thinkT++;if(enemy.thinkT>40+Math.random()*30){enemy.thinkT=0;
+if(Math.random()>0.4){enemy.attacking=true;enemy.animT=15;}else{enemy.blocking=true;enemy.animT=20;}}
+if(player.attacking&&player.animT===10){if(enemy.blocking){msg='Blocked!';msgT=30;}else{hp2-=12+Math.floor(Math.random()*8);document.getElementById('hp2').textContent=Math.max(0,hp2);for(let i=0;i<5;i++)particles.push({x:W*0.7,y:H/2,vx:(Math.random()-.5)*6,vy:(Math.random()-.5)*6,life:15,color:'#e94560'});msg='Hit!';msgT=20;}}
+if(enemy.attacking&&enemy.animT===10){if(player.blocking){msg='You blocked!';msgT=30;}else{hp1-=10+Math.floor(Math.random()*8);document.getElementById('hp1').textContent=Math.max(0,hp1);for(let i=0;i<5;i++)particles.push({x:W*0.3,y:H/2,vx:(Math.random()-.5)*6,vy:(Math.random()-.5)*6,life:15,color:'#4fc3f7'});msg='You got hit!';msgT=20;}}
+if(hp2<=0){wins++;localStorage.setItem('sword-fight-wins',wins);document.getElementById('wn').textContent=wins;msg='🎉 You win the round!';paused=true;}
+if(hp1<=0){msg='💀 You lost! Tap to retry.';paused=true;}
+if(msgT>0)msgT--;
+particles.forEach((p,i)=>{p.x+=p.vx;p.y+=p.vy;p.life--;if(p.life<=0)particles.splice(i,1);});}
+function drawFighter(x,facing,color,attacking,blocking){ctx.save();ctx.translate(x,H/2+20);
+ctx.fillStyle=color;ctx.fillRect(-12,-40,24,50);
+ctx.fillStyle='#ffd54f';ctx.beginPath();ctx.arc(0,-50,12,0,Math.PI*2);ctx.fill();
+if(attacking){ctx.fillStyle='#ccc';ctx.fillRect(facing*15,-35,facing*35,5);}
+else if(blocking){ctx.fillStyle='#8d6e63';ctx.fillRect(facing*12,-45,facing*6,40);}
+else{ctx.fillStyle='#ccc';ctx.fillRect(facing*10,-30,facing*20,4);}
+ctx.restore();}
+function draw(){ctx.fillStyle='#16213e';ctx.fillRect(0,0,W,H);
+ctx.fillStyle='#2a2a4e';ctx.fillRect(0,H/2+70,W,H/2-70);
+ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.beginPath();ctx.moveTo(W/2,0);ctx.lineTo(W/2,H);ctx.stroke();
+drawFighter(W*0.3,1,'#4fc3f7',player.attacking,player.blocking);
+drawFighter(W*0.7,-1,'#e94560',enemy.attacking,enemy.blocking);
+particles.forEach(p=>{ctx.globalAlpha=p.life/15;ctx.fillStyle=p.color;ctx.fillRect(p.x-3,p.y-3,6,6);ctx.globalAlpha=1;});
+if(msgT>0||paused){ctx.fillStyle='#fff';ctx.font='bold 18px Arial';ctx.textAlign='center';ctx.fillText(msg,W/2,50);}
+ctx.fillStyle='rgba(255,255,255,0.3)';ctx.font='12px Arial';ctx.textAlign='center';ctx.fillText('⚔️ ATTACK',W*0.25,H-15);ctx.fillText('🛡️ BLOCK',W*0.75,H-15);}
+function loop(){update();draw();requestAnimationFrame(loop);}
+loop();
+</script>
+</body>
+</html>

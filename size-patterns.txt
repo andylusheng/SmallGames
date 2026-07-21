@@ -1,0 +1,108 @@
+﻿2048 | 
+archery | const W=Math.min(420,innerWidth-16),H=Math.min(400,innerHeight-80);
+asteroid-dodge | 
+avoid-blocks | const W=Math.min(360,innerWidth-16),H=Math.min(480,innerHeight-80);
+balloon-pop | const W=Math.min(380,innerWidth-16),H=Math.min(460,innerHeight-80);
+basketball | const W=Math.min(380,innerWidth-16),H=Math.min(450,innerHeight-90);
+basketball-hoop | const W=Math.min(400,innerWidth-16),H=Math.min(500,innerHeight-80);
+block-blast | 
+boat-race | const W=Math.min(400,innerWidth-16),H=Math.min(480,innerHeight-80);
+bounce-ball | const W=Math.min(380,innerWidth-16),H=Math.min(440,innerHeight-80);
+bowling | const W=Math.min(400,innerWidth-16),H=Math.min(500,innerHeight-80);
+breakout | c.width=480;c.height=400;
+brick-breaker | const W=Math.min(400,innerWidth-16),H=Math.min(480,innerHeight-80);
+bubble-cannon | const W=Math.min(400,innerWidth-16),H=Math.min(520,innerHeight-80);
+bubble-pop | c.width=COLS*SIZE;c.height=ROWS*SIZE;
+bubble-shooter | const W=360,H=480,R=16,COLS=11;
+bubble-wrap | 
+cannon-blast | const W=Math.min(400,innerWidth-16),H=Math.min(480,innerHeight-80);
+car-dodge | 
+catch-stars | const W=Math.min(380,innerWidth-16),H=Math.min(460,innerHeight-80);
+chess-puzzle | 
+coin-flip | 
+color-fill | 
+color-match | 
+color-switch | 
+connect-four | 
+cookie-clicker | 
+crossy-road | const W=Math.min(400,innerWidth-16),H=Math.min(440,innerHeight-80);
+dice-duel | 
+doodle-jump | const W=360,H=560;c.width=W;c.height=H;
+drift-racer | const W=Math.min(400,innerWidth-16),H=Math.min(400,innerHeight-100);
+duck-hunt | const W=Math.min(400,innerWidth-16),H=Math.min(480,innerHeight-80);
+fidget-spinner | 
+flappy-bird | c.width=320;c.height=480;
+flappy-fish | 
+frogger | const W=Math.min(400,innerWidth-16),H=Math.min(440,innerHeight-80);
+fruit-catch | const W=380,H=520;c.width=W;c.height=H;
+fruit-memory | 
+fruit-ninja | const W=Math.min(400,innerWidth-16),H=Math.min(460,innerHeight-80);
+fruit-slash | let W,H;function resize(){W=c.width=Math.min(innerWidth,480);H=c.height=Math.min(innerHeight,720)}
+gem-crush | 
+golf-putt | const W=Math.min(400,innerWidth-16),H=Math.min(480,innerHeight-80);
+gomoku | 
+gravity-flip | const W=Math.min(400,innerWidth-16),H=Math.min(400,innerHeight-80);
+hangman | 
+helicopter | const W=Math.min(420,innerWidth-16),H=Math.min(400,innerHeight-80);
+hex-merge | 
+hill-climb | const W=Math.min(400,innerWidth-16),H=Math.min(300,innerHeight-100);
+idle-factory | 
+idle-miner | 
+jump-rope | const W=Math.min(360,innerWidth-16),H=Math.min(440,innerHeight-80);
+knife-hit | const W=Math.min(400,innerWidth-20),H=Math.min(500,innerHeight-80);
+lemonade-stand | 
+magic-8ball | 
+maze-runner | c.width=COLS*CELL;c.height=ROWS*CELL; ||   c.width=COLS*CELL;c.height=ROWS*CELL;
+memory-cards | 
+memory-match | 
+memory-sequence | 
+merge-defense | 
+minesweeper | 
+moto-trial | const W=Math.min(400,innerWidth-16),H=Math.min(300,innerHeight-100);
+ninja-runner | const W=Math.min(400,innerWidth-16),H=Math.min(400,innerHeight-80);
+nonogram | 
+number-puzzle | 
+pac-man | const COLS=11,ROWS=11,TS=Math.min(Math.floor((Math.min(400,innerWidth-16))/COLS),32);
+paper-toss | const W=Math.min(360,innerWidth-16),H=Math.min(480,innerHeight-90);
+penalty-kick | 
+pet-merge | 
+piano-tiles | 
+pipe-connect | 
+plant-defense | const W=Math.min(400,innerWidth-16),H=Math.min(300,innerHeight-120);
+platformer | const W=Math.min(400,innerWidth-16),H=Math.min(400,innerHeight-80);
+pong | const W=500,H=360;c.width=W;c.height=H;
+quick-tap | 
+reaction-test | 
+rock-paper-scissors | 
+sand-fall | 
+simon-says | 
+ski-run | const W=Math.min(360,innerWidth-16),H=Math.min(420,innerHeight-80);
+snake | const S=20,COLS=20,ROWS=20; || c.width=COLS*S;c.height=ROWS*S;
+snake-battle | 
+sokoban | 
+space-invaders | const W=400,H=500;c.width=W;c.height=H;
+space-pinball | const W=Math.min(320,innerWidth-16),H=Math.min(460,innerHeight-80);
+space-shooter |       canvas.width = Math.min(window.innerWidth, 480); ||       canvas.height = Math.min(window.innerHeight, 720);
+speed-math | 
+speed-racer | let W,H;function resize(){W=c.width=Math.min(innerWidth,400);H=c.height=Math.min(innerHeight,700)}
+subway-dash | const W=Math.min(400,innerWidth-16),H=Math.min(480,innerHeight-80);
+sudoku | 
+surfing | const W=Math.min(360,innerWidth-16),H=Math.min(420,innerHeight-80);
+sword-fight | const W=Math.min(400,innerWidth-16),H=Math.min(380,innerHeight-80);
+table-tennis | const W=Math.min(400,innerWidth-16),H=Math.min(280,innerHeight-100);
+tangram | 
+tank-battle | const W=Math.min(400,innerWidth-16),H=Math.min(480,innerHeight-80);
+tap-tower | 
+tap-tycoon | 
+tetris | const S=25,COLS=10,ROWS=20; || c.width=COLS*S;c.height=ROWS*S;
+tic-tac-toe | 
+tile-hop | 
+tower-defense | c.width=COLS*CELL;c.height=ROWS*CELL;
+tower-stack | const W=360,H=500;c.width=W;c.height=H;
+volleyball | const W=Math.min(400,innerWidth-16),H=Math.min(360,innerHeight-80);
+water-sort | 
+whack-a-mole | 
+whack-mole | 
+word-scramble | 
+word-search | 
+zombie-shoot | const W=Math.min(400,innerWidth-16),H=Math.min(500,innerHeight-80);

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Chess Puzzle</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:10px;color:#fff}
+h1{font-size:20px;margin-bottom:6px}
+.hud{margin-bottom:8px;font-size:14px}
+.hud span{color:#4fc3f7;font-weight:bold}
+#board{display:grid;grid-template-columns:repeat(8,40px);grid-template-rows:repeat(8,40px);border:3px solid #4fc3f7;border-radius:4px}
+.sq{width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;user-select:none;transition:background .15s}
+.light{background:#f0d9b5}
+.dark{background:#b58863}
+.sq.sel{background:#4fc3f7!important}
+.sq.hint{box-shadow:inset 0 0 0 3px #4caf50}
+#msg{margin-top:10px;font-size:14px;color:#aaa;text-align:center}
+#next{margin-top:10px;padding:8px 20px;background:#4fc3f7;border:none;border-radius:6px;color:#1a1a2e;font-weight:bold;cursor:pointer;font-size:14px}
+</style>
+</head>
+<body>
+<h1>♟️ Chess Puzzle</h1>
+<div class="hud">Puzzle: <span id="pz">1</span>/8 | Solved: <span id="sv">0</span></div>
+<div id="board"></div>
+<div id="msg">Find the best move for White! Tap piece, then destination.</div>
+<button id="next">Skip Puzzle</button>
+<script>
+const puzzles=[
+{board:[['','','','','k','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','P','','',''],['R','','','','K','','','']],from:[7,0],to:[0,0],hint:'Rook to a8 is checkmate!'},
+{board:[['','','','k','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','Q','','','','',''],['','','','','K','','','']],from:[6,2],to:[1,2],hint:'Queen to c7 threatens mate!'},
+{board:[['r','','','k','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','B','','K','','','R']],from:[7,7],to:[0,7],hint:'Rh8+ forces the king!'},
+{board:[['','','','','k','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','N','','','','',''],['','','','','','','',''],['','','','','K','','','']],from:[5,2],to:[3,3],hint:'Knight to d5 controls key squares!'},
+{board:[['','','','','k','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','P','','','','',''],['R','','','','K','','','']],from:[6,1],to:[5,1],hint:'Push b3 to prepare Ra2!'},
+{board:[['','','','','','r','k',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','K','','','R']],from:[7,7],to:[5,7],hint:'Rh3 prepares a back-rank attack!'},
+{board:[['','','','k','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','Q','','',''],['','','','','K','','','']],from:[6,4],to:[2,4],hint:'Qe5+ wins the king!'},
+{board:[['r','','b','k','','','','r'],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['P','P','P','P','','P','P','P'],['R','N','B','Q','K','B','N','R']],from:[7,3],to:[5,3],hint:'Qd3 develops with tempo!'}
+];
+let current=0,solved=0,selected=null,boardEl=document.getElementById('board');
+function render(){boardEl.innerHTML='';const p=puzzles[current];for(let r=0;r<8;r++){for(let c=0;c<8;c++){const sq=document.createElement('div');sq.className='sq '+((r+c)%2===0?'light':'dark');const piece=p.board[r][c];if(piece){const isWhite=piece===piece.toUpperCase();sq.textContent=isWhite?getUnicode(piece,true):getUnicode(piece,false);}
+sq.addEventListener('click',()=>onTap(r,c,sq));boardEl.appendChild(sq);}}
+document.getElementById('pz').textContent=current+1;}
+function getUnicode(p,white){const map={K:'♔',Q:'♕',R:'♖',B:'♗',N:'♘',P:'♙',k:'♚',q:'♛',r:'♜',b:'♝',n:'♞',p:'♟'};return map[white?p.toLowerCase():p]||'';}
+function onTap(r,c,sq){const p=puzzles[current];if(selected){const idx=r*8+c;const cells=boardEl.children;
+if(r===p.to[0]&&c===p.to[1]){solved++;document.getElementById('sv').textContent=solved;document.getElementById('msg').textContent='✅ Correct! '+p.hint;cells[selected[0]*8+selected[1]].classList.remove('sel');selected=null;setTimeout(nextPuzzle,1500);}else{cells[selected[0]*8+selected[1]].classList.remove('sel');selected=null;document.getElementById('msg').textContent='❌ Not the best move. Try again! Hint: '+p.hint;}}
+else{if(r===p.from[0]&&c===p.from[1]){selected=[r,c];sq.classList.add('sel');}else{document.getElementById('msg').textContent='Select the highlighted piece. Hint: '+p.hint;}}}
+function nextPuzzle(){current=(current+1)%puzzles.length;selected=null;document.getElementById('msg').textContent='Find the best move for White! Tap piece, then destination.';render();}
+document.getElementById('next').addEventListener('click',()=>{document.getElementById('msg').textContent='Answer: '+puzzles[current].hint;setTimeout(nextPuzzle,1500);});
+render();
+</script>
+<script>
+(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
+</script>
+</body>
+</html>

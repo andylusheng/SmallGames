@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#16213e"/>
+<rect x="60" y="220" width="280" height="30" rx="4" fill="#0f3460"/>
+<rect x="185" y="150" width="30" height="50" rx="4" fill="#4fc3f7"/>
+<circle cx="200" cy="140" r="12" fill="#fff"/>
+<path d="M100 200 Q200 120 300 200" stroke="#e94560" stroke-width="4" fill="none"/>
+<circle cx="100" cy="200" r="8" fill="#ffc107"/>
+<circle cx="300" cy="200" r="8" fill="#ffc107"/>
+<text x="200" y="100" font-size="16" fill="#4caf50" font-family="Arial" font-weight="bold" text-anchor="middle">Jump! +5</text>
+<text x="200" y="285" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">🪢 JUMP ROPE</text>
+</svg>

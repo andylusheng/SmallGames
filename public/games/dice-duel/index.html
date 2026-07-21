@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Dice Duel</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:20px;color:#fff}
+h1{font-size:22px;margin-bottom:8px}
+.score{display:flex;gap:20px;margin-bottom:16px;font-size:15px}
+.score span{color:#4fc3f7;font-weight:bold}
+.arena{display:flex;gap:30px;align-items:center;margin-bottom:20px}
+.dice{width:80px;height:80px;background:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:40px;transition:transform .3s}
+.dice.rolling{animation:shake .3s infinite}
+@keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-10deg)}75%{transform:rotate(10deg)}}
+.vs{font-size:18px;color:#aaa;font-weight:bold}
+#result{font-size:20px;font-weight:bold;min-height:30px;margin-bottom:16px}
+#result.win{color:#4caf50}
+#result.lose{color:#e94560}
+#result.draw{color:#ffc107}
+#roll{padding:12px 36px;border:none;border-radius:12px;background:#4fc3f7;color:#1a1a2e;font-size:16px;font-weight:bold;cursor:pointer;transition:transform .1s}
+#roll:active{transform:scale(0.95)}
+#roll:disabled{opacity:0.5}
+.streak{margin-top:12px;color:#aaa;font-size:13px}
+.streak span{color:#ffc107}
+</style>
+</head>
+<body>
+<h1>🎲 Dice Duel</h1>
+<div class="score">You: <span id="pw">0</span> | CPU: <span id="cw">0</span></div>
+<div class="arena">
+<div class="dice" id="pd">🎲</div>
+<div class="vs">VS</div>
+<div class="dice" id="cd">🎲</div>
+</div>
+<div id="result">Roll to battle!</div>
+<button id="roll">🎲 Roll Dice</button>
+<div class="streak">Win Streak: <span id="st">0</span> | Best: <span id="bs">0</span></div>
+<script>
+const faces=['⚀','⚁','⚂','⚃','⚄','⚅'];
+let pw=0,cw=0,streak=0,best=+localStorage.getItem('dd-best')||0;
+document.getElementById('bs').textContent=best;
+const btn=document.getElementById('roll');
+btn.addEventListener('click',()=>{
+  btn.disabled=true;
+  const pd=document.getElementById('pd'),cd=document.getElementById('cd');
+  pd.classList.add('rolling');cd.classList.add('rolling');
+  const el=document.getElementById('result');
+  el.textContent='Rolling...';el.className='';
+  setTimeout(()=>{
+    const pv=Math.floor(Math.random()*6),cv2=Math.floor(Math.random()*6);
+    pd.textContent=faces[pv];cd.textContent=faces[cv2];
+    pd.classList.remove('rolling');cd.classList.remove('rolling');
+    if(pv>cv2){
+      el.textContent='You Win! 🎉';el.className='win';pw++;streak++;
+      if(streak>best){best=streak;localStorage.setItem('dd-best',best);document.getElementById('bs').textContent=best;}
+    }else if(pv<cv2){
+      el.textContent='You Lose! 💀';el.className='lose';cw++;streak=0;
+    }else{
+      el.textContent="It's a Draw!";el.className='draw';
+    }
+    document.getElementById('pw').textContent=pw;
+    document.getElementById('cw').textContent=cw;
+    document.getElementById('st').textContent=streak;
+    btn.disabled=false;
+  },600);
+});
+</script>
+<script>
+(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
+</script>
+</body>
+</html>

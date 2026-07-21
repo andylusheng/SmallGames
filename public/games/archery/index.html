@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Archery</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Score: <span id="sc">0</span> | Arrows: <span id="ar">10</span> | Wind: <span id="wd">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">Tap/Click to set power, tap again to shoot!</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80);
+cv.width=W;cv.height=H;
+let score=0,arrows=10,wind=0,power=0,charging=false,phase='aim';
+let arrow=null,target={x:W-70,y:H/2,r:40,vy:1.5};
+let particles=[];
+function newWind(){wind=Math.round((Math.random()-0.5)*6*10)/10;}
+function init(){
+  score=0;arrows=10;phase='aim';power=0;charging=false;arrow=null;
+  target.y=H/2;target.vy=1.5+Math.random();
+  newWind();updateUI();
+}
+function updateUI(){
+  document.getElementById('sc').textContent=score;
+  document.getElementById('ar').textContent=arrows;
+  document.getElementById('wd').textContent=(wind>0?'→':'←')+Math.abs(wind);
+}
+function shoot(){
+  if(phase!=='aim'||arrows<=0)return;
+  arrow={x:40,y:H/2,vx:power*0.14,vy:-2,active:true};
+  phase='fly';arrows--;updateUI();
+}
+function update(){
+  // target movement
+  target.y+=target.vy;
+  if(target.y<target.r+10||target.y>H-target.r-10)target.vy*=-1;
+  if(charging){power=Math.min(100,power+2);}
+  if(arrow&&arrow.active){
+    arrow.vx+=wind*0.003;
+    arrow.vy+=0.15;
+    arrow.x+=arrow.vx;
+    arrow.y+=arrow.vy;
+    // hit target?
+    const dx=arrow.x-target.x,dy=arrow.y-target.y;
+    const dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<target.r){
+      arrow.active=false;
+      let pts=dist<8?10:dist<18?7:dist<28?5:3;
+      score+=pts;updateUI();
+      for(let i=0;i<8;i++)particles.push({x:arrow.x,y:arrow.y,vx:(Math.random()-0.5)*4,vy:(Math.random()-0.5)*4,life:25,color:pts>=10?'#ffc107':'#4caf50'});
+      setTimeout(()=>{arrow=null;phase='aim';power=0;if(arrows<=0)phase='done';},500);
+    }
+    if(arrow.x>W+20||arrow.y>H+20){
+      arrow=null;phase='aim';power=0;
+      if(arrows<=0)phase='done';
+    }
+  }
+  for(let p of particles){p.x+=p.vx;p.y+=p.vy;p.life--;}
+  particles=particles.filter(p=>p.life>0);
+}
+function draw(){
+  // sky gradient
+  const g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#16213e');g.addColorStop(1,'#0f3460');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  // ground
+  ctx.fillStyle='#2e7d32';ctx.fillRect(0,H-20,W,20);
+  // target
+  ctx.beginPath();ctx.arc(target.x,target.y,target.r,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
+  ctx.beginPath();ctx.arc(target.x,target.y,target.r*0.7,0,Math.PI*2);ctx.fillStyle='#e94560';ctx.fill();
+  ctx.beginPath();ctx.arc(target.x,target.y,target.r*0.4,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
+  ctx.beginPath();ctx.arc(target.x,target.y,target.r*0.15,0,Math.PI*2);ctx.fillStyle='#e94560';ctx.fill();
+  // target stand
+  ctx.fillStyle='#5d4037';ctx.fillRect(target.x-4,target.y+target.r,8,H-20-target.y-target.r);
+  // bow
+  ctx.strokeStyle='#8d6e63';ctx.lineWidth=3;
+  ctx.beginPath();ctx.arc(40,H/2,20,-.8,.8);ctx.stroke();
+  ctx.strokeStyle='#ccc';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(40+20*Math.cos(-.8),H/2+20*Math.sin(-.8));
+  ctx.lineTo(40-(charging?power*0.1:0),H/2);
+  ctx.lineTo(40+20*Math.cos(.8),H/2+20*Math.sin(.8));ctx.stroke();
+  // power bar
+  if(charging||power>0){
+    ctx.fillStyle='#333';ctx.fillRect(10,H-40,80,10);
+    ctx.fillStyle=power>70?'#e94560':'#4caf50';
+    ctx.fillRect(10,H-40,power*0.8,10);
+  }
+  // arrow in flight
+  if(arrow){
+    ctx.save();ctx.translate(arrow.x,arrow.y);
+    ctx.rotate(Math.atan2(arrow.vy,arrow.vx));
+    ctx.fillStyle='#ffc107';ctx.fillRect(-12,-1.5,24,3);
+    ctx.beginPath();ctx.moveTo(12,0);ctx.lineTo(6,-4);ctx.lineTo(6,4);ctx.fill();
+    ctx.restore();
+  }
+  // particles
+  for(let p of particles){
+    ctx.globalAlpha=p.life/25;ctx.fillStyle=p.color;
+    ctx.fillRect(p.x-2,p.y-2,4,4);
+  }
+  ctx.globalAlpha=1;
+  // wind indicator
+  ctx.fillStyle='#aaa';ctx.font='12px Arial';ctx.textAlign='center';
+  ctx.fillText('Wind: '+(wind>0?'→':'←')+Math.abs(wind),W/2,16);
+  if(phase==='done'){
+    ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#ffc107';ctx.font='bold 26px Arial';ctx.textAlign='center';
+    ctx.fillText('Score: '+score,W/2,H/2-15);
+    ctx.fillStyle='#fff';ctx.font='16px Arial';
+    ctx.fillText('Tap to play again',W/2,H/2+20);
+  }
+}
+function loop(){update();draw();requestAnimationFrame(loop);}
+cv.addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  if(phase==='done'){init();return;}
+  if(phase==='aim'){charging=true;power=0;}
+});
+cv.addEventListener('pointerup',e=>{
+  if(phase==='aim'&&charging){charging=false;shoot();}
+});
+document.addEventListener('keydown',e=>{
+  if(e.code==='Space'){
+    e.preventDefault();
+    if(phase==='done'){init();return;}
+    if(phase==='aim'&&!charging){charging=true;power=0;}
+  }
+});
+document.addEventListener('keyup',e=>{
+  if(e.code==='Space'&&charging){charging=false;shoot();}
+});
+init();loop();
+</script>
+</body>
+</html>

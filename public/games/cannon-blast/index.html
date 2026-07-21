@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Cannon Blast</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Score: <span id="sc">0</span> | Shots: <span id="sh">10</span> | Best: <span id="bs">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">Drag to aim & set power, release to fire! Destroy all targets!</div>
+<script>
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80);
+const c=document.getElementById('c');c.width=W;c.height=H;
+const ctx=c.getContext('2d');
+let score=0,shots=10,angle=-Math.PI/4,power=50,dragging=false,dragStart=null,ball=null,targets=[],particles=[],gameOver=false,best=+localStorage.getItem('cannon-blast-best')||0;
+document.getElementById('bs').textContent=best;
+function initTargets(){targets=[];for(let i=0;i<5;i++){targets.push({x:150+Math.random()*(W-180),y:50+Math.random()*(H-200),r:15+Math.random()*10,hit:false});}}
+initTargets();
+c.addEventListener('pointerdown',e=>{if(gameOver){reset();return;}if(ball)return;const r=c.getBoundingClientRect();dragging=true;dragStart={x:e.clientX-r.left,y:e.clientY-r.top};});
+c.addEventListener('pointermove',e=>{if(!dragging)return;const r=c.getBoundingClientRect();const mx=e.clientX-r.left,my=e.clientY-r.top;const dx=dragStart.x-mx,dy=dragStart.y-my;angle=Math.atan2(-dy,dx);power=Math.min(100,Math.hypot(dx,dy));});
+c.addEventListener('pointerup',()=>{if(!dragging)return;dragging=false;if(shots<=0||ball)return;shots--;document.getElementById('sh').textContent=shots;ball={x:30,y:H-40,vx:Math.cos(angle)*power*0.12,vy:Math.sin(angle)*power*0.12};});
+function reset(){score=0;shots=10;ball=null;gameOver=false;document.getElementById('sc').textContent=0;document.getElementById('sh').textContent=10;initTargets();}
+function update(){if(gameOver)return;
+if(ball){ball.x+=ball.vx;ball.y+=ball.vy;ball.vy+=0.15;
+targets.forEach((t,i)=>{if(!t.hit&&Math.hypot(ball.x-t.x,ball.y-t.y)<t.r+6){t.hit=true;score+=20;document.getElementById('sc').textContent=score;for(let p=0;p<8;p++)particles.push({x:t.x,y:t.y,vx:(Math.random()-.5)*6,vy:(Math.random()-.5)*6,life:25,color:'#ff9800'});if(score>best){best=score;localStorage.setItem('cannon-blast-best',best);document.getElementById('bs').textContent=best;}}});
+if(ball.x>W+20||ball.y>H+20||ball.x<-20){ball=null;if(targets.every(t=>t.hit)){initTargets();shots+=3;document.getElementById('sh').textContent=shots;}else if(shots<=0){gameOver=true;}}}
+particles.forEach((p,i)=>{p.x+=p.vx;p.y+=p.vy;p.vy+=0.1;p.life--;if(p.life<=0)particles.splice(i,1);});}
+function draw(){ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,W,H);
+ctx.fillStyle='#2d5a27';ctx.fillRect(0,H-25,W,25);
+ctx.save();ctx.translate(30,H-40);ctx.rotate(angle);ctx.fillStyle='#546e7a';ctx.fillRect(0,-6,35,12);ctx.restore();
+ctx.fillStyle='#37474f';ctx.beginPath();ctx.arc(30,H-40,14,0,Math.PI*2);ctx.fill();
+if(dragging){ctx.strokeStyle='rgba(79,195,247,0.5)';ctx.setLineDash([5,5]);ctx.beginPath();ctx.moveTo(30,H-40);let px=30,py=H-40,pvx=Math.cos(angle)*power*0.12,pvy=Math.sin(angle)*power*0.12;for(let i=0;i<20;i++){px+=pvx;py+=pvy;pvy+=0.15;ctx.lineTo(px,py);}ctx.stroke();ctx.setLineDash([]);
+ctx.fillStyle='#4fc3f7';ctx.font='12px Arial';ctx.fillText('Power: '+Math.round(power)+'%',10,H-60);}
+targets.forEach(t=>{if(t.hit)return;ctx.beginPath();ctx.arc(t.x,t.y,t.r,0,Math.PI*2);ctx.fillStyle='#e94560';ctx.fill();ctx.beginPath();ctx.arc(t.x,t.y,t.r*0.6,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.beginPath();ctx.arc(t.x,t.y,t.r*0.3,0,Math.PI*2);ctx.fillStyle='#e94560';ctx.fill();});
+if(ball){ctx.beginPath();ctx.arc(ball.x,ball.y,6,0,Math.PI*2);ctx.fillStyle='#333';ctx.fill();}
+particles.forEach(p=>{ctx.globalAlpha=p.life/25;ctx.fillStyle=p.color;ctx.fillRect(p.x-3,p.y-3,6,6);ctx.globalAlpha=1;});
+if(gameOver){ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#e94560';ctx.font='bold 28px Arial';ctx.textAlign='center';ctx.fillText('OUT OF AMMO!',W/2,H/2-20);ctx.fillStyle='#fff';ctx.font='16px Arial';ctx.fillText('Score: '+score+' | Tap to retry',W/2,H/2+20);}}
+function loop(){update();draw();requestAnimationFrame(loop);}
+loop();
+</script>
+</body>
+</html>

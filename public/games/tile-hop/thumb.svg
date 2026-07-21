@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#16213e"/>
+<rect x="60" y="200" width="90" height="50" rx="8" fill="#0f3460" stroke="#4fc3f7" stroke-width="2"/>
+<rect x="155" y="140" width="90" height="50" rx="8" fill="#0f3460" stroke="#4fc3f7" stroke-width="2"/>
+<rect x="250" y="80" width="90" height="50" rx="8" fill="#0f3460" stroke="#4fc3f7" stroke-width="2"/>
+<circle cx="200" cy="125" r="14" fill="#e94560"/>
+<circle cx="196" cy="121" r="4" fill="#fff"/>
+<path d="M105 200 L200 140 L295 80" stroke="#4fc3f744" stroke-width="2" stroke-dasharray="4,4" fill="none"/>
+<text x="200" y="285" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">🐸 TILE HOP</text>
+</svg>

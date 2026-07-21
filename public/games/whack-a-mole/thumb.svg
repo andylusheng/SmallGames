@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#4a7c59"/>
+  <!-- Grass texture -->
+  <rect x="0" y="250" width="400" height="50" fill="#3d6b4a"/>
+  <!-- Holes -->
+  <ellipse cx="110" cy="120" rx="40" ry="20" fill="#3d2b1f"/>
+  <ellipse cx="200" cy="120" rx="40" ry="20" fill="#3d2b1f"/>
+  <ellipse cx="290" cy="120" rx="40" ry="20" fill="#3d2b1f"/>
+  <ellipse cx="110" cy="210" rx="40" ry="20" fill="#3d2b1f"/>
+  <ellipse cx="200" cy="210" rx="40" ry="20" fill="#3d2b1f"/>
+  <ellipse cx="290" cy="210" rx="40" ry="20" fill="#3d2b1f"/>
+  <!-- Mole popping up -->
+  <ellipse cx="200" cy="105" rx="22" ry="25" fill="#8d6e63"/>
+  <ellipse cx="200" cy="115" rx="18" ry="15" fill="#a1887f"/>
+  <circle cx="193" cy="100" r="4" fill="#333"/>
+  <circle cx="207" cy="100" r="4" fill="#333"/>
+  <circle cx="193" cy="99" r="1.5" fill="#fff"/>
+  <circle cx="207" cy="99" r="1.5" fill="#fff"/>
+  <ellipse cx="200" cy="108" rx="5" ry="4" fill="#e91e63"/>
+  <line x1="175" y1="105" x2="160" y2="102" stroke="#555" stroke-width="1.5"/>
+  <line x1="175" y1="110" x2="160" y2="112" stroke="#555" stroke-width="1.5"/>
+  <line x1="225" y1="105" x2="240" y2="102" stroke="#555" stroke-width="1.5"/>
+  <line x1="225" y1="110" x2="240" y2="112" stroke="#555" stroke-width="1.5"/>
+  <!-- Another mole -->
+  <ellipse cx="290" cy="198" rx="20" ry="22" fill="#8d6e63"/>
+  <ellipse cx="290" cy="206" rx="16" ry="13" fill="#a1887f"/>
+  <circle cx="284" cy="194" r="3.5" fill="#333"/>
+  <circle cx="296" cy="194" r="3.5" fill="#333"/>
+  <ellipse cx="290" cy="201" rx="4" ry="3" fill="#e91e63"/>
+  <!-- Hammer -->
+  <rect x="130" y="150" width="8" height="50" rx="3" fill="#795548" transform="rotate(-30 134 175)"/>
+  <rect x="115" y="140" width="35" height="22" rx="5" fill="#607d8b" transform="rotate(-30 132 151)"/>
+  <!-- Score -->
+  <text x="200" y="275" font-family="Arial" font-size="16" font-weight="bold" fill="#fff" text-anchor="middle">Score: 15</text>
+  <!-- Stars -->
+  <text x="60" y="60" font-size="16" opacity=".6">⭐</text>
+  <text x="330" y="70" font-size="14" opacity=".5">⭐</text>
+</svg>

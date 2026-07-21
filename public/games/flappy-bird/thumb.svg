@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#87ceeb"/>
+      <stop offset="100%" style="stop-color:#4a90d9"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bg)"/>
+  <!-- Clouds -->
+  <ellipse cx="80" cy="60" rx="40" ry="20" fill="#fff" opacity=".7"/>
+  <ellipse cx="320" cy="90" rx="50" ry="22" fill="#fff" opacity=".5"/>
+  <ellipse cx="200" cy="40" rx="35" ry="16" fill="#fff" opacity=".6"/>
+  <!-- Pipes -->
+  <rect x="120" y="0" width="45" height="100" fill="#4caf50"/>
+  <rect x="115" y="90" width="55" height="20" fill="#388e3c" rx="3"/>
+  <rect x="120" y="200" width="45" height="100" fill="#4caf50"/>
+  <rect x="115" y="195" width="55" height="20" fill="#388e3c" rx="3"/>
+  <rect x="280" y="0" width="45" height="140" fill="#4caf50"/>
+  <rect x="275" y="130" width="55" height="20" fill="#388e3c" rx="3"/>
+  <rect x="280" y="240" width="45" height="60" fill="#4caf50"/>
+  <rect x="275" y="235" width="55" height="20" fill="#388e3c" rx="3"/>
+  <!-- Bird -->
+  <ellipse cx="200" cy="150" rx="18" ry="14" fill="#fdd835"/>
+  <circle cx="210" cy="145" r="5" fill="#fff"/>
+  <circle cx="212" cy="145" r="2.5" fill="#333"/>
+  <polygon points="220,150 232,148 220,155" fill="#ff7043"/>
+  <path d="M185,155 Q175,160 185,165" fill="#f9a825"/>
+  <!-- Ground -->
+  <rect x="0" y="280" width="400" height="20" fill="#8d6e63"/>
+  <rect x="0" y="278" width="400" height="5" fill="#66bb6a"/>
+</svg>

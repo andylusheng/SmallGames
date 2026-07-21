@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Idle Factory</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:20px;color:#fff}
+h1{font-size:20px;margin-bottom:8px}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px;font-size:12px;width:min(340px,92vw)}
+.stat{background:#0f3460;padding:6px 8px;border-radius:8px;text-align:center}
+.stat span{color:#4fc3f7;font-weight:bold;font-size:14px;display:block}
+#factory{width:min(340px,92vw);background:#16213e;border-radius:12px;padding:14px;margin-bottom:12px}
+.machine{display:flex;justify-content:space-between;align-items:center;padding:10px;margin-bottom:6px;background:#0f3460;border-radius:8px;border:1px solid #1a1a2e}
+.machine-info{font-size:13px}
+.machine-info b{font-size:14px}
+.machine-info .prod{color:#4caf50;font-size:12px}
+.buy-btn{padding:6px 12px;border-radius:8px;border:none;background:#4fc3f7;color:#1a1a2e;font-weight:bold;font-size:12px;cursor:pointer}
+.buy-btn:disabled{opacity:.4;cursor:default}
+#prestige{margin-top:8px;padding:10px 20px;border-radius:20px;border:2px solid #ffc107;background:transparent;color:#ffc107;font-weight:bold;font-size:14px;cursor:pointer}
+#prestige:disabled{opacity:.3;cursor:default}
+#msg{font-size:12px;color:#aaa;margin-top:8px}
+</style>
+</head>
+<body>
+<h1>🏭 Idle Factory</h1>
+<div class="stats">
+<div class="stat">Cash<span id="cash">$0</span></div>
+<div class="stat">Income/s<span id="inc">$0</span></div>
+<div class="stat">Multiplier<span id="mult">x1</span></div>
+</div>
+<div id="factory"></div>
+<button id="prestige" onclick="doPrestige()" disabled>⭐ Prestige (need $10K)</button>
+<div id="msg">Buy machines to earn money automatically!</div>
+<script>
+let cash=0,income=0,multiplier=1,prestiges=0;
+const machines=[
+  {name:'Lemonade Stand',emoji:'🍋',baseCost:15,cost:15,count:0,baseIncome:1},
+  {name:'Bakery',emoji:'🍞',baseCost:100,cost:100,count:0,baseIncome:5},
+  {name:'Car Wash',emoji:'🚗',baseCost:500,cost:500,count:0,baseIncome:20},
+  {name:'Tech Startup',emoji:'💻',baseCost:3000,cost:3000,count:0,baseIncome:100},
+  {name:'Space Tourism',emoji:'🚀',baseCost:20000,cost:20000,count:0,baseIncome:500},
+];
+try{const s=JSON.parse(localStorage.getItem('idlefactory'));if(s){cash=s.c;multiplier=s.m;prestiges=s.p;machines.forEach((m,i)=>{if(s.machines[i]){m.count=s.machines[i].c;m.cost=s.machines[i].co}})}}catch(e){}
+function save(){localStorage.setItem('idlefactory',JSON.stringify({c:cash,m:multiplier,p:prestiges,machines:machines.map(m=>({c:m.count,co:m.cost}))}))}
+function calcIncome(){income=machines.reduce((sum,m)=>sum+m.count*m.baseIncome*multiplier,0)}
+function buy(i){
+  const m=machines[i];
+  if(cash<m.cost)return;
+  cash-=m.cost;m.count++;
+  m.cost=Math.floor(m.baseCost*Math.pow(1.35,m.count));
+  calcIncome();render();save();
+}
+function doPrestige(){
+  if(cash<10000)return;
+  prestiges++;multiplier=1+prestiges*0.5;
+  cash=0;
+  machines.forEach(m=>{m.count=0;m.cost=m.baseCost});
+  calcIncome();render();save();
+}
+function render(){
+  document.getElementById('cash').textContent='$'+fmt(cash);
+  document.getElementById('inc').textContent='$'+fmt(income);
+  document.getElementById('mult').textContent='x'+multiplier.toFixed(1);
+  document.getElementById('prestige').disabled=cash<10000;
+  const el=document.getElementById('factory');
+  el.innerHTML=machines.map((m,i)=>`<div class="machine"><div class="machine-info"><b>${m.emoji} ${m.name} (${m.count})</b><div class="prod">+$${fmt(m.baseIncome*multiplier)}/s each</div></div><button class="buy-btn" onclick="buy(${i})" ${cash<m.cost?'disabled':''}>$${fmt(m.cost)}</button></div>`).join('');
+}
+function fmt(n){if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(1)+'K';return Math.floor(n)}
+setInterval(()=>{cash+=income/10;render()},100);
+setInterval(save,5000);
+calcIncome();render();
+</script>
+<script>
+(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
+</script>
+</body>
+</html>

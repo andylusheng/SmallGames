@@ -1,0 +1,58 @@
+{
+  "site": {
+    "name": "PlayFree Games",
+    "tagline": "免费在线游戏 - 无需下载"
+  },
+  "nav": {
+    "home": "首页",
+    "categories": "分类",
+    "search": "搜索游戏...",
+    "newGames": "最新游戏",
+    "popular": "热门游戏"
+  },
+  "categories": {
+    "all": "全部游戏",
+    "action": "动作",
+    "puzzle": "益智",
+    "arcade": "街机",
+    "racing": "赛车",
+    "sports": "体育",
+    "shooting": "射击",
+    "strategy": "策略",
+    "casual": "休闲",
+    "adventure": "冒险"
+  },
+  "home": {
+    "featured": "精选游戏",
+    "newGames": "最新游戏",
+    "popularGames": "热门游戏",
+    "allGames": "全部游戏",
+    "playNow": "立即游玩",
+    "loadMore": "加载更多"
+  },
+  "game": {
+    "play": "开始游戏",
+    "fullscreen": "全屏",
+    "share": "分享",
+    "relatedGames": "猜你喜欢",
+    "loading": "游戏加载中...",
+    "clickToPlay": "点击开始",
+    "about": "游戏简介",
+    "instructions": "操作说明",
+    "tips": "旋转设备获得更好体验"
+  },
+  "footer": {
+    "about": "关于我们",
+    "privacy": "隐私政策",
+    "terms": "服务条款",
+    "dmca": "DMCA",
+    "contact": "联系我们",
+    "copyright": "版权所有。",
+    "description": "在浏览器中畅玩数千款免费在线游戏。无需下载，无需注册，点击即玩！"
+  },
+  "search": {
+    "placeholder": "搜索游戏...",
+    "noResults": "未找到游戏",
+    "results": "款游戏"
+  }
+}

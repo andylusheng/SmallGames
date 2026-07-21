@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Basketball Shots</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Score: <span id="sc">0</span> | Streak: <span id="st">0</span> | Best: <span id="bs">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">Drag from ball to aim & shoot!</div>
+<script>
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-90);
+const cv=document.getElementById('c');cv.width=W;cv.height=H;
+const ctx=cv.getContext('2d');
+let score=0,streak=0,best=+localStorage.getItem('bball_best')||0;
+document.getElementById('bs').textContent=best;
+const hoop={x:W*0.7,y:H*0.25,r:22};
+let ball={x:W*0.3,y:H*0.75,vx:0,vy:0,r:14,active:false,scored:false};
+let dragging=false,dragStart=null,dragEnd=null,shots=0;
+function resetBall(){
+  ball={x:W*0.2+Math.random()*W*0.2,y:H*0.75,vx:0,vy:0,r:14,active:false,scored:false};
+}
+cv.addEventListener('pointerdown',e=>{
+  const p=getPos(e);
+  if(Math.hypot(p.x-ball.x,p.y-ball.y)<50){dragging=true;dragStart=p;dragEnd=p}
+});
+cv.addEventListener('pointermove',e=>{if(dragging)dragEnd=getPos(e)});
+cv.addEventListener('pointerup',()=>{
+  if(dragging&&dragStart&&dragEnd){
+    const dx=dragStart.x-dragEnd.x,dy=dragStart.y-dragEnd.y;
+    const power=Math.min(Math.hypot(dx,dy)*0.15,18);
+    const angle=Math.atan2(dy,dx);
+    ball.vx=Math.cos(angle)*power;
+    ball.vy=Math.sin(angle)*power;
+    ball.active=true;shots++;
+  }
+  dragging=false;
+});
+function getPos(e){const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
+function loop(){
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#16213e';ctx.fillRect(0,0,W,H);
+  // Backboard
+  ctx.fillStyle='#fff';ctx.fillRect(hoop.x+hoop.r+5,hoop.y-40,6,60);
+  // Hoop
+  ctx.strokeStyle='#e94560';ctx.lineWidth=4;
+  ctx.beginPath();ctx.moveTo(hoop.x-hoop.r,hoop.y);ctx.lineTo(hoop.x+hoop.r,hoop.y);ctx.stroke();
+  // Net
+  ctx.strokeStyle='#ffffff44';ctx.lineWidth=1;
+  for(let i=-2;i<=2;i++){
+    ctx.beginPath();ctx.moveTo(hoop.x+i*10,hoop.y);ctx.lineTo(hoop.x+i*6,hoop.y+30);ctx.stroke();
+  }
+  // Ball physics
+  if(ball.active){
+    ball.vy+=0.4;
+    ball.x+=ball.vx;ball.y+=ball.vy;
+    // Score detection
+    if(!ball.scored&&Math.abs(ball.x-hoop.x)<hoop.r-5&&Math.abs(ball.y-hoop.y)<8&&ball.vy>0){
+      ball.scored=true;score++;streak++;
+      document.getElementById('sc').textContent=score;
+      document.getElementById('st').textContent=streak;
+      if(score>best){best=score;localStorage.setItem('bball_best',best);document.getElementById('bs').textContent=best}
+      // Move hoop for next shot
+      hoop.x=W*0.4+Math.random()*W*0.4;
+      hoop.y=H*0.15+Math.random()*H*0.2;
+      setTimeout(resetBall,500);
+    }
+    // Bounce off walls
+    if(ball.x<ball.r||ball.x>W-ball.r)ball.vx*=-0.6;
+    if(ball.y>H+50){streak=0;document.getElementById('st').textContent=0;resetBall()}
+  }
+  // Draw ball
+  ctx.fillStyle='#ff9800';
+  ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#e65100';ctx.lineWidth=2;
+  ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(ball.x-ball.r,ball.y);ctx.lineTo(ball.x+ball.r,ball.y);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(ball.x,ball.y-ball.r);ctx.lineTo(ball.x,ball.y+ball.r);ctx.stroke();
+  // Draw aim line
+  if(dragging&&dragStart&&dragEnd){
+    ctx.strokeStyle='#4fc3f7';ctx.lineWidth=2;ctx.setLineDash([5,5]);
+    ctx.beginPath();ctx.moveTo(ball.x,ball.y);
+    ctx.lineTo(ball.x+(dragStart.x-dragEnd.x)*0.5,ball.y+(dragStart.y-dragEnd.y)*0.5);
+    ctx.stroke();ctx.setLineDash([]);
+    // Power indicator
+    const power=Math.min(Math.hypot(dragStart.x-dragEnd.x,dragStart.y-dragEnd.y)*0.15,18);
+    ctx.fillStyle=power>12?'#e94560':'#4caf50';
+    ctx.font='12px Arial';ctx.textAlign='center';
+    ctx.fillText(Math.floor(power/18*100)+'%',ball.x,ball.y-25);
+  }
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>

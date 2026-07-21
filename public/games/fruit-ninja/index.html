@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Fruit Ninja</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Score: <span id="sc">0</span> | Lives: <span id="lv">3</span> | Best: <span id="bs">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">Swipe through fruits to slice them! Avoid bombs 💣</div>
+<script>
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80);
+const c=document.getElementById('c');c.width=W;c.height=H;
+const ctx=c.getContext('2d');
+let score=0,lives=3,fruits=[],sliceTrail=[],gameOver=false,best=+localStorage.getItem('fruit-ninja-best')||0;
+document.getElementById('bs').textContent=best;
+const fruitTypes=[{emoji:'🍎',color:'#e94560'},{emoji:'🍊',color:'#ff9800'},{emoji:'🍋',color:'#ffc107'},{emoji:'🍉',color:'#4caf50'},{emoji:'🍇',color:'#9c27b0'},{emoji:'🍓',color:'#e91e63'}];
+let spawnT=0;
+function spawn(){const isBomb=Math.random()<0.15;fruits.push({x:Math.random()*(W-60)+30,y:H+30,vx:(Math.random()-0.5)*3,vy:-9-Math.random()*4,r:20,type:isBomb?-1:Math.floor(Math.random()*fruitTypes.length),sliced:false});}
+let slicing=false,lastPos=null;
+c.addEventListener('pointerdown',e=>{if(gameOver){reset();return;}slicing=true;const r=c.getBoundingClientRect();lastPos={x:e.clientX-r.left,y:e.clientY-r.top};});
+c.addEventListener('pointermove',e=>{if(!slicing)return;const r=c.getBoundingClientRect();const pos={x:e.clientX-r.left,y:e.clientY-r.top};sliceTrail.push({...pos,life:10});
+fruits.forEach(f=>{if(f.sliced)return;if(Math.hypot(pos.x-f.x,pos.y-f.y)<f.r+10){f.sliced=true;if(f.type===-1){lives=0;document.getElementById('lv').textContent=0;gameOver=true;}else{score+=10;document.getElementById('sc').textContent=score;if(score>best){best=score;localStorage.setItem('fruit-ninja-best',best);document.getElementById('bs').textContent=best;}}}});
+lastPos=pos;});
+c.addEventListener('pointerup',()=>{slicing=false;lastPos=null;});
+function reset(){score=0;lives=3;fruits=[];gameOver=false;document.getElementById('sc').textContent=0;document.getElementById('lv').textContent=3;}
+function update(){if(gameOver)return;spawnT++;if(spawnT>40){spawnT=0;spawn();if(Math.random()>0.6)spawn();}
+fruits.forEach((f,i)=>{f.x+=f.vx;f.y+=f.vy;f.vy+=0.2;
+if(f.y>H+40){fruits.splice(i,1);if(!f.sliced&&f.type!==-1){lives--;document.getElementById('lv').textContent=lives;if(lives<=0){gameOver=true;if(score>best){best=score;localStorage.setItem('fruit-ninja-best',best);document.getElementById('bs').textContent=best;}}}}});
+sliceTrail.forEach((s,i)=>{s.life--;if(s.life<=0)sliceTrail.splice(i,1);});}
+function draw(){ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,W,H);
+fruits.forEach(f=>{if(f.sliced){ctx.globalAlpha=0.5;ctx.font='24px Arial';ctx.textAlign='center';ctx.fillText(fruitTypes[f.type]?fruitTypes[f.type].emoji:'💥',f.x-8,f.y);ctx.fillText(fruitTypes[f.type]?fruitTypes[f.type].emoji:'💥',f.x+8,f.y+5);ctx.globalAlpha=1;}else{ctx.font='28px Arial';ctx.textAlign='center';ctx.fillText(f.type===-1?'💣':fruitTypes[f.type].emoji,f.x,f.y+8);}});
+if(sliceTrail.length>1){ctx.strokeStyle='rgba(79,195,247,0.7)';ctx.lineWidth=3;ctx.beginPath();sliceTrail.forEach((s,i)=>{if(i===0)ctx.moveTo(s.x,s.y);else ctx.lineTo(s.x,s.y);});ctx.stroke();ctx.lineWidth=1;}
+if(gameOver){ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#e94560';ctx.font='bold 28px Arial';ctx.textAlign='center';ctx.fillText('GAME OVER',W/2,H/2-20);ctx.fillStyle='#fff';ctx.font='16px Arial';ctx.fillText('Score: '+score+' | Tap to retry',W/2,H/2+20);}}
+function loop(){update();draw();requestAnimationFrame(loop);}
+loop();
+</script>
+</body>
+</html>

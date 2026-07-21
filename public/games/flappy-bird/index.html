@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Flappy Bird</title>
+<style>
+*{margin:0;padding:0}body{background:#4dc9e6;display:flex;align-items:center;justify-content:center;height:100vh;overflow:hidden}
+canvas{border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+const c=document.getElementById('c'),x=c.getContext('2d');
+c.width=Math.min(860,innerWidth-16);c.height=Math.min(640,innerHeight-80);
+let bird={x:60,y:240,v:0,r:12},pipes=[],score=0,best=0,frame=0,state='ready';
+const gap=130,pipeW=45,gravity=0.4,jump=-7;
+
+function flap(){
+  if(state==='ready'){state='play';bird.v=jump}
+  else if(state==='play'){bird.v=jump}
+  else if(state==='dead'){reset()}
+}
+function reset(){bird={x:60,y:240,v:0,r:12};pipes=[];score=0;frame=0;state='ready'}
+document.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();flap()}});
+c.addEventListener('click',flap);
+c.addEventListener('touchstart',e=>{e.preventDefault();flap()});
+
+function update(){
+  if(state!=='play')return;
+  frame++;
+  bird.v+=gravity;bird.y+=bird.v;
+  if(frame%90===0){
+    const h=60+Math.random()*(c.height-gap-120);
+    pipes.push({x:c.width,top:h,bot:h+gap});
+  }
+  pipes.forEach(p=>{p.x-=2.5});
+  pipes=pipes.filter(p=>p.x>-pipeW);
+  // collision
+  if(bird.y+bird.r>c.height-40||bird.y-bird.r<0){die();return}
+  pipes.forEach(p=>{
+    if(bird.x+bird.r>p.x&&bird.x-bird.r<p.x+pipeW){
+      if(bird.y-bird.r<p.top||bird.y+bird.r>p.bot){die();return}
+    }
+    if(!p.scored&&p.x+pipeW<bird.x){p.scored=true;score++}
+  });
+}
+function die(){state='dead';best=Math.max(best,score)}
+function draw(){
+  // sky
+  x.fillStyle='#4dc9e6';x.fillRect(0,0,c.width,c.height);
+  // ground
+  x.fillStyle='#8b5e3c';x.fillRect(0,c.height-40,c.width,40);
+  x.fillStyle='#4caf50';x.fillRect(0,c.height-40,c.width,8);
+  // pipes
+  pipes.forEach(p=>{
+    x.fillStyle='#388e3c';
+    x.fillRect(p.x,0,pipeW,p.top);
+    x.fillRect(p.x,p.bot,pipeW,c.height-p.bot);
+    x.fillStyle='#2e7d32';
+    x.fillRect(p.x-3,p.top-20,pipeW+6,20);
+    x.fillRect(p.x-3,p.bot,pipeW+6,20);
+  });
+  // bird
+  x.fillStyle='#fdd835';
+  x.beginPath();x.arc(bird.x,bird.y,bird.r,0,7);x.fill();
+  x.fillStyle='#ff8f00';
+  x.beginPath();x.moveTo(bird.x+bird.r,bird.y);x.lineTo(bird.x+bird.r+8,bird.y+3);x.lineTo(bird.x+bird.r,bird.y+6);x.fill();
+  x.fillStyle='#fff';x.beginPath();x.arc(bird.x+4,bird.y-3,4,0,7);x.fill();
+  x.fillStyle='#000';x.beginPath();x.arc(bird.x+5,bird.y-3,2,0,7);x.fill();
+  // score
+  x.fillStyle='#fff';x.font='bold 28px Arial';x.textAlign='center';
+  x.strokeStyle='#000';x.lineWidth=3;
+  x.strokeText(score,c.width/2,50);x.fillText(score,c.width/2,50);
+  // states
+  if(state==='ready'){
+    x.fillStyle='rgba(0,0,0,.3)';x.fillRect(0,0,c.width,c.height);
+    x.fillStyle='#fff';x.font='bold 24px Arial';
+    x.fillText('Flappy Bird',c.width/2,180);
+    x.font='16px Arial';x.fillText('Tap or Space to fly',c.width/2,220);
+  }
+  if(state==='dead'){
+    x.fillStyle='rgba(0,0,0,.5)';x.fillRect(0,0,c.width,c.height);
+    x.fillStyle='#fff';x.font='bold 28px Arial';
+    x.fillText('Game Over',c.width/2,180);
+    x.font='18px Arial';
+    x.fillText('Score: '+score+'  Best: '+best,c.width/2,220);
+    x.font='14px Arial';x.fillText('Tap to restart',c.width/2,260);
+  }
+}
+function loop(){update();draw();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>

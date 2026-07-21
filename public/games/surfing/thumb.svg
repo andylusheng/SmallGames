@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#01579b"/>
+<path d="M0 180 Q50 160 100 180 Q150 200 200 180 Q250 160 300 180 Q350 200 400 180 V300 H0 Z" fill="#0277bd"/>
+<path d="M0 220 Q50 200 100 220 Q150 240 200 220 Q250 200 300 220 Q350 240 400 220 V300 H0 Z" fill="#0288d1"/>
+<ellipse cx="200" cy="170" rx="30" ry="8" fill="#fff"/>
+<circle cx="200" cy="150" r="12" fill="#e94560"/>
+<rect x="197" y="135" width="6" height="15" fill="#333"/>
+<ellipse cx="120" cy="130" rx="12" ry="8" fill="#5d4037"/>
+<ellipse cx="300" cy="100" rx="14" ry="9" fill="#5d4037"/>
+<polygon points="260,80 265,70 270,80 268,80 268,90 262,90 262,80" fill="#ffc107"/>
+<polygon points="150,60 155,50 160,60 158,60 158,70 152,70 152,60" fill="#ffc107"/>
+<text x="200" y="280" text-anchor="middle" fill="#fff" font-size="22" font-family="Arial" font-weight="bold">SURF RUNNER</text>
+</svg>

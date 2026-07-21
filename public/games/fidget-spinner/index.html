@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Fidget Spinner</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:10px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{touch-action:none}
+#msg{color:#aaa;margin-top:10px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">RPM: <span id="rpm">0</span> | Best: <span id="bs">0</span> RPM</div>
+<canvas id="c" width="300" height="300"></canvas>
+<div id="msg">Swipe/flick the spinner to make it go faster!</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+cv.width=cv.height=Math.min(520,innerWidth-16,innerHeight-120);const CT=cv.width/2,SC=cv.width/300;
+let angle=0,velocity=0,best=+localStorage.getItem('spinner_best')||0;
+document.getElementById('bs').textContent=best;
+let lastTouch=null,lastTime=0;
+cv.addEventListener('pointerdown',e=>{
+  const p=getPos(e);lastTouch=p;lastTime=Date.now();
+});
+cv.addEventListener('pointermove',e=>{
+  if(!lastTouch)return;
+  const p=getPos(e);
+  const a1=Math.atan2(lastTouch.y-CT,lastTouch.x-CT);
+  const a2=Math.atan2(p.y-CT,p.x-CT);
+  let da=a2-a1;
+  if(da>Math.PI)da-=Math.PI*2;
+  if(da<-Math.PI)da+=Math.PI*2;
+  velocity+=da*0.5;
+  lastTouch=p;
+});
+cv.addEventListener('pointerup',()=>lastTouch=null);
+function getPos(e){const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
+function loop(){
+  ctx.clearRect(0,0,cv.width,cv.height);
+  angle+=velocity;
+  velocity*=0.995; // Friction
+  if(Math.abs(velocity)<0.0001)velocity=0;
+  const rpm=Math.abs(Math.round(velocity*955));
+  document.getElementById('rpm').textContent=rpm;
+  if(rpm>best){best=rpm;localStorage.setItem('spinner_best',best);document.getElementById('bs').textContent=best}
+  ctx.save();ctx.translate(CT,CT);ctx.scale(SC,SC);ctx.rotate(angle);
+  // Draw spinner
+  const colors=['#e94560','#4fc3f7','#ffc107'];
+  for(let i=0;i<3;i++){
+    const a=i*Math.PI*2/3;
+    ctx.save();ctx.rotate(a);
+    // Arm
+    ctx.fillStyle='#37474f';
+    ctx.beginPath();ctx.roundRect(-12,-15,24,75,12);ctx.fill();
+    // Weight circle
+    ctx.fillStyle=colors[i];
+    ctx.beginPath();ctx.arc(0,60,20,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.2)';
+    ctx.beginPath();ctx.arc(-5,55,7,0,Math.PI*2);ctx.fill();
+    ctx.restore();
+  }
+  // Center bearing
+  ctx.fillStyle='#546e7a';
+  ctx.beginPath();ctx.arc(0,0,18,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#78909c';
+  ctx.beginPath();ctx.arc(0,0,12,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#90a4ae';
+  ctx.beginPath();ctx.arc(0,0,6,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+  // Speed glow
+  if(rpm>100){
+    ctx.strokeStyle=`rgba(79,195,247,${Math.min(rpm/2000,0.5)})`;
+    ctx.lineWidth=3;
+    ctx.beginPath();ctx.arc(CT,CT,85*SC,0,Math.PI*2);ctx.stroke();
+  }
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>

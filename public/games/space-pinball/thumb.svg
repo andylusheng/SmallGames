@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#0a0a2a"/>
+<rect x="80" y="20" width="240" height="260" rx="8" fill="none" stroke="#333" stroke-width="4"/>
+<circle cx="160" cy="100" r="22" fill="#e94560" stroke="#ffc107" stroke-width="2"/>
+<circle cx="240" cy="100" r="22" fill="#9c27b0" stroke="#ffc107" stroke-width="2"/>
+<circle cx="200" cy="70" r="18" fill="#e94560" stroke="#ffc107" stroke-width="2"/>
+<circle cx="140" cy="160" r="16" fill="#9c27b0" stroke="#ffc107" stroke-width="2"/>
+<circle cx="260" cy="160" r="16" fill="#e94560" stroke="#ffc107" stroke-width="2"/>
+<line x1="130" y1="240" x2="175" y2="220" stroke="#4fc3f7" stroke-width="8" stroke-linecap="round"/>
+<line x1="270" y1="240" x2="225" y2="220" stroke="#4fc3f7" stroke-width="8" stroke-linecap="round"/>
+<circle cx="200" cy="180" r="8" fill="#fff"/>
+<circle cx="198" cy="177" r="3" fill="rgba(255,255,255,0.5)"/>
+<text x="200" y="290" text-anchor="middle" fill="#4fc3f7" font-size="22" font-family="Arial" font-weight="bold">SPACE PINBALL</text>
+</svg>

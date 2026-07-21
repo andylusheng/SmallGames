@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#1a1a2e"/>
+<text x="200" y="100" font-size="42" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">7 × 8 = ?</text>
+<rect x="80" y="130" width="100" height="50" rx="10" fill="#0f3460" stroke="#4fc3f7" stroke-width="2"/>
+<text x="130" y="162" font-size="22" fill="#fff" font-family="Arial" text-anchor="middle">54</text>
+<rect x="220" y="130" width="100" height="50" rx="10" fill="#1b5e20" stroke="#4caf50" stroke-width="2"/>
+<text x="270" y="162" font-size="22" fill="#4caf50" font-family="Arial" text-anchor="middle">56</text>
+<rect x="80" y="195" width="100" height="50" rx="10" fill="#0f3460" stroke="#4fc3f7" stroke-width="2"/>
+<text x="130" y="227" font-size="22" fill="#fff" font-family="Arial" text-anchor="middle">48</text>
+<rect x="220" y="195" width="100" height="50" rx="10" fill="#0f3460" stroke="#4fc3f7" stroke-width="2"/>
+<text x="270" y="227" font-size="22" fill="#fff" font-family="Arial" text-anchor="middle">63</text>
+<text x="200" y="285" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">⚡ SPEED MATH</text>
+</svg>

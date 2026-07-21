@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#1a1a2e"/>
+<rect x="80" y="80" width="40" height="140" rx="0" ry="0" fill="none" stroke="#4fc3f7" stroke-width="3"/>
+<rect x="80" y="150" width="40" height="35" fill="#e94560"/>
+<rect x="80" y="185" width="40" height="35" fill="#4caf50"/>
+<rect x="160" y="80" width="40" height="140" fill="none" stroke="#4fc3f7" stroke-width="3"/>
+<rect x="160" y="115" width="40" height="35" fill="#ffc107"/>
+<rect x="160" y="150" width="40" height="35" fill="#e94560"/>
+<rect x="160" y="185" width="40" height="35" fill="#9c27b0"/>
+<rect x="240" y="80" width="40" height="140" fill="none" stroke="#4fc3f7" stroke-width="3"/>
+<rect x="240" y="150" width="40" height="35" fill="#4caf50"/>
+<rect x="240" y="185" width="40" height="35" fill="#ffc107"/>
+<rect x="320" y="80" width="40" height="140" fill="none" stroke="#4fc3f7" stroke-width="3"/>
+<rect x="320" y="185" width="40" height="35" fill="#9c27b0"/>
+<rect x="77" y="218" width="46" height="6" rx="3" fill="#4fc3f7"/>
+<rect x="157" y="218" width="46" height="6" rx="3" fill="#4fc3f7"/>
+<rect x="237" y="218" width="46" height="6" rx="3" fill="#4fc3f7"/>
+<rect x="317" y="218" width="46" height="6" rx="3" fill="#4fc3f7"/>
+<text x="200" y="270" text-anchor="middle" fill="#4fc3f7" font-size="24" font-family="Arial" font-weight="bold">WATER SORT</text>
+</svg>

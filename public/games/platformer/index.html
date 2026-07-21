@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Pixel Platformer</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Coins: <span id="cn">0</span> | Level: <span id="lv">1</span> | Best: <span id="bs">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">← → to move | Space/↑/Tap to jump | Reach the flag!</div>
+<script>
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80);
+const c=document.getElementById('c');c.width=W;c.height=H;
+const ctx=c.getContext('2d');
+let coins=0,level=1,gameOver=false,best=+localStorage.getItem('platformer-best')||0;
+document.getElementById('bs').textContent=best;
+const player={x:30,y:0,vx:0,vy:0,w:16,h:20,onGround:false};
+let platforms=[],coinList=[],flag={},keys={},camX=0;
+function genLevel(){platforms=[];coinList=[];let px=0;
+platforms.push({x:0,y:H-30,w:120,h:30});
+for(let i=0;i<8+level*2;i++){px+=60+Math.random()*60;const py=H-60-Math.random()*120;const pw=50+Math.random()*60;platforms.push({x:px,y:py,w:pw,h:14});if(Math.random()>0.4)coinList.push({x:px+pw/2,y:py-25,got:false});}
+flag={x:px+100,y:H-80};platforms.push({x:px+80,y:H-30,w:80,h:30});
+player.x=30;player.y=H-60;player.vx=0;player.vy=0;camX=0;}
+genLevel();
+document.addEventListener('keydown',e=>{keys[e.key]=true;if(e.key===' '||e.key==='ArrowUp')e.preventDefault();});
+document.addEventListener('keyup',e=>keys[e.key]=false);
+c.addEventListener('pointerdown',e=>{if(gameOver){gameOver=false;level=1;coins=0;document.getElementById('cn').textContent=0;document.getElementById('lv').textContent=1;genLevel();return;}player.vy=-9;player.onGround=false;});
+function update(){if(gameOver)return;
+if(keys['ArrowLeft']||keys['a'])player.vx=-3;else if(keys['ArrowRight']||keys['d'])player.vx=3;else player.vx*=0.7;
+if((keys[' ']||keys['ArrowUp']||keys['w'])&&player.onGround){player.vy=-9;player.onGround=false;}
+player.vy+=0.5;player.x+=player.vx;player.y+=player.vy;player.onGround=false;
+platforms.forEach(p=>{if(player.x+player.w>p.x&&player.x<p.x+p.w&&player.y+player.h>p.y&&player.y+player.h<p.y+p.h+10&&player.vy>=0){player.y=p.y-player.h;player.vy=0;player.onGround=true;}});
+if(player.y>H+50){gameOver=true;if(coins>best){best=coins;localStorage.setItem('platformer-best',best);document.getElementById('bs').textContent=best;}}
+coinList.forEach(cn=>{if(!cn.got&&Math.hypot(player.x+8-cn.x,player.y+10-cn.y)<18){cn.got=true;coins++;document.getElementById('cn').textContent=coins;}});
+if(Math.hypot(player.x-flag.x,player.y-flag.y)<30){level++;document.getElementById('lv').textContent=level;genLevel();}
+camX=player.x-W/3;if(camX<0)camX=0;}
+function draw(){ctx.fillStyle='#0f3460';ctx.fillRect(0,0,W,H);
+ctx.save();ctx.translate(-camX,0);
+platforms.forEach(p=>{ctx.fillStyle='#4caf50';ctx.fillRect(p.x,p.y,p.w,p.h);ctx.fillStyle='#388e3c';ctx.fillRect(p.x,p.y,p.w,4);});
+coinList.forEach(cn=>{if(cn.got)return;ctx.fillStyle='#ffc107';ctx.beginPath();ctx.arc(cn.x,cn.y,7,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ff8f00';ctx.font='bold 9px Arial';ctx.textAlign='center';ctx.fillText('$',cn.x,cn.y+3);});
+ctx.fillStyle='#e94560';ctx.fillRect(flag.x,flag.y-40,4,50);ctx.fillStyle='#ffc107';ctx.beginPath();ctx.moveTo(flag.x+4,flag.y-40);ctx.lineTo(flag.x+24,flag.y-32);ctx.lineTo(flag.x+4,flag.y-24);ctx.fill();
+ctx.fillStyle='#4fc3f7';ctx.fillRect(player.x,player.y,player.w,player.h);ctx.fillStyle='#fff';ctx.fillRect(player.x+9,player.y+4,4,4);
+ctx.restore();
+if(gameOver){ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#e94560';ctx.font='bold 24px Arial';ctx.textAlign='center';ctx.fillText('FELL OFF!',W/2,H/2-20);ctx.fillStyle='#fff';ctx.font='16px Arial';ctx.fillText('Coins: '+coins+' | Tap to retry',W/2,H/2+20);}}
+function loop(){update();draw();requestAnimationFrame(loop);}
+loop();
+</script>
+</body>
+</html>

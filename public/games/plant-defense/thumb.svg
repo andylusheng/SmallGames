@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#1a1a2e"/>
+<rect x="0" y="200" width="400" height="100" fill="#2d5a27"/>
+<rect x="40" y="140" width="50" height="60" fill="#3a7a32"/>
+<text x="65" y="180" text-anchor="middle" font-size="28">🌻</text>
+<rect x="120" y="140" width="50" height="60" fill="#3a7a32"/>
+<text x="145" y="180" text-anchor="middle" font-size="28">🌵</text>
+<rect x="200" y="140" width="50" height="60" fill="#3a7a32"/>
+<text x="225" y="180" text-anchor="middle" font-size="28">🧱</text>
+<text x="310" y="170" text-anchor="middle" font-size="30">🧟</text>
+<text x="350" y="185" text-anchor="middle" font-size="30">🧟</text>
+<circle cx="180" cy="155" r="5" fill="#ffc107"/>
+<circle cx="195" cy="150" r="5" fill="#ffc107"/>
+<circle cx="210" cy="155" r="5" fill="#ffc107"/>
+<circle cx="320" cy="60" r="20" fill="#ffc107"/>
+<text x="200" y="275" text-anchor="middle" fill="#4caf50" font-size="22" font-family="Arial" font-weight="bold">PLANT DEFENSE</text>
+</svg>

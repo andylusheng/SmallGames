@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Coin Flip</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:16px;color:#fff}
+h1{font-size:20px;margin-bottom:8px}
+.hud{display:flex;gap:16px;margin-bottom:16px;font-size:14px}
+.hud span{color:#4fc3f7;font-weight:bold}
+#coin{width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,#ffc107,#ff8f00);display:flex;align-items:center;justify-content:center;font-size:48px;margin:20px 0;transition:transform .1s;box-shadow:0 8px 24px rgba(255,193,7,0.3)}
+#coin.flipping{animation:flip .6s ease-out}
+@keyframes flip{0%{transform:rotateY(0)}100%{transform:rotateY(1800deg)}}
+#result{font-size:18px;margin-bottom:16px;min-height:28px;font-weight:bold}
+#choices{display:flex;gap:16px;margin-bottom:16px}
+#choices button{padding:12px 28px;border:none;border-radius:8px;font-size:16px;font-weight:bold;cursor:pointer;transition:transform .1s}
+#choices button:active{transform:scale(0.95)}
+#headsBtn{background:#ffc107;color:#1a1a2e}
+#tailsBtn{background:#4fc3f7;color:#1a1a2e}
+#stats{font-size:13px;color:#aaa;text-align:center;line-height:1.8}
+</style>
+</head>
+<body>
+<h1>🪙 Coin Flip</h1>
+<div class="hud">Streak: <span id="streak">0</span> | Best: <span id="bs">0</span></div>
+<div id="coin">🪙</div>
+<div id="result">Make your guess!</div>
+<div id="choices">
+<button id="headsBtn">Heads</button>
+<button id="tailsBtn">Tails</button>
+</div>
+<div id="stats">Wins: <span id="wins">0</span> | Losses: <span id="losses">0</span> | Total: <span id="total">0</span></div>
+<script>
+let streak=0,best=+localStorage.getItem('coin-flip-best')||0,wins=0,losses=0,total=0,flipping=false;
+document.getElementById('bs').textContent=best;
+const coinEl=document.getElementById('coin'),resultEl=document.getElementById('result');
+function flip(guess){if(flipping)return;flipping=true;
+coinEl.classList.add('flipping');resultEl.textContent='Flipping...';resultEl.style.color='#fff';
+setTimeout(()=>{const result=Math.random()<0.5?'heads':'tails';
+coinEl.textContent=result==='heads'?'👑':'🦅';
+coinEl.classList.remove('flipping');
+total++;
+if(result===guess){wins++;streak++;if(streak>best){best=streak;localStorage.setItem('coin-flip-best',best);document.getElementById('bs').textContent=best;}
+resultEl.textContent='✅ '+result.toUpperCase()+'! Streak: '+streak;resultEl.style.color='#4caf50';}
+else{losses++;streak=0;resultEl.textContent='❌ '+result.toUpperCase()+'! Streak reset!';resultEl.style.color='#e94560';}
+document.getElementById('streak').textContent=streak;
+document.getElementById('wins').textContent=wins;document.getElementById('losses').textContent=losses;document.getElementById('total').textContent=total;
+flipping=false;},700);}
+document.getElementById('headsBtn').addEventListener('click',()=>flip('heads'));
+document.getElementById('tailsBtn').addEventListener('click',()=>flip('tails'));
+</script>
+<script>
+(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
+</script>
+</body>
+</html>

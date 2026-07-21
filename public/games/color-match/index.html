@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Color Match</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:20px}
+h1{color:#fff;font-size:24px;margin-bottom:6px}
+.sub{color:#aaa;font-size:14px;margin-bottom:16px}
+.stats{display:flex;gap:16px;margin-bottom:20px}
+.stat{background:#16213e;padding:8px 16px;border-radius:8px;color:#fff;font-size:15px}
+.stat span{color:#4fc3f7;font-weight:bold}
+#word{font-size:48px;font-weight:bold;margin:20px 0;min-height:60px;text-align:center}
+#question{color:#aaa;font-size:16px;margin-bottom:20px}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:min(320px,85vw)}
+.choice{padding:16px;border-radius:12px;font-size:18px;font-weight:bold;color:#fff;cursor:pointer;border:3px solid transparent;transition:all .15s;text-align:center}
+.choice:hover{transform:scale(1.05);border-color:#fff}
+.choice.correct{border-color:#4caf50;animation:pop .3s}
+.choice.wrong{border-color:#e94560;opacity:.5}
+@keyframes pop{50%{transform:scale(1.1)}}
+#result{margin-top:16px;font-size:18px;min-height:28px;color:#fff}
+.btn{margin-top:16px;padding:10px 24px;background:#e94560;color:#fff;border:none;border-radius:8px;font-size:15px;cursor:pointer;display:none}
+.timer-bar{width:min(320px,85vw);height:6px;background:#333;border-radius:3px;margin-bottom:16px;overflow:hidden}
+.timer-fill{height:100%;background:#4fc3f7;transition:width .1s linear;border-radius:3px}
+</style>
+</head>
+<body>
+<h1>🎨 Color Match</h1>
+<p class="sub">Does the TEXT COLOR match the WORD shown?</p>
+<div class="stats">
+  <div class="stat">Score: <span id="score">0</span></div>
+  <div class="stat">Streak: <span id="streak">0</span></div>
+  <div class="stat">Best: <span id="best">0</span></div>
+</div>
+<div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
+<div id="word">READY?</div>
+<div id="question">Tap YES if the color matches the word</div>
+<div class="choices">
+  <div class="choice" style="background:#4caf50" onclick="answer(true)">✓ YES</div>
+  <div class="choice" style="background:#e94560" onclick="answer(false)">✗ NO</div>
+</div>
+<div id="result"></div>
+<button class="btn" id="startBtn" onclick="startGame()">Start Game</button>
+<script>
+const COLORS=[
+  {name:'RED',hex:'#e94560'},
+  {name:'BLUE',hex:'#2196f3'},
+  {name:'GREEN',hex:'#4caf50'},
+  {name:'YELLOW',hex:'#ffc107'},
+  {name:'PURPLE',hex:'#9c27b0'},
+  {name:'ORANGE',hex:'#ff9800'}
+];
+let score=0,streak=0,best=0,playing=false,currentMatch=false;
+let timeLeft=100,timerInt=null;
+
+function startGame(){
+  score=0;streak=0;playing=true;
+  document.getElementById('score').textContent='0';
+  document.getElementById('streak').textContent='0';
+  document.getElementById('startBtn').style.display='none';
+  document.getElementById('result').textContent='';
+  nextRound();
+}
+
+function nextRound(){
+  if(!playing)return;
+  timeLeft=100;
+  clearInterval(timerInt);
+  timerInt=setInterval(()=>{
+    timeLeft-=2;
+    document.getElementById('timerFill').style.width=timeLeft+'%';
+    if(timeLeft<=0){clearInterval(timerInt);gameOver();}
+  },60);
+  
+  // Generate round
+  const wordColor=COLORS[Math.floor(Math.random()*COLORS.length)];
+  let displayColor;
+  currentMatch=Math.random()<0.5;
+  if(currentMatch){displayColor=wordColor;}
+  else{
+    do{displayColor=COLORS[Math.floor(Math.random()*COLORS.length)];}
+    while(displayColor.name===wordColor.name);
+  }
+  
+  const wordEl=document.getElementById('word');
+  wordEl.textContent=wordColor.name;
+  wordEl.style.color=displayColor.hex;
+}
+
+function answer(userSaysMatch){
+  if(!playing)return;
+  clearInterval(timerInt);
+  
+  const correct=(userSaysMatch===currentMatch);
+  const resultEl=document.getElementById('result');
+  
+  if(correct){
+    score+=10+streak*2;
+    streak++;
+    resultEl.textContent='✅ Correct! +'+( 10+(streak-1)*2);
+    resultEl.style.color='#4caf50';
+  }else{
+    streak=0;
+    resultEl.textContent='❌ Wrong!';
+    resultEl.style.color='#e94560';
+  }
+  
+  document.getElementById('score').textContent=score;
+  document.getElementById('streak').textContent=streak;
+  if(score>best){best=score;document.getElementById('best').textContent=best;}
+  
+  setTimeout(nextRound,600);
+}
+
+function gameOver(){
+  playing=false;
+  document.getElementById('word').textContent='TIME UP!';
+  document.getElementById('word').style.color='#fff';
+  document.getElementById('result').textContent=`Final Score: ${score}`;
+  document.getElementById('result').style.color='#4fc3f7';
+  document.getElementById('startBtn').style.display='inline-block';
+  document.getElementById('startBtn').textContent='Play Again';
+  document.getElementById('timerFill').style.width='0%';
+}
+
+// Show start button initially
+document.getElementById('startBtn').style.display='inline-block';
+</script>
+<script>
+(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
+</script>
+</body>
+</html>

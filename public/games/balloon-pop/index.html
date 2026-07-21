@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Balloon Pop</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Score: <span id="sc">0</span> | Missed: <span id="ms">0</span>/10 | Time: <span id="tm">30</span>s</div>
+<canvas id="c"></canvas>
+<div id="msg">Tap balloons to pop them! Don't let them escape!</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80);
+cv.width=W;cv.height=H;
+let balloons=[],score=0,missed=0,timeLeft=30,active=false,frame=0;
+const COLORS=['#e94560','#ff9800','#ffc107','#4caf50','#4fc3f7','#9c27b0','#e91e63'];
+function spawn(){
+  const r=18+Math.random()*14;
+  balloons.push({x:r+Math.random()*(W-2*r),y:H+r,r,vy:-(1.2+Math.random()*1.5+score*0.02),color:COLORS[Math.floor(Math.random()*COLORS.length)],wobble:Math.random()*Math.PI*2});
+}
+function start(){
+  score=0;missed=0;timeLeft=30;active=true;balloons=[];frame=0;
+  document.getElementById('sc').textContent=0;
+  document.getElementById('ms').textContent=0;
+  document.getElementById('tm').textContent=30;
+  const t=setInterval(()=>{
+    timeLeft--;document.getElementById('tm').textContent=timeLeft;
+    if(timeLeft<=0||missed>=10){clearInterval(t);active=false;}
+  },1000);
+}
+function update(){
+  if(!active)return;
+  frame++;
+  if(frame%Math.max(20,50-score)===0)spawn();
+  for(let i=balloons.length-1;i>=0;i--){
+    const b=balloons[i];
+    b.y+=b.vy;b.wobble+=0.05;
+    b.x+=Math.sin(b.wobble)*0.5;
+    if(b.y+b.r<-10){balloons.splice(i,1);missed++;document.getElementById('ms').textContent=missed;}
+  }
+}
+function draw(){
+  const g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#0f3460');g.addColorStop(1,'#1a1a2e');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  for(let b of balloons){
+    ctx.beginPath();ctx.ellipse(b.x,b.y,b.r*0.85,b.r,0,0,Math.PI*2);
+    ctx.fillStyle=b.color;ctx.fill();
+    ctx.beginPath();ctx.ellipse(b.x-b.r*0.25,b.y-b.r*0.3,b.r*0.2,b.r*0.3,0,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,0.3)';ctx.fill();
+    ctx.beginPath();ctx.moveTo(b.x,b.y+b.r);ctx.lineTo(b.x-3,b.y+b.r+8);ctx.lineTo(b.x+3,b.y+b.r+8);ctx.closePath();
+    ctx.fillStyle=b.color;ctx.fill();
+    ctx.beginPath();ctx.moveTo(b.x,b.y+b.r+8);
+    ctx.quadraticCurveTo(b.x+4,b.y+b.r+16,b.x,b.y+b.r+22);
+    ctx.strokeStyle='#aaa';ctx.lineWidth=1;ctx.stroke();
+  }
+  if(!active&&(missed>=10||timeLeft<=0)){
+    ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#ffc107';ctx.font='bold 24px Arial';ctx.textAlign='center';
+    ctx.fillText(`Score: ${score}`,W/2,H/2-10);
+    ctx.fillStyle='#fff';ctx.font='16px Arial';
+    ctx.fillText('Tap to play again',W/2,H/2+25);
+  }
+  if(!active&&missed===0&&timeLeft===30){
+    ctx.fillStyle='rgba(0,0,0,0.4)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#fff';ctx.font='bold 22px Arial';ctx.textAlign='center';
+    ctx.fillText('TAP TO START',W/2,H/2);
+  }
+}
+function pop(px,py){
+  for(let i=balloons.length-1;i>=0;i--){
+    const b=balloons[i];
+    const d=Math.sqrt((px-b.x)**2+(py-b.y)**2);
+    if(d<b.r+5){
+      balloons.splice(i,1);score++;
+      document.getElementById('sc').textContent=score;
+      return;
+    }
+  }
+}
+cv.addEventListener('pointerdown',e=>{
+  if(!active){start();return;}
+  const r=cv.getBoundingClientRect();
+  pop(e.clientX-r.left,e.clientY-r.top);
+});
+function loop(){update();draw();requestAnimationFrame(loop);}
+loop();
+</script>
+</body>
+</html>

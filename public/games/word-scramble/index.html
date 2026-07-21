@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Word Scramble</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:20px}
+h1{color:#fff;font-size:22px;margin-bottom:6px}
+.hud{display:flex;gap:16px;margin-bottom:16px;color:#fff;font-size:14px}
+.hud span{color:#4fc3f7;font-weight:bold}
+#hint{color:#aaa;font-size:14px;margin-bottom:12px;font-style:italic}
+#slots{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;justify-content:center}
+.slot{width:42px;height:48px;border-radius:8px;background:#16213e;border:2px solid #0f3460;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:bold;color:#4fc3f7;text-transform:uppercase}
+.slot.filled{border-color:#4fc3f7}
+.slot.correct{border-color:#4caf50;color:#4caf50}
+.slot.wrong{border-color:#e94560;color:#e94560;animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+#letters{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:360px}
+.letter{width:44px;height:48px;border-radius:10px;background:#0f3460;border:2px solid #4fc3f733;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;color:#fff;cursor:pointer;transition:all .15s;text-transform:uppercase}
+.letter:hover{background:#1a4a7a;transform:scale(1.05)}
+.letter.used{opacity:.3;pointer-events:none}
+.msg{color:#aaa;margin-top:16px;font-size:14px;min-height:20px}
+.btn{margin-top:10px;padding:8px 20px;background:#e94560;color:#fff;border:none;border-radius:6px;font-size:14px;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>🔤 Word Scramble</h1>
+<div class="hud">
+  <div>Score: <span id="score">0</span></div>
+  <div>Round: <span id="round">1</span>/10</div>
+  <div>Streak: <span id="streak">0</span></div>
+</div>
+<div id="hint"></div>
+<div id="slots"></div>
+<div id="letters"></div>
+<div class="msg" id="msg"></div>
+<button class="btn" onclick="skipWord()">Skip →</button>
+<script>
+const WORDS=[
+  {word:'PLANET',hint:'A celestial body orbiting a star'},
+  {word:'GUITAR',hint:'A stringed musical instrument'},
+  {word:'CASTLE',hint:'A large fortified building'},
+  {word:'JUNGLE',hint:'A dense tropical forest'},
+  {word:'ROCKET',hint:'A vehicle for space travel'},
+  {word:'PUZZLE',hint:'A game that tests your brain'},
+  {word:'DRAGON',hint:'A mythical fire-breathing creature'},
+  {word:'ISLAND',hint:'Land surrounded by water'},
+  {word:'WIZARD',hint:'A person who practices magic'},
+  {word:'FROZEN',hint:'Turned into ice'},
+  {word:'BRIDGE',hint:'A structure spanning a gap'},
+  {word:'CANDLE',hint:'Provides light when lit'},
+  {word:'TEMPLE',hint:'A place of worship'},
+  {word:'PIRATE',hint:'A sea robber'},
+  {word:'GALAXY',hint:'A system of millions of stars'},
+  {word:'SHADOW',hint:'A dark shape cast by light'},
+  {word:'THUNDER',hint:'Sound after lightning'},
+  {word:'COMPASS',hint:'Shows direction'},
+  {word:'DIAMOND',hint:'A precious gemstone'},
+  {word:'VOLCANO',hint:'A mountain that erupts lava'}
+];
+let current=null,answer=[],score=0,round=1,streak=0,usedLetters=[];
+
+function init(){
+  score=0;round=1;streak=0;
+  document.getElementById('score').textContent='0';
+  document.getElementById('round').textContent='1';
+  document.getElementById('streak').textContent='0';
+  nextWord();
+}
+
+function nextWord(){
+  if(round>10){document.getElementById('msg').textContent=`🎉 Game Over! Final Score: ${score}`;return;}
+  document.getElementById('round').textContent=round;
+  const idx=Math.floor(Math.random()*WORDS.length);
+  current=WORDS[idx];
+  answer=[];usedLetters=[];
+  document.getElementById('hint').textContent='💡 '+current.hint;
+  document.getElementById('msg').textContent='';
+  
+  // Scramble
+  let scrambled=current.word.split('');
+  do{scrambled.sort(()=>Math.random()-0.5);}while(scrambled.join('')===current.word);
+  
+  // Render slots
+  const slotsEl=document.getElementById('slots');slotsEl.innerHTML='';
+  for(let i=0;i<current.word.length;i++){
+    const slot=document.createElement('div');slot.className='slot';slot.id='slot-'+i;
+    slotsEl.appendChild(slot);
+  }
+  
+  // Render letters
+  const lettersEl=document.getElementById('letters');lettersEl.innerHTML='';
+  scrambled.forEach((ch,i)=>{
+    const btn=document.createElement('div');
+    btn.className='letter';btn.textContent=ch;btn.dataset.idx=i;
+    btn.addEventListener('click',()=>pickLetter(i,ch));
+    lettersEl.appendChild(btn);
+  });
+}
+
+function pickLetter(idx,ch){
+  if(usedLetters.includes(idx))return;
+  usedLetters.push(idx);
+  answer.push({idx,ch});
+  document.querySelector(`.letter[data-idx="${idx}"]`).classList.add('used');
+  
+  const pos=answer.length-1;
+  const slot=document.getElementById('slot-'+pos);
+  slot.textContent=ch;slot.classList.add('filled');
+  
+  if(answer.length===current.word.length)checkAnswer();
+}
+
+function checkAnswer(){
+  const guess=answer.map(a=>a.ch).join('');
+  if(guess===current.word){
+    streak++;score+=10+streak*5;
+    document.getElementById('score').textContent=score;
+    document.getElementById('streak').textContent=streak;
+    document.getElementById('msg').textContent='✅ Correct! +'+(10+streak*5);
+    document.querySelectorAll('.slot').forEach(s=>s.classList.add('correct'));
+    setTimeout(()=>{round++;nextWord();},1000);
+  }else{
+    streak=0;document.getElementById('streak').textContent='0';
+    document.getElementById('msg').textContent='❌ Wrong! Try again.';
+    document.querySelectorAll('.slot').forEach(s=>s.classList.add('wrong'));
+    setTimeout(()=>{
+      answer=[];usedLetters=[];
+      document.querySelectorAll('.slot').forEach(s=>{s.textContent='';s.className='slot';});
+      document.querySelectorAll('.letter').forEach(l=>l.classList.remove('used'));
+    },600);
+  }
+}
+
+function skipWord(){
+  streak=0;document.getElementById('streak').textContent='0';
+  document.getElementById('msg').textContent=`The word was: ${current.word}`;
+  setTimeout(()=>{round++;nextWord();},1200);
+}
+
+init();
+</script>
+<script>
+(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
+</script>
+</body>
+</html>

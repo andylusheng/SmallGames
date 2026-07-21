@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Paper Toss</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Score: <span id="sc">0</span> | Missed: <span id="ms">0</span>/5 | Best: <span id="bs">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">Swipe up to toss paper into the bin! Watch the wind →</div>
+<script>
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-90);
+const cv=document.getElementById('c');cv.width=W;cv.height=H;
+const ctx=cv.getContext('2d');
+let score=0,missed=0,best=+localStorage.getItem('papertoss_best')||0,gameOver=false;
+document.getElementById('bs').textContent=best;
+const bin={x:W/2,y:H*0.2,w:50,h:40};
+let paper={x:W/2,y:H*0.8,vx:0,vy:0,active:false,r:12};
+let wind=(Math.random()-0.5)*2;
+let dragStart=null,dragEnd=null,dragging=false;
+cv.addEventListener('pointerdown',e=>{
+  if(gameOver){restart();return}
+  const p=getPos(e);
+  if(Math.hypot(p.x-paper.x,p.y-paper.y)<40&&!paper.active){dragging=true;dragStart=p;dragEnd=p}
+});
+cv.addEventListener('pointermove',e=>{if(dragging)dragEnd=getPos(e)});
+cv.addEventListener('pointerup',()=>{
+  if(dragging&&dragStart&&dragEnd){
+    const dx=dragEnd.x-dragStart.x,dy=dragEnd.y-dragStart.y;
+    if(dy<-20){
+      paper.vx=dx*0.08;paper.vy=dy*0.12;paper.active=true;
+    }
+  }
+  dragging=false;
+});
+function getPos(e){const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
+function resetPaper(){paper={x:W/2,y:H*0.8,vx:0,vy:0,active:false,r:12};wind=(Math.random()-0.5)*3}
+function restart(){score=0;missed=0;gameOver=false;document.getElementById('sc').textContent=0;document.getElementById('ms').textContent=0;resetPaper();loop()}
+function loop(){
+  if(gameOver)return;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#16213e';ctx.fillRect(0,0,W,H);
+  // Wind indicator
+  ctx.fillStyle='#aaa';ctx.font='13px Arial';ctx.textAlign='center';
+  const windStr=wind>0?'→'.repeat(Math.ceil(Math.abs(wind))):'←'.repeat(Math.ceil(Math.abs(wind)));
+  ctx.fillText('Wind: '+windStr,W/2,H-15);
+  // Draw bin
+  ctx.fillStyle='#37474f';
+  ctx.beginPath();
+  ctx.moveTo(bin.x-bin.w/2,bin.y);
+  ctx.lineTo(bin.x-bin.w/2+8,bin.y+bin.h);
+  ctx.lineTo(bin.x+bin.w/2-8,bin.y+bin.h);
+  ctx.lineTo(bin.x+bin.w/2,bin.y);
+  ctx.closePath();ctx.fill();
+  ctx.strokeStyle='#78909c';ctx.lineWidth=2;ctx.stroke();
+  // Bin opening
+  ctx.strokeStyle='#4fc3f7';ctx.lineWidth=3;
+  ctx.beginPath();ctx.ellipse(bin.x,bin.y,bin.w/2,8,0,0,Math.PI*2);ctx.stroke();
+  // Paper physics
+  if(paper.active){
+    paper.vy+=0.25;
+    paper.vx+=wind*0.01;
+    paper.x+=paper.vx;paper.y+=paper.vy;
+    // Check if in bin
+    if(paper.y>bin.y-5&&paper.y<bin.y+15&&Math.abs(paper.x-bin.x)<bin.w/2-5&&paper.vy>0){
+      score++;document.getElementById('sc').textContent=score;
+      if(score>best){best=score;localStorage.setItem('papertoss_best',best);document.getElementById('bs').textContent=best}
+      resetPaper();
+    }
+    // Missed
+    if(paper.y>H+20||paper.x<-20||paper.x>W+20){
+      missed++;document.getElementById('ms').textContent=missed;
+      if(missed>=5){
+        gameOver=true;
+        ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillRect(0,0,W,H);
+        ctx.fillStyle='#fff';ctx.font='bold 24px Arial';ctx.textAlign='center';
+        ctx.fillText('GAME OVER',W/2,H/2-15);
+        ctx.font='16px Arial';ctx.fillText('Score: '+score,W/2,H/2+15);
+        ctx.font='13px Arial';ctx.fillStyle='#4fc3f7';ctx.fillText('Tap to restart',W/2,H/2+45);
+        return;
+      }
+      resetPaper();
+    }
+  }
+  // Draw paper
+  ctx.save();ctx.translate(paper.x,paper.y);
+  if(paper.active)ctx.rotate(paper.x*0.05);
+  ctx.fillStyle='#fff';
+  ctx.beginPath();ctx.arc(0,0,paper.r,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#ccc';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(-5,-5);ctx.lineTo(5,5);ctx.moveTo(5,-5);ctx.lineTo(-5,5);ctx.stroke();
+  ctx.restore();
+  // Aim guide
+  if(dragging&&dragStart&&dragEnd){
+    ctx.strokeStyle='#4fc3f7';ctx.lineWidth=2;ctx.setLineDash([4,4]);
+    ctx.beginPath();ctx.moveTo(paper.x,paper.y);
+    ctx.lineTo(paper.x+(dragEnd.x-dragStart.x)*0.3,paper.y+(dragEnd.y-dragStart.y)*0.3);
+    ctx.stroke();ctx.setLineDash([]);
+  }
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>

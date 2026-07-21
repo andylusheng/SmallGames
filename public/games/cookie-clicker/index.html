@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Cookie Clicker</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:20px;color:#fff}
+h1{font-size:22px;margin-bottom:4px}
+.count{font-size:36px;font-weight:bold;color:#ffc107;margin:8px 0}
+.per-sec{color:#aaa;font-size:14px;margin-bottom:16px}
+#cookie{font-size:120px;cursor:pointer;transition:transform .1s;user-select:none;margin:10px 0}
+#cookie:active{transform:scale(0.9)}
+#cookie:hover{transform:scale(1.05)}
+.shop{width:min(360px,90vw);margin-top:16px}
+.shop h3{margin-bottom:8px;color:#4fc3f7;font-size:15px}
+.item{display:flex;justify-content:space-between;align-items:center;background:#16213e;padding:10px 14px;border-radius:8px;margin-bottom:6px;cursor:pointer;border:1px solid #0f3460;transition:all .15s}
+.item:hover{border-color:#4fc3f7;background:#1a2a4e}
+.item.disabled{opacity:.4;pointer-events:none}
+.item .name{font-size:14px}
+.item .cost{color:#ffc107;font-size:13px;font-weight:bold}
+.item .owned{color:#4caf50;font-size:12px}
+.float{position:fixed;pointer-events:none;font-size:20px;font-weight:bold;color:#ffc107;animation:floatUp 1s forwards}
+@keyframes floatUp{to{transform:translateY(-60px);opacity:0}}
+</style>
+</head>
+<body>
+<h1>🍪 Cookie Clicker</h1>
+<div class="count" id="count">0</div>
+<div class="per-sec">per second: <span id="cps">0</span></div>
+<div id="cookie" onclick="clickCookie(event)">🍪</div>
+<div class="shop">
+  <h3>🏪 Upgrades</h3>
+  <div id="shopItems"></div>
+</div>
+<script>
+let cookies=0,cps=0,clickPower=1;
+const UPGRADES=[
+  {name:'👆 Auto Clicker',baseCost:15,cps:0.1,owned:0},
+  {name:'👵 Grandma',baseCost:100,cps:1,owned:0},
+  {name:'🌾 Farm',baseCost:500,cps:5,owned:0},
+  {name:'🏭 Factory',baseCost:3000,cps:20,owned:0},
+  {name:'🚀 Rocket',baseCost:15000,cps:100,owned:0},
+  {name:'⏰ Time Machine',baseCost:100000,cps:500,owned:0},
+  {name:'💪 Click Power x2',baseCost:200,cps:0,owned:0,isClick:true}
+];
+
+function getCost(u){return Math.floor(u.baseCost*Math.pow(1.15,u.owned));}
+
+function clickCookie(e){
+  cookies+=clickPower;
+  updateDisplay();
+  // Float text
+  const el=document.createElement('div');
+  el.className='float';el.textContent='+'+clickPower;
+  el.style.left=(e.clientX-10)+'px';el.style.top=(e.clientY-20)+'px';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1000);
+}
+
+function buyUpgrade(idx){
+  const u=UPGRADES[idx];
+  const cost=getCost(u);
+  if(cookies<cost)return;
+  cookies-=cost;u.owned++;
+  if(u.isClick){clickPower*=2;}
+  else{cps+=u.cps;}
+  updateDisplay();renderShop();
+}
+
+function updateDisplay(){
+  document.getElementById('count').textContent=formatNum(Math.floor(cookies));
+  document.getElementById('cps').textContent=cps.toFixed(1);
+}
+
+function formatNum(n){
+  if(n>=1e9)return(n/1e9).toFixed(1)+'B';
+  if(n>=1e6)return(n/1e6).toFixed(1)+'M';
+  if(n>=1e3)return(n/1e3).toFixed(1)+'K';
+  return n.toString();
+}
+
+function renderShop(){
+  const el=document.getElementById('shopItems');el.innerHTML='';
+  UPGRADES.forEach((u,i)=>{
+    const cost=getCost(u);
+    const div=document.createElement('div');
+    div.className='item'+(cookies<cost?' disabled':'');
+    div.innerHTML=`<div><div class="name">${u.name}</div><div class="owned">Owned: ${u.owned}${u.cps?' | +'+u.cps+'/s':''}</div></div><div class="cost">🍪 ${formatNum(cost)}</div>`;
+    div.addEventListener('click',()=>buyUpgrade(i));
+    el.appendChild(div);
+  });
+}
+
+// Game loop
+setInterval(()=>{
+  cookies+=cps/10;
+  updateDisplay();
+},100);
+setInterval(renderShop,1000);
+
+renderShop();updateDisplay();
+</script>
+<script>
+(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
+</script>
+</body>
+</html>

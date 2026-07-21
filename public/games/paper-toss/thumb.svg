@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#16213e"/>
+<rect x="280" y="180" width="60" height="70" rx="4" fill="#5d4037"/>
+<rect x="285" y="175" width="50" height="8" rx="2" fill="#8d6e63"/>
+<circle cx="160" cy="160" r="16" fill="#fff" opacity="0.9"/>
+<path d="M155 155 L165 155 L163 165 L157 165Z" fill="#ddd"/>
+<path d="M160 160 Q200 80 290 180" fill="none" stroke="#4fc3f7" stroke-width="2" stroke-dasharray="6,4"/>
+<path d="M130 240 L160 200 L170 210 L140 250Z" fill="#ffc107" opacity="0.6"/>
+<text x="200" y="285" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">📄 PAPER TOSS</text>
+</svg>

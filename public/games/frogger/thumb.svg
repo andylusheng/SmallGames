@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#1a1a2e"/>
+<rect x="0" y="240" width="400" height="60" fill="#2d5a27"/>
+<rect x="0" y="180" width="400" height="50" fill="#333"/>
+<rect x="0" y="120" width="400" height="50" fill="#1565c0"/>
+<rect x="0" y="60" width="400" height="50" fill="#333"/>
+<rect x="0" y="0" width="400" height="50" fill="#2d5a27"/>
+<ellipse cx="200" cy="260" rx="18" ry="14" fill="#4caf50"/>
+<circle cx="192" cy="250" r="5" fill="#fff"/>
+<circle cx="208" cy="250" r="5" fill="#fff"/>
+<circle cx="192" cy="250" r="2" fill="#000"/>
+<circle cx="208" cy="250" r="2" fill="#000"/>
+<rect x="80" y="190" width="60" height="30" rx="5" fill="#e94560"/>
+<rect x="250" y="195" width="50" height="25" rx="5" fill="#ffc107"/>
+<rect x="120" y="130" width="70" height="25" rx="8" fill="#8b4513"/>
+<rect x="280" y="135" width="50" height="20" rx="8" fill="#8b4513"/>
+<text x="200" y="290" text-anchor="middle" fill="#4caf50" font-size="24" font-family="Arial" font-weight="bold">FROGGER</text>
+</svg>

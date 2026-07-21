@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Speed Racer</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;overflow:hidden;font-family:Arial,sans-serif}
+canvas{display:block;margin:0 auto}
+#ui{position:absolute;top:10px;left:50%;transform:translateX(-50%);color:#fff;font-size:16px;text-align:center}
+#over{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;text-align:center;display:none}
+#over h1{font-size:32px;color:#ff4444;margin-bottom:10px}
+#over button{padding:12px 30px;font-size:16px;background:#6366f1;color:#fff;border:none;border-radius:8px;cursor:pointer}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="ui">Speed: <span id="sp">0</span> km/h | Score: <span id="sc">0</span></div>
+<div id="over"><h1>CRASH!</h1><p style="font-size:18px;margin-bottom:15px">Score: <span id="fs">0</span></p><button onclick="restart()">Try Again</button></div>
+<script>
+const c=document.getElementById('c'),x=c.getContext('2d');
+let W,H;function resize(){W=c.width=Math.min(innerWidth-16,860);H=c.height=Math.min(innerHeight-80,640)}
+resize();addEventListener('resize',resize);
+let score=0,speed=3,running=true,player={x:0,lane:1},cars=[],roadY=0,nitro=[];
+const laneW=()=>W/3;const lanes=[0,1,2];
+player.x=W/2;
+let keys={},touchX=null;
+addEventListener('keydown',e=>keys[e.key]=true);
+addEventListener('keyup',e=>keys[e.key]=false);
+c.addEventListener('touchstart',e=>{touchX=e.touches[0].clientX});
+c.addEventListener('touchmove',e=>{e.preventDefault();const tx=e.touches[0].clientX;
+  if(tx<touchX-20){player.lane=Math.max(0,player.lane-1);touchX=tx}
+  else if(tx>touchX+20){player.lane=Math.min(2,player.lane+1);touchX=tx}});
+c.addEventListener('click',e=>{const rx=e.offsetX;if(rx<W/3)player.lane=Math.max(0,player.lane-1);else if(rx>W*2/3)player.lane=Math.min(2,player.lane+1)});
+
+function spawnCar(){const lane=Math.floor(Math.random()*3);
+  cars.push({x:lane*laneW()+laneW()/2,y:-60,lane,w:35,h:60,color:`hsl(${Math.random()*360},70%,50%)`})}
+function spawnNitro(){nitro.push({x:Math.floor(Math.random()*3)*laneW()+laneW()/2,y:-30,r:12})}
+
+function update(){
+  if(!running)return;
+  if(keys['ArrowLeft']||keys['a']){player.lane=Math.max(0,player.lane-1);keys['ArrowLeft']=false;keys['a']=false}
+  if(keys['ArrowRight']||keys['d']){player.lane=Math.min(2,player.lane+1);keys['ArrowRight']=false;keys['d']=false}
+  player.x+=(player.lane*laneW()+laneW()/2-player.x)*0.15;
+  speed+=0.002;score+=Math.floor(speed);
+  document.getElementById('sp').textContent=Math.floor(speed*20);
+  document.getElementById('sc').textContent=score;
+  roadY=(roadY+speed*3)%40;
+  if(Math.random()<0.02+speed*0.003)spawnCar();
+  if(Math.random()<0.005)spawnNitro();
+  const py=H-100;
+  cars=cars.filter(car=>{car.y+=speed*2.5;
+    if(Math.abs(car.x-player.x)<30&&Math.abs(car.y-py)<50){gameOver();return false}
+    return car.y<H+80});
+  nitro=nitro.filter(n=>{n.y+=speed*2.5;
+    if(Math.abs(n.x-player.x)<25&&Math.abs(n.y-py)<30){speed+=1;return false}
+    return n.y<H+30});
+}
+function draw(){
+  x.fillStyle='#2d5a27';x.fillRect(0,0,W,H);
+  x.fillStyle='#333';x.fillRect(10,0,W-20,H);
+  // road lines
+  x.strokeStyle='#fff';x.lineWidth=2;x.setLineDash([20,20]);
+  for(let i=1;i<3;i++){x.beginPath();x.moveTo(i*laneW(),roadY-40);x.lineTo(i*laneW(),H);x.stroke()}
+  x.setLineDash([]);
+  // road edges
+  x.fillStyle='#ff0';for(let y=roadY-40;y<H;y+=40){x.fillRect(8,y,4,20);x.fillRect(W-12,y,4,20)}
+  // nitro
+  nitro.forEach(n=>{x.fillStyle='#0ff';x.beginPath();x.arc(n.x,n.y,n.r,0,7);x.fill();
+    x.fillStyle='#fff';x.font='12px Arial';x.textAlign='center';x.fillText('N',n.x,n.y+4)});
+  // enemy cars
+  cars.forEach(car=>{x.fillStyle=car.color;x.fillRect(car.x-car.w/2,car.y-car.h/2,car.w,car.h);
+    x.fillStyle='rgba(0,0,0,.3)';x.fillRect(car.x-car.w/2+5,car.y-car.h/2+5,car.w-10,15)});
+  // player car
+  const py=H-100;
+  x.fillStyle='#6366f1';x.fillRect(player.x-18,py-30,36,60);
+  x.fillStyle='#818cf8';x.fillRect(player.x-13,py-25,26,20);
+  x.fillStyle='#f59e0b';x.fillRect(player.x-15,py+25,8,8);x.fillRect(player.x+7,py+25,8,8);
+}
+function gameOver(){running=false;document.getElementById('fs').textContent=score;document.getElementById('over').style.display='block'}
+function restart(){score=0;speed=3;running=true;cars=[];nitro=[];player.lane=1;
+  document.getElementById('over').style.display='none'}
+function loop(){update();draw();requestAnimationFrame(loop)}loop();
+</script>
+</body>
+</html>

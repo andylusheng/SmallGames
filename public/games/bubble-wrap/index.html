@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Bubble Wrap</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:20px;color:#fff}
+h1{font-size:20px;margin-bottom:8px}
+.hud{display:flex;gap:16px;margin-bottom:12px;font-size:14px}
+.hud span{color:#4fc3f7;font-weight:bold}
+#wrap{display:grid;gap:4px;padding:12px;background:#0f3460;border-radius:12px;touch-action:manipulation}
+.bubble{width:38px;height:38px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#7ecbf5,#4fc3f7,#2196f3);cursor:pointer;transition:all .1s;box-shadow:inset -2px -2px 4px rgba(0,0,0,.3),2px 2px 4px rgba(0,0,0,.2)}
+.bubble:active{transform:scale(.9)}
+.bubble.popped{background:#16213e;box-shadow:inset 2px 2px 4px rgba(0,0,0,.5);transform:scale(.85);pointer-events:none}
+#msg{margin-top:12px;font-size:14px;color:#aaa}
+button{margin-top:10px;padding:10px 24px;border-radius:20px;border:none;background:#4fc3f7;color:#1a1a2e;font-weight:bold;font-size:15px;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>🫧 Bubble Wrap</h1>
+<div class="hud">Popped: <span id="pp">0</span>/<span id="tt">0</span> | Sheets: <span id="sh">0</span></div>
+<div id="wrap"></div>
+<div id="msg">Pop all the bubbles to relax!</div>
+<button onclick="newSheet()">New Sheet</button>
+<script>
+const COLS=8,ROWS=8;
+let popped=0,sheets=0;
+function newSheet(){
+  popped=0;
+  const wrap=document.getElementById('wrap');
+  wrap.style.gridTemplateColumns=`repeat(${COLS},38px)`;
+  wrap.innerHTML='';
+  for(let i=0;i<COLS*ROWS;i++){
+    const b=document.createElement('div');
+    b.className='bubble';
+    b.addEventListener('pointerdown',()=>pop(b));
+    wrap.appendChild(b);
+  }
+  document.getElementById('pp').textContent=0;
+  document.getElementById('tt').textContent=COLS*ROWS;
+  document.getElementById('msg').textContent='Pop all the bubbles to relax!';
+}
+function pop(el){
+  if(el.classList.contains('popped'))return;
+  el.classList.add('popped');
+  popped++;
+  document.getElementById('pp').textContent=popped;
+  if(popped===COLS*ROWS){
+    sheets++;
+    document.getElementById('sh').textContent=sheets;
+    document.getElementById('msg').textContent='✨ Sheet complete! So satisfying!';
+    setTimeout(newSheet,1000);
+  }
+}
+newSheet();
+</script>
+<script>
+(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
+</script>
+</body>
+</html>

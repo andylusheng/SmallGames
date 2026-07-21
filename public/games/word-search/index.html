@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Word Search</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:10px;color:#fff}
+h1{font-size:20px;margin-bottom:6px}
+.hud{display:flex;gap:16px;margin-bottom:8px;font-size:14px}
+.hud span{color:#4fc3f7;font-weight:bold}
+#words{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:10px;max-width:360px}
+.word-tag{padding:4px 10px;border-radius:12px;background:#0f3460;font-size:13px;transition:all .3s}
+.word-tag.found{background:#1b5e20;color:#4caf50;text-decoration:line-through}
+#grid{display:grid;gap:2px;background:#0f3460;padding:6px;border-radius:8px;touch-action:none;user-select:none}
+.cell{width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold;border-radius:4px;background:#16213e;cursor:pointer;transition:background .15s}
+.cell.selected{background:#e94560}
+.cell.found-cell{background:#1b5e20;color:#4caf50}
+#msg{margin-top:10px;font-size:14px;color:#aaa;min-height:20px}
+#msg.win{color:#4caf50;font-weight:bold}
+button{margin-top:10px;padding:10px 24px;border-radius:20px;border:none;background:#4fc3f7;color:#1a1a2e;font-weight:bold;font-size:15px;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>🔍 Word Search</h1>
+<div class="hud">Found: <span id="fc">0</span>/<span id="tw">0</span></div>
+<div id="words"></div>
+<div id="grid"></div>
+<div id="msg">Find all hidden words!</div>
+<button onclick="init()">New Game</button>
+<script>
+const WORDS_POOL=['CAT','DOG','SUN','MOON','STAR','FISH','BIRD','TREE','FROG','BEAR','WOLF','LION','DEER','HAWK','CRAB','SEAL','WORM','DUCK','GOAT','HARE'];
+const SIZE=8;let grid=[],words=[],found=[],selecting=false,selCells=[],startCell=null;
+function init(){
+  const shuffled=[...WORDS_POOL].sort(()=>Math.random()-.5);
+  words=shuffled.slice(0,5);found=[];
+  grid=Array.from({length:SIZE},()=>Array(SIZE).fill(''));
+  words.forEach(w=>placeWord(w));
+  for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++)if(!grid[r][c])grid[r][c]=String.fromCharCode(65+Math.floor(Math.random()*26));
+  render();
+}
+function placeWord(word){
+  const dirs=[[0,1],[1,0],[1,1],[0,-1],[-1,0]];
+  for(let attempt=0;attempt<100;attempt++){
+    const d=dirs[Math.floor(Math.random()*dirs.length)];
+    const r=Math.floor(Math.random()*SIZE),c=Math.floor(Math.random()*SIZE);
+    let ok=true;
+    for(let i=0;i<word.length;i++){
+      const nr=r+d[0]*i,nc=c+d[1]*i;
+      if(nr<0||nr>=SIZE||nc<0||nc>=SIZE){ok=false;break}
+      if(grid[nr][nc]&&grid[nr][nc]!==word[i]){ok=false;break}
+    }
+    if(ok){for(let i=0;i<word.length;i++)grid[r+d[0]*i][c+d[1]*i]=word[i];return}
+  }
+}
+function render(){
+  const g=document.getElementById('grid');
+  g.style.gridTemplateColumns=`repeat(${SIZE},36px)`;
+  g.innerHTML='';
+  for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
+    const cell=document.createElement('div');
+    cell.className='cell';cell.textContent=grid[r][c];
+    cell.dataset.r=r;cell.dataset.c=c;
+    cell.addEventListener('pointerdown',e=>{e.preventDefault();startSelect(r,c)});
+    cell.addEventListener('pointerenter',e=>{if(selecting)extendSelect(r,c)});
+    g.appendChild(cell);
+  }
+  document.addEventListener('pointerup',endSelect);
+  const wd=document.getElementById('words');
+  wd.innerHTML=words.map(w=>`<span class="word-tag${found.includes(w)?' found':''}">${w}</span>`).join('');
+  document.getElementById('fc').textContent=found.length;
+  document.getElementById('tw').textContent=words.length;
+}
+function getCell(r,c){return document.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`)}
+function startSelect(r,c){selecting=true;selCells=[{r,c}];highlight()}
+function extendSelect(r,c){
+  if(selCells.length===0)return;
+  const s=selCells[0];
+  const dr=Math.sign(r-s.r),dc=Math.sign(c-s.c);
+  const len=Math.max(Math.abs(r-s.r),Math.abs(c-s.c))+1;
+  if(Math.abs(r-s.r)!==0&&Math.abs(c-s.c)!==0&&Math.abs(r-s.r)!==Math.abs(c-s.c))return;
+  const newSel=[];
+  for(let i=0;i<len;i++){const nr=s.r+dr*i,nc=s.c+dc*i;if(nr>=0&&nr<SIZE&&nc>=0&&nc<SIZE)newSel.push({r:nr,c:nc})}
+  selCells=newSel;highlight();
+}
+function highlight(){
+  document.querySelectorAll('.cell.selected').forEach(el=>el.classList.remove('selected'));
+  selCells.forEach(({r,c})=>{const el=getCell(r,c);if(el&&!el.classList.contains('found-cell'))el.classList.add('selected')});
+}
+function endSelect(){
+  if(!selecting)return;selecting=false;
+  const selected=selCells.map(({r,c})=>grid[r][c]).join('');
+  const reversed=[...selected].reverse().join('');
+  let matched=null;
+  if(words.includes(selected)&&!found.includes(selected))matched=selected;
+  else if(words.includes(reversed)&&!found.includes(reversed))matched=reversed;
+  if(matched){
+    found.push(matched);
+    selCells.forEach(({r,c})=>{const el=getCell(r,c);if(el){el.classList.remove('selected');el.classList.add('found-cell')}});
+    document.getElementById('words').innerHTML=words.map(w=>`<span class="word-tag${found.includes(w)?' found':''}">${w}</span>`).join('');
+    document.getElementById('fc').textContent=found.length;
+    if(found.length===words.length){document.getElementById('msg').textContent='🎉 All words found!';document.getElementById('msg').className='win'}
+  }else{
+    document.querySelectorAll('.cell.selected').forEach(el=>el.classList.remove('selected'));
+  }
+  selCells=[];
+}
+init();
+</script>
+<script>
+(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
+</script>
+</body>
+</html>

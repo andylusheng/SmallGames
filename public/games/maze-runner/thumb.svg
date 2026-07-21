@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#1a1a2e"/>
+<rect x="80" y="30" width="240" height="220" rx="8" fill="#16213e"/>
+<g stroke="#0f3460" stroke-width="6" fill="none">
+<path d="M100 50 L100 230 M100 50 L300 50 M300 50 L300 170 M300 230 L180 230"/>
+<path d="M140 90 L140 190 M140 90 L260 90 M260 90 L260 150"/>
+<path d="M180 130 L180 190 M180 130 L220 130 M220 130 L220 190"/>
+<path d="M100 170 L140 170 M260 170 L300 170"/>
+</g>
+<circle cx="120" cy="70" r="10" fill="#4fc3f7"/>
+<circle cx="117" cy="67" r="3" fill="#fff"/>
+<circle cx="124" cy="67" r="3" fill="#fff"/>
+<text x="280" y="215" font-size="22">🏁</text>
+<text x="200" y="280" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">MAZE RUNNER</text>
+</svg>

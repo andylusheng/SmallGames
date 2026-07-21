@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Plant Defense</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:14px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none}
+#shop{display:flex;gap:8px;margin-top:8px}
+#shop button{padding:6px 12px;background:#16213e;border:2px solid #4fc3f7;border-radius:6px;color:#fff;cursor:pointer;font-size:12px}
+#shop button.sel{background:#4fc3f7;color:#1a1a2e}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">☀️ Sun: <span id="sun">50</span> | Wave: <span id="wave">1</span> | Score: <span id="sc">0</span></div>
+<canvas id="c"></canvas>
+<div id="shop">
+<button data-t="0" class="sel">🌻 Sunflower (50)</button>
+<button data-t="1">🌵 Shooter (100)</button>
+<button data-t="2">🧱 Wall (50)</button>
+</div>
+<div id="msg">Select a plant, then tap a grid cell to place it. Defend your garden!</div>
+<script>
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-120);
+const c=document.getElementById('c');c.width=W;c.height=H;const ctx=c.getContext('2d');
+const COLS=8,ROWS=5,CW=W/COLS,CH=H/ROWS;
+let sun=50,wave=1,score=0,gameOver=false,selType=0;
+let plants=[],enemies=[],bullets=[],sunDrops=[];
+let best=+localStorage.getItem('plant-defense-best')||0;
+const plantTypes=[{name:'Sunflower',cost:50,hp:3,emoji:'🌻'},{name:'Shooter',cost:100,hp:3,emoji:'🌵'},{name:'Wall',cost:50,hp:10,emoji:'🧱'}];
+document.querySelectorAll('#shop button').forEach(b=>{b.addEventListener('click',()=>{selType=+b.dataset.t;document.querySelectorAll('#shop button').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');});});
+c.addEventListener('pointerdown',e=>{if(gameOver){reset();return;}const r=c.getBoundingClientRect();const col=Math.floor((e.clientX-r.left)/CW),row=Math.floor((e.clientY-r.top)/CH);
+if(col<0||col>=COLS||row<0||row>=ROWS)return;
+if(plants.some(p=>p.col===col&&p.row===row))return;
+const t=plantTypes[selType];if(sun<t.cost)return;sun-=t.cost;
+plants.push({col,row,type:selType,hp:t.hp,maxHp:t.hp,timer:0});updateUI();});
+function updateUI(){document.getElementById('sun').textContent=sun;document.getElementById('wave').textContent=wave;document.getElementById('sc').textContent=score;}
+let spawnTimer=0,sunTimer=0;
+function update(){if(gameOver)return;
+spawnTimer++;sunTimer++;
+if(sunTimer>180){sunTimer=0;sunDrops.push({x:Math.random()*W,y:-20,vy:1});}
+sunDrops.forEach(s=>s.y+=s.vy);sunDrops=sunDrops.filter(s=>{if(s.y>H){return false;}return true;});
+const spawnRate=Math.max(60,180-wave*15);
+if(spawnTimer>spawnRate){spawnTimer=0;const row=Math.floor(Math.random()*ROWS);enemies.push({x:W+10,row,hp:2+Math.floor(wave/2),maxHp:2+Math.floor(wave/2),speed:0.3+wave*0.03});}
+plants.forEach(p=>{p.timer++;if(p.type===0&&p.timer>200){p.timer=0;sun+=25;updateUI();}
+if(p.type===1&&p.timer>60){p.timer=0;const hasEnemy=enemies.some(e=>e.row===p.row&&e.x>p.col*CW);if(hasEnemy)bullets.push({x:p.col*CW+CW/2,y:p.row*CH+CH/2,row:p.row});}});
+bullets.forEach(b=>b.x+=4);bullets=bullets.filter(b=>b.x<W+10);
+bullets.forEach(b=>{enemies.forEach(e=>{if(e.row===b.row&&Math.abs(e.x-b.x)<15){e.hp--;b.x=W+100;}});});
+enemies.forEach(e=>{e.x-=e.speed;const col=Math.floor(e.x/CW);const blocker=plants.find(p=>p.row===e.row&&p.col===col);if(blocker&&e.x<(col+1)*CW){e.x=(col+1)*CW;blocker.hp-=0.02;}});
+enemies=enemies.filter(e=>{if(e.hp<=0){score+=10;updateUI();return false;}if(e.x<0){gameOver=true;if(score>best){best=score;localStorage.setItem('plant-defense-best',best);}return false;}return true;});
+plants=plants.filter(p=>p.hp>0);
+if(score>0&&score%100===0&&score/100>=wave){wave++;updateUI();}}
+function draw(){ctx.fillStyle='#2d5a27';ctx.fillRect(0,0,W,H);
+for(let r=0;r<ROWS;r++){for(let col=0;col<COLS;col++){ctx.fillStyle=(r+col)%2===0?'#3a7a32':'#2d6a27';ctx.fillRect(col*CW,r*CH,CW,CH);}}
+plants.forEach(p=>{ctx.font='24px Arial';ctx.textAlign='center';ctx.fillText(plantTypes[p.type].emoji,p.col*CW+CW/2,p.row*CH+CH/2+8);
+if(p.hp<p.maxHp){ctx.fillStyle='#e94560';ctx.fillRect(p.col*CW+4,p.row*CH+2,CW-8,3);ctx.fillStyle='#4caf50';ctx.fillRect(p.col*CW+4,p.row*CH+2,(CW-8)*p.hp/p.maxHp,3);}});
+enemies.forEach(e=>{ctx.font='22px Arial';ctx.textAlign='center';ctx.fillText('🧟',e.x,e.row*CH+CH/2+8);
+ctx.fillStyle='#e94560';ctx.fillRect(e.x-12,e.row*CH+2,24,3);ctx.fillStyle='#4caf50';ctx.fillRect(e.x-12,e.row*CH+2,24*e.hp/e.maxHp,3);});
+ctx.fillStyle='#ffc107';bullets.forEach(b=>{ctx.beginPath();ctx.arc(b.x,b.y,4,0,Math.PI*2);ctx.fill();});
+ctx.font='16px Arial';sunDrops.forEach(s=>{ctx.fillText('☀️',s.x,s.y);});
+if(gameOver){ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#e94560';ctx.font='bold 22px Arial';ctx.textAlign='center';ctx.fillText('GAME OVER',W/2,H/2-10);ctx.fillStyle='#fff';ctx.font='14px Arial';ctx.fillText('Score: '+score+' | Best: '+best+' | Tap to restart',W/2,H/2+20);}}
+function reset(){sun=50;wave=1;score=0;gameOver=false;plants=[];enemies=[];bullets=[];sunDrops=[];spawnTimer=0;updateUI();}
+function loop(){update();draw();requestAnimationFrame(loop);}
+loop();
+</script>
+</body>
+</html>

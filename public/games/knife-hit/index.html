@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Knife Hit</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:8px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{touch-action:none}
+#msg{color:#aaa;margin-top:8px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Level: <span id="lv">1</span> | Knives: <span id="kn">5</span></div>
+<canvas id="c"></canvas>
+<div id="msg">Tap or click to throw knife • Don't hit other knives!</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const W=Math.min(860,innerWidth-20),H=Math.min(640,innerHeight-80);
+cv.width=W;cv.height=H;
+const cx=W/2,cy=H*0.32,R=60;
+let level=1,knivesLeft=5,knivesInLog=[],rot=0,rotSpeed=0.02;
+let knife=null,gameOver=false,win=false,apples=[];
+function initLevel(){
+  knivesLeft=4+level;
+  knivesInLog=[];
+  rotSpeed=0.015+level*0.004;
+  if(level>3)rotSpeed*=(Math.random()>0.5?1:-1);
+  apples=[];
+  const ac=Math.min(level,4);
+  for(let i=0;i<ac;i++){
+    let a=Math.random()*Math.PI*2;
+    apples.push({angle:a,taken:false});
+  }
+  knife=null;gameOver=false;win=false;
+  document.getElementById('lv').textContent=level;
+  document.getElementById('kn').textContent=knivesLeft;
+}
+function throwKnife(){
+  if(knife||gameOver||win)return;
+  if(knivesLeft<=0)return;
+  knife={y:H-60,speed:14};
+}
+function hitTest(kAngle){
+  for(let k of knivesInLog){
+    let diff=Math.abs(kAngle-k.angle)%(Math.PI*2);
+    if(diff>Math.PI)diff=Math.PI*2-diff;
+    if(diff<0.22)return true;
+  }
+  return false;
+}
+function update(){
+  rot+=rotSpeed;
+  if(level>2&&Math.random()<0.005)rotSpeed*=-1;
+  if(knife){
+    knife.y-=knife.speed;
+    if(knife.y<=cy+R+20){
+      const kAngle=Math.PI/2-rot;
+      let na=((kAngle%( Math.PI*2))+Math.PI*2)%(Math.PI*2);
+      if(hitTest(na)){
+        gameOver=true;knife=null;return;
+      }
+      knivesInLog.push({angle:na});
+      knivesLeft--;
+      document.getElementById('kn').textContent=knivesLeft;
+      for(let ap of apples){
+        if(ap.taken)continue;
+        let diff=Math.abs(na-ap.angle)%(Math.PI*2);
+        if(diff>Math.PI)diff=Math.PI*2-diff;
+        if(diff<0.3){ap.taken=true;}
+      }
+      knife=null;
+      if(knivesLeft<=0){
+        win=true;
+        setTimeout(()=>{level++;initLevel();},800);
+      }
+    }
+  }
+}
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  // log
+  ctx.save();ctx.translate(cx,cy);ctx.rotate(rot);
+  ctx.beginPath();ctx.arc(0,0,R,0,Math.PI*2);
+  ctx.fillStyle='#5d4037';ctx.fill();
+  ctx.beginPath();ctx.arc(0,0,R-8,0,Math.PI*2);
+  ctx.fillStyle='#795548';ctx.fill();
+  ctx.beginPath();ctx.arc(0,0,12,0,Math.PI*2);
+  ctx.fillStyle='#4e342e';ctx.fill();
+  // rings
+  ctx.strokeStyle='#6d4c41';ctx.lineWidth=2;
+  ctx.beginPath();ctx.arc(0,0,R*0.5,0,Math.PI*2);ctx.stroke();
+  ctx.beginPath();ctx.arc(0,0,R*0.75,0,Math.PI*2);ctx.stroke();
+  // knives in log
+  for(let k of knivesInLog){
+    ctx.save();ctx.rotate(k.angle);
+    ctx.fillStyle='#b0bec5';
+    ctx.fillRect(-3,R-4,6,28);
+    ctx.fillStyle='#78909c';
+    ctx.fillRect(-4,R+24,8,12);
+    ctx.restore();
+  }
+  // apples
+  for(let ap of apples){
+    if(ap.taken)continue;
+    ctx.save();ctx.rotate(ap.angle);
+    ctx.font='18px Arial';ctx.textAlign='center';
+    ctx.fillText('🍎',0,R+16);
+    ctx.restore();
+  }
+  ctx.restore();
+  // flying knife
+  if(knife){
+    ctx.fillStyle='#e0e0e0';
+    ctx.fillRect(cx-3,knife.y-20,6,24);
+    ctx.fillStyle='#90a4ae';
+    ctx.fillRect(cx-4,knife.y+4,8,10);
+  }
+  // waiting knife
+  if(!knife&&!gameOver&&!win&&knivesLeft>0){
+    ctx.fillStyle='#e0e0e0';
+    ctx.fillRect(cx-3,H-80,6,24);
+    ctx.fillStyle='#90a4ae';
+    ctx.fillRect(cx-4,H-56,8,10);
+  }
+  if(gameOver){
+    ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#e94560';ctx.font='bold 28px Arial';ctx.textAlign='center';
+    ctx.fillText('GAME OVER',cx,H/2-10);
+    ctx.fillStyle='#fff';ctx.font='16px Arial';
+    ctx.fillText('Tap to retry',cx,H/2+25);
+  }
+  if(win){
+    ctx.fillStyle='#4caf50';ctx.font='bold 24px Arial';ctx.textAlign='center';
+    ctx.fillText('LEVEL CLEAR! ✓',cx,H/2);
+  }
+}
+function loop(){update();draw();requestAnimationFrame(loop);}
+cv.addEventListener('pointerdown',()=>{
+  if(gameOver){level=1;initLevel();return;}
+  throwKnife();
+});
+document.addEventListener('keydown',e=>{
+  if(e.code==='Space'){e.preventDefault();if(gameOver){level=1;initLevel();}else throwKnife();}
+});
+initLevel();loop();
+</script>
+</body>
+</html>

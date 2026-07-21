@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#1a1a2e"/>
+<rect x="100" y="50" width="80" height="80" rx="12" fill="#e94560" opacity="1"/>
+<rect x="220" y="50" width="80" height="80" rx="12" fill="#4fc3f7" opacity="0.4"/>
+<rect x="100" y="150" width="80" height="80" rx="12" fill="#ffc107" opacity="0.4"/>
+<rect x="220" y="150" width="80" height="80" rx="12" fill="#4caf50" opacity="0.4"/>
+<text x="200" y="40" font-size="14" fill="#ffc107" font-family="Arial" text-anchor="middle">Level 5 - Watch!</text>
+<text x="200" y="280" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">🧠 MEMORY SEQUENCE</text>
+</svg>

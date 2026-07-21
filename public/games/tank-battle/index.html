@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Tank Battle</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Score: <span id="sc">0</span> | HP: <span id="hp">100</span> | Best: <span id="bs">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">WASD/Arrows to move | Space/Tap to shoot | Destroy enemy tanks!</div>
+<script>
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80);
+const c=document.getElementById('c');c.width=W;c.height=H;
+const ctx=c.getContext('2d');
+let score=0,hp=100,gameOver=false,best=+localStorage.getItem('tank-battle-best')||0;
+document.getElementById('bs').textContent=best;
+const player={x:W/2,y:H-60,angle:-Math.PI/2,speed:2.5,size:16};
+let bullets=[],enemies=[],eBullets=[],particles=[],keys={},spawnT=0;
+document.addEventListener('keydown',e=>{keys[e.key]=true;if(e.key===' ')shoot();});
+document.addEventListener('keyup',e=>keys[e.key]=false);
+c.addEventListener('pointerdown',e=>{if(gameOver){reset();return;}shoot();});
+function shoot(){if(gameOver)return;bullets.push({x:player.x+Math.cos(player.angle)*20,y:player.y+Math.sin(player.angle)*20,vx:Math.cos(player.angle)*5,vy:Math.sin(player.angle)*5});}
+function spawnEnemy(){const side=Math.floor(Math.random()*3);let ex,ey,ea;if(side===0){ex=Math.random()*W;ey=-20;ea=Math.PI/2;}else if(side===1){ex=-20;ey=Math.random()*H/2;ea=0;}else{ex=W+20;ey=Math.random()*H/2;ea=Math.PI;}enemies.push({x:ex,y:ey,angle:ea,speed:0.8+Math.random()*0.5,hp:2,shootT:60+Math.random()*60});}
+function reset(){score=0;hp=100;gameOver=false;player.x=W/2;player.y=H-60;bullets=[];enemies=[];eBullets=[];particles=[];document.getElementById('sc').textContent=0;document.getElementById('hp').textContent=100;}
+function update(){if(gameOver)return;
+if(keys['ArrowLeft']||keys['a'])player.angle-=0.05;
+if(keys['ArrowRight']||keys['d'])player.angle+=0.05;
+if(keys['ArrowUp']||keys['w']){player.x+=Math.cos(player.angle)*player.speed;player.y+=Math.sin(player.angle)*player.speed;}
+if(keys['ArrowDown']||keys['s']){player.x-=Math.cos(player.angle)*player.speed;player.y-=Math.sin(player.angle)*player.speed;}
+player.x=Math.max(16,Math.min(W-16,player.x));player.y=Math.max(16,Math.min(H-16,player.y));
+spawnT++;if(spawnT>90){spawnT=0;spawnEnemy();}
+bullets.forEach((b,i)=>{b.x+=b.vx;b.y+=b.vy;if(b.x<0||b.x>W||b.y<0||b.y>H)bullets.splice(i,1);});
+eBullets.forEach((b,i)=>{b.x+=b.vx;b.y+=b.vy;if(b.x<0||b.x>W||b.y<0||b.y>H){eBullets.splice(i,1);return;}if(Math.hypot(b.x-player.x,b.y-player.y)<16){eBullets.splice(i,1);hp-=10;document.getElementById('hp').textContent=hp;if(hp<=0){gameOver=true;if(score>best){best=score;localStorage.setItem('tank-battle-best',best);document.getElementById('bs').textContent=best;}}}});
+enemies.forEach((en,ei)=>{const a=Math.atan2(player.y-en.y,player.x-en.x);en.angle=a;en.x+=Math.cos(a)*en.speed;en.y+=Math.sin(a)*en.speed;en.shootT--;if(en.shootT<=0){en.shootT=80+Math.random()*40;eBullets.push({x:en.x,y:en.y,vx:Math.cos(a)*3,vy:Math.sin(a)*3});}
+bullets.forEach((b,bi)=>{if(Math.hypot(b.x-en.x,b.y-en.y)<18){en.hp--;bullets.splice(bi,1);for(let p=0;p<4;p++)particles.push({x:en.x,y:en.y,vx:(Math.random()-.5)*4,vy:(Math.random()-.5)*4,life:15,color:'#ff9800'});if(en.hp<=0){enemies.splice(ei,1);score+=25;document.getElementById('sc').textContent=score;if(score>best){best=score;localStorage.setItem('tank-battle-best',best);document.getElementById('bs').textContent=best;}}}});});
+particles.forEach((p,i)=>{p.x+=p.vx;p.y+=p.vy;p.life--;if(p.life<=0)particles.splice(i,1);});}
+function drawTank(t,color){ctx.save();ctx.translate(t.x,t.y);ctx.rotate(t.angle);ctx.fillStyle=color;ctx.fillRect(-14,-10,28,20);ctx.fillStyle='#333';ctx.fillRect(10,-3,14,6);ctx.restore();}
+function draw(){ctx.fillStyle='#2a2a3e';ctx.fillRect(0,0,W,H);
+for(let i=0;i<W;i+=40)for(let j=0;j<H;j+=40){ctx.fillStyle=(i+j)%80===0?'#252540':'#2a2a3e';ctx.fillRect(i,j,40,40);}
+drawTank(player,'#4fc3f7');
+enemies.forEach(en=>drawTank(en,'#e94560'));
+ctx.fillStyle='#ffc107';bullets.forEach(b=>{ctx.beginPath();ctx.arc(b.x,b.y,3,0,Math.PI*2);ctx.fill();});
+ctx.fillStyle='#ff5722';eBullets.forEach(b=>{ctx.beginPath();ctx.arc(b.x,b.y,3,0,Math.PI*2);ctx.fill();});
+particles.forEach(p=>{ctx.globalAlpha=p.life/15;ctx.fillStyle=p.color;ctx.fillRect(p.x-2,p.y-2,4,4);ctx.globalAlpha=1;});
+if(gameOver){ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#e94560';ctx.font='bold 28px Arial';ctx.textAlign='center';ctx.fillText('GAME OVER',W/2,H/2-20);ctx.fillStyle='#fff';ctx.font='16px Arial';ctx.fillText('Score: '+score+' | Tap to restart',W/2,H/2+20);}}
+function loop(){update();draw();requestAnimationFrame(loop);}
+loop();
+</script>
+</body>
+</html>

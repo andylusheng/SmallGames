@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Pipe Connect</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:10px;color:#fff}
+h1{font-size:20px;margin-bottom:6px}
+.hud{display:flex;gap:16px;margin-bottom:10px;font-size:14px}
+.hud span{color:#4fc3f7;font-weight:bold}
+#grid{display:grid;gap:3px;background:#0f3460;padding:8px;border-radius:10px}
+.pipe{width:52px;height:52px;background:#16213e;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s}
+.pipe svg{width:44px;height:44px}
+.pipe.connected svg path{stroke:#4caf50}
+#msg{margin-top:10px;font-size:14px;color:#aaa;min-height:20px}
+#msg.win{color:#4caf50;font-weight:bold}
+button{margin-top:8px;padding:10px 24px;border-radius:20px;border:none;background:#4fc3f7;color:#1a1a2e;font-weight:bold;font-size:15px;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>🔧 Pipe Connect</h1>
+<div class="hud">Moves: <span id="mv">0</span> | Level: <span id="lv">1</span></div>
+<div id="grid"></div>
+<div id="msg">Rotate pipes to connect flow from 💧 to 🏁</div>
+<button onclick="init()">New Puzzle</button>
+<script>
+const SIZE=5;
+const TYPES=['straight','corner','tee','cross'];
+let grid=[],moves=0,level=1;
+// Pipe connections: [top,right,bottom,left]
+function getConnections(type,rot){
+  const base={straight:[1,0,1,0],corner:[1,1,0,0],tee:[1,1,0,1],cross:[1,1,1,1]}[type];
+  const r=[];for(let i=0;i<4;i++)r[i]=base[(i-rot+4)%4];return r;
+}
+function svgPath(type){
+  const paths={
+    straight:'M22 4 L22 40',
+    corner:'M22 4 L22 22 L40 22',
+    tee:'M22 4 L22 22 L40 22 M22 22 L4 22',
+    cross:'M22 4 L22 40 M4 22 L40 22'
+  };
+  return `<svg viewBox="0 0 44 44"><path d="${paths[type]}" fill="none" stroke="#4fc3f7" stroke-width="6" stroke-linecap="round"/></svg>`;
+}
+function init(){
+  moves=0;document.getElementById('mv').textContent=0;
+  grid=[];
+  for(let r=0;r<SIZE;r++){
+    grid[r]=[];
+    for(let c=0;c<SIZE;c++){
+      const type=TYPES[Math.floor(Math.random()*TYPES.length)];
+      const rot=Math.floor(Math.random()*4);
+      grid[r][c]={type,rot,connected:false};
+    }
+  }
+  // Ensure solvable: set solution then scramble
+  const solRot=grid.map(row=>row.map(cell=>cell.rot));
+  grid.forEach(row=>row.forEach(cell=>{cell.rot=Math.floor(Math.random()*4)}));
+  render();
+}
+function render(){
+  const g=document.getElementById('grid');
+  g.style.gridTemplateColumns=`repeat(${SIZE},52px)`;
+  g.innerHTML='';
+  for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
+    const cell=grid[r][c];
+    const div=document.createElement('div');
+    div.className='pipe'+(cell.connected?' connected':'');
+    div.innerHTML=`<div style="transform:rotate(${cell.rot*90}deg)">${svgPath(cell.type)}</div>`;
+    div.addEventListener('pointerdown',()=>rotate(r,c));
+    g.appendChild(div);
+  }
+  checkConnected();
+}
+function rotate(r,c){
+  grid[r][c].rot=(grid[r][c].rot+1)%4;
+  moves++;document.getElementById('mv').textContent=moves;
+  render();
+}
+function checkConnected(){
+  // BFS from top-left
+  const visited=Array.from({length:SIZE},()=>Array(SIZE).fill(false));
+  const q=[[0,0]];visited[0][0]=true;
+  const dirs=[[-1,0],[0,1],[1,0],[0,-1]];
+  while(q.length){
+    const [r,c]=q.shift();
+    const conn=getConnections(grid[r][c].type,grid[r][c].rot);
+    for(let d=0;d<4;d++){
+      if(!conn[d])continue;
+      const nr=r+dirs[d][0],nc=c+dirs[d][1];
+      if(nr<0||nr>=SIZE||nc<0||nc>=SIZE||visited[nr][nc])continue;
+      const nconn=getConnections(grid[nr][nc].type,grid[nr][nc].rot);
+      if(nconn[(d+2)%4]){visited[nr][nc]=true;q.push([nr,nc])}
+    }
+  }
+  let allConnected=true;
+  for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
+    grid[r][c].connected=visited[r][c];
+    if(!visited[r][c])allConnected=false;
+  }
+  // Update visuals
+  const pipes=document.querySelectorAll('.pipe');
+  let i=0;
+  for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
+    pipes[i].classList.toggle('connected',grid[r][c].connected);i++;
+  }
+  if(visited[SIZE-1][SIZE-1]){
+    document.getElementById('msg').textContent='🎉 Connected! Well done!';
+    document.getElementById('msg').className='win';
+    level++;document.getElementById('lv').textContent=level;
+  }else{
+    document.getElementById('msg').textContent='Rotate pipes to connect flow from 💧 to 🏁';
+    document.getElementById('msg').className='';
+  }
+}
+init();
+</script>
+<script>
+(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
+</script>
+</body>
+</html>

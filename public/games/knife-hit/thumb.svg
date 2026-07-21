@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#1a1a2e"/>
+<circle cx="200" cy="120" r="60" fill="#5d4037"/>
+<circle cx="200" cy="120" r="50" fill="#795548"/>
+<circle cx="200" cy="120" r="12" fill="#4e342e"/>
+<rect x="197" y="55" width="6" height="30" fill="#b0bec5"/>
+<rect x="196" y="48" width="8" height="10" fill="#78909c"/>
+<rect x="230" y="80" width="6" height="30" fill="#b0bec5" transform="rotate(45 233 95)"/>
+<rect x="160" y="85" width="6" height="30" fill="#b0bec5" transform="rotate(-45 163 100)"/>
+<text x="280" y="100" font-size="22">🍎</text>
+<rect x="197" y="220" width="6" height="35" fill="#e0e0e0"/>
+<rect x="195" y="255" width="10" height="12" fill="#90a4ae"/>
+<text x="200" y="290" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">🔪 KNIFE HIT</text>
+</svg>

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#1a1a2e"/>
+<line x1="200" y1="80" x2="260" y2="80" stroke="#e94560" stroke-width="5"/>
+<line x1="200" y1="80" x2="205" y2="110" stroke="#fff" stroke-width="2"/>
+<line x1="260" y1="80" x2="255" y2="110" stroke="#fff" stroke-width="2"/>
+<line x1="210" y1="80" x2="215" y2="110" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+<line x1="230" y1="80" x2="230" y2="110" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+<line x1="250" y1="80" x2="245" y2="110" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+<rect x="260" y="50" width="8" height="100" fill="#546e7a"/>
+<circle cx="150" cy="200" r="22" fill="#ff9800" stroke="#e65100" stroke-width="2"/>
+<line x1="128" y1="200" x2="172" y2="200" stroke="#e65100" stroke-width="1.5"/>
+<line x1="150" y1="178" x2="150" y2="222" stroke="#e65100" stroke-width="1.5"/>
+<path d="M150 200 Q180 120 230 85" fill="none" stroke="#4fc3f7" stroke-width="2" stroke-dasharray="5,5"/>
+<text x="200" y="285" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">🏀 HOOP MASTER</text>
+</svg>

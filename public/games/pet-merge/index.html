@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Pet Merge</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:16px;color:#fff}
+h1{font-size:20px;margin-bottom:8px}
+.hud{display:flex;gap:16px;margin-bottom:12px;font-size:14px}
+.hud span{color:#4fc3f7;font-weight:bold}
+#grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:14px}
+.cell{width:56px;height:56px;background:#16213e;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;transition:all .15s;border:2px solid transparent}
+.cell.sel{border-color:#ffc107;transform:scale(1.08)}
+.cell.filled{background:#0f3460}
+#actions{display:flex;gap:10px;margin-bottom:10px}
+#actions button{padding:8px 16px;background:#4fc3f7;border:none;border-radius:6px;color:#1a1a2e;font-weight:bold;cursor:pointer;font-size:13px}
+#msg{font-size:12px;color:#aaa;text-align:center}
+</style>
+</head>
+<body>
+<h1>🐾 Pet Merge</h1>
+<div class="hud">Score: <span id="sc">0</span> | Best: <span id="bs">0</span> | Level: <span id="lv">1</span></div>
+<div id="grid"></div>
+<div id="actions"><button id="addBtn">+ Add Pet</button><button id="resetBtn">Reset</button></div>
+<div id="msg">Tap two same pets to merge them into a higher level pet!</div>
+<script>
+const pets=['🐣','🐥','🐤','🐔','🦅','🦉','🦚','🦜','🐉','🐲'];
+const SIZE=5;let grid=Array(SIZE*SIZE).fill(-1),selected=-1,score=0,best=+localStorage.getItem('pet-merge-best')||0,level=1;
+document.getElementById('bs').textContent=best;
+const gridEl=document.getElementById('grid');
+function render(){gridEl.innerHTML='';for(let i=0;i<SIZE*SIZE;i++){const cell=document.createElement('div');cell.className='cell'+(grid[i]>=0?' filled':'')+(i===selected?' sel':'');
+if(grid[i]>=0)cell.textContent=pets[Math.min(grid[i],pets.length-1)];
+cell.addEventListener('click',()=>onCell(i));gridEl.appendChild(cell);}
+document.getElementById('sc').textContent=score;document.getElementById('lv').textContent=level;}
+function onCell(i){if(selected===-1){if(grid[i]>=0){selected=i;render();}}else{if(i===selected){selected=-1;render();return;}
+if(grid[i]===grid[selected]&&grid[i]>=0){grid[i]=grid[i]+1;grid[selected]=-1;score+=Math.pow(2,grid[i]);
+if(score>best){best=score;localStorage.setItem('pet-merge-best',best);document.getElementById('bs').textContent=best;}
+level=Math.max(level,grid[i]+1);selected=-1;render();
+document.getElementById('msg').textContent='🎉 Merged to '+pets[Math.min(grid[i],pets.length-1)]+'!';}
+else{selected=grid[i]>=0?i:-1;render();}}}
+function addPet(){const empty=[];for(let i=0;i<SIZE*SIZE;i++){if(grid[i]<0)empty.push(i);}
+if(empty.length===0){document.getElementById('msg').textContent='💀 No space! Merge pets to free up slots.';return;}
+const idx=empty[Math.floor(Math.random()*empty.length)];
+const maxLv=Math.min(3+Math.floor(score/100),6);
+grid[idx]=Math.floor(Math.random()*Math.min(maxLv,3));render();}
+document.getElementById('addBtn').addEventListener('click',addPet);
+document.getElementById('resetBtn').addEventListener('click',()=>{grid=Array(SIZE*SIZE).fill(-1);selected=-1;score=0;level=1;render();addPet();addPet();addPet();});
+addPet();addPet();addPet();
+</script>
+<script>
+(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
+</script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Bubble Cannon</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Score: <span id="sc">0</span> | Best: <span id="bs">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">Aim and shoot bubbles to match 3+ same colors!</div>
+<script>
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80);
+const c=document.getElementById('c');c.width=W;c.height=H;
+const ctx=c.getContext('2d');
+const R=16,COLS=Math.floor(W/(R*2)),colors=['#e94560','#4fc3f7','#4caf50','#ffc107','#9c27b0'];
+let grid=[],score=0,shooter={x:W/2,y:H-30,angle:-Math.PI/2,color:0,next:0},bullet=null,gameOver=false,best=+localStorage.getItem('bubble-cannon-best')||0;
+document.getElementById('bs').textContent=best;
+function init(){grid=[];for(let row=0;row<6;row++){grid[row]=[];for(let col=0;col<COLS;col++){grid[row][col]=Math.random()<0.7?Math.floor(Math.random()*colors.length):-1;}}shooter.color=Math.floor(Math.random()*colors.length);shooter.next=Math.floor(Math.random()*colors.length);}
+init();
+function getPos(row,col){const offset=(row%2)?R:0;return{x:col*R*2+R+offset,y:row*R*1.8+R+10};}
+c.addEventListener('pointerdown',e=>{if(gameOver){init();score=0;gameOver=false;document.getElementById('sc').textContent=0;return;}if(bullet)return;const r=c.getBoundingClientRect();const mx=e.clientX-r.left,my=e.clientY-r.top;shooter.angle=Math.atan2(my-shooter.y,mx-shooter.x);if(shooter.angle>-0.1)shooter.angle=-0.1;if(shooter.angle<-Math.PI+0.1)shooter.angle=-Math.PI+0.1;
+bullet={x:shooter.x,y:shooter.y,vx:Math.cos(shooter.angle)*7,vy:Math.sin(shooter.angle)*7,color:shooter.color};shooter.color=shooter.next;shooter.next=Math.floor(Math.random()*colors.length);});
+function snap(bx,by){let bestR=0,bestC=0,bestD=Infinity;for(let row=0;row<15;row++){for(let col=0;col<COLS;col++){const p=getPos(row,col);const d=Math.hypot(bx-p.x,by-p.y);if(d<bestD){bestD=d;bestR=row;bestC=col;}}}if(!grid[bestR])grid[bestR]=[];grid[bestR][bestC]=bullet.color;bullet=null;checkMatch(bestR,bestC);}
+function checkMatch(row,col){const color=grid[row][col];if(color===-1)return;const visited=new Set();const stack=[[row,col]];const matched=[];
+while(stack.length){const[r,cc]=stack.pop();const key=r+','+cc;if(visited.has(key))continue;visited.add(key);if(!grid[r]||grid[r][cc]!==color)continue;matched.push([r,cc]);const neighbors=[[r-1,cc],[r+1,cc],[r,cc-1],[r,cc+1],[r-1,cc+(r%2?1:-1)],[r+1,cc+(r%2?1:-1)]];neighbors.forEach(n=>stack.push(n));}
+if(matched.length>=3){matched.forEach(([r,cc])=>{grid[r][cc]=-1;});score+=matched.length*10;document.getElementById('sc').textContent=score;if(score>best){best=score;localStorage.setItem('bubble-cannon-best',best);document.getElementById('bs').textContent=best;}}}
+function update(){if(gameOver)return;if(bullet){bullet.x+=bullet.vx;bullet.y+=bullet.vy;if(bullet.x<R||bullet.x>W-R)bullet.vx*=-1;if(bullet.y<R+10){snap(bullet.x,bullet.y);return;}
+for(let row=0;row<grid.length;row++){for(let col=0;col<COLS;col++){if(grid[row]&&grid[row][col]!==-1){const p=getPos(row,col);if(Math.hypot(bullet.x-p.x,bullet.y-p.y)<R*1.8){snap(bullet.x,bullet.y);return;}}}}
+if(bullet&&bullet.y>H){bullet=null;}}}
+function draw(){ctx.fillStyle='#16213e';ctx.fillRect(0,0,W,H);
+for(let row=0;row<grid.length;row++){for(let col=0;col<COLS;col++){if(grid[row]&&grid[row][col]!==-1){const p=getPos(row,col);ctx.beginPath();ctx.arc(p.x,p.y,R-1,0,Math.PI*2);ctx.fillStyle=colors[grid[row][col]];ctx.fill();ctx.beginPath();ctx.arc(p.x-4,p.y-4,4,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,0.3)';ctx.fill();}}}
+ctx.strokeStyle='rgba(79,195,247,0.4)';ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(shooter.x,shooter.y);ctx.lineTo(shooter.x+Math.cos(shooter.angle)*60,shooter.y+Math.sin(shooter.angle)*60);ctx.stroke();ctx.setLineDash([]);
+ctx.beginPath();ctx.arc(shooter.x,shooter.y,R,0,Math.PI*2);ctx.fillStyle=colors[shooter.color];ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.lineWidth=1;
+ctx.beginPath();ctx.arc(shooter.x+30,shooter.y,R*0.7,0,Math.PI*2);ctx.fillStyle=colors[shooter.next];ctx.fill();ctx.fillStyle='#aaa';ctx.font='10px Arial';ctx.fillText('next',shooter.x+22,shooter.y+R+12);
+if(bullet){ctx.beginPath();ctx.arc(bullet.x,bullet.y,R-1,0,Math.PI*2);ctx.fillStyle=colors[bullet.color];ctx.fill();}}
+function loop(){update();draw();requestAnimationFrame(loop);}
+loop();
+</script>
+</body>
+</html>

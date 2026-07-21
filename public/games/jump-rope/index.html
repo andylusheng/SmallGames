@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Jump Rope</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Jumps: <span id="sc">0</span> | Best: <span id="bs">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">Tap/Space to jump when rope is at feet!</div>
+<script>
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80);
+const cv=document.getElementById('c');cv.width=W;cv.height=H;
+const ctx=cv.getContext('2d');
+let score=0,best=+localStorage.getItem('jumprope_best')||0,gameOver=false;
+document.getElementById('bs').textContent=best;
+const player={x:W/2,y:H*0.6,vy:0,jumping:false,w:30,h:50};
+let ropeAngle=0,ropeSpeed=0.04,timing=0,canJump=true,hitCooldown=0;
+const GROUND=H*0.75;
+function jump(){
+  if(gameOver){restart();return}
+  if(!player.jumping){
+    player.vy=-12;player.jumping=true;
+  }
+}
+cv.addEventListener('pointerdown',jump);
+document.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();jump()}});
+function restart(){
+  score=0;gameOver=false;ropeSpeed=0.04;
+  player.y=GROUND-player.h;player.vy=0;player.jumping=false;
+  document.getElementById('sc').textContent=0;
+  loop();
+}
+function loop(){
+  if(gameOver)return;
+  ctx.clearRect(0,0,W,H);
+  // Background
+  ctx.fillStyle='#16213e';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#0f3460';ctx.fillRect(0,GROUND,W,H-GROUND);
+  // Physics
+  player.vy+=0.6;
+  player.y+=player.vy;
+  if(player.y>=GROUND-player.h){player.y=GROUND-player.h;player.vy=0;player.jumping=false}
+  // Rope
+  ropeAngle+=ropeSpeed;
+  const ropeY=GROUND-10+Math.sin(ropeAngle)*60;
+  const ropeAtFeet=Math.sin(ropeAngle)>0.85;
+  // Draw rope
+  ctx.beginPath();
+  ctx.moveTo(W*0.15,GROUND-60);
+  ctx.quadraticCurveTo(W/2,ropeY-40,W*0.85,GROUND-60);
+  ctx.strokeStyle='#e94560';ctx.lineWidth=4;ctx.stroke();
+  // Draw player
+  const px=player.x,py=player.y;
+  ctx.fillStyle='#4fc3f7';
+  ctx.fillRect(px-player.w/2,py,player.w,player.h);
+  ctx.fillStyle='#fff';
+  ctx.beginPath();ctx.arc(px,py-8,12,0,Math.PI*2);ctx.fill();
+  // Eyes
+  ctx.fillStyle='#1a1a2e';
+  ctx.beginPath();ctx.arc(px-4,py-10,2,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(px+4,py-10,2,0,Math.PI*2);ctx.fill();
+  // Collision: rope at feet level and player not jumping high enough
+  if(ropeAtFeet&&!player.jumping&&hitCooldown<=0){
+    gameOver=true;
+    if(score>best){best=score;localStorage.setItem('jumprope_best',best);document.getElementById('bs').textContent=best}
+    ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#fff';ctx.font='bold 26px Arial';ctx.textAlign='center';
+    ctx.fillText('TRIPPED!',W/2,H/2-20);
+    ctx.font='18px Arial';ctx.fillText('Jumps: '+score,W/2,H/2+15);
+    ctx.font='14px Arial';ctx.fillStyle='#4fc3f7';
+    ctx.fillText('Tap to retry',W/2,H/2+50);
+    return;
+  }
+  if(hitCooldown>0)hitCooldown--;
+  // Score when rope passes and player jumped
+  if(ropeAtFeet&&player.jumping&&canJump){
+    score++;document.getElementById('sc').textContent=score;
+    canJump=false;
+    ropeSpeed=Math.min(0.08,0.04+score*0.001);
+    setTimeout(()=>canJump=true,500);
+  }
+  // Rope holders
+  ctx.fillStyle='#ffc107';
+  ctx.beginPath();ctx.arc(W*0.15,GROUND-60,8,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(W*0.85,GROUND-60,8,0,Math.PI*2);ctx.fill();
+  requestAnimationFrame(loop);
+}
+player.y=GROUND-player.h;
+loop();
+</script>
+</body>
+</html>

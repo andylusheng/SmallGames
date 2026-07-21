@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#16213e"/>
+<line x1="200" y1="20" x2="200" y2="280" stroke="#333" stroke-width="3" stroke-dasharray="10,10"/>
+<rect x="30" y="110" width="14" height="70" rx="7" fill="#4fc3f7"/>
+<rect x="356" y="130" width="14" height="70" rx="7" fill="#e94560"/>
+<circle cx="220" cy="140" r="10" fill="#fff"/>
+<circle cx="220" cy="140" r="14" fill="#4fc3f733"/>
+<text x="120" y="60" font-size="36" fill="#4fc3f7" font-family="Arial" font-weight="bold" text-anchor="middle">3</text>
+<text x="280" y="60" font-size="36" fill="#e94560" font-family="Arial" font-weight="bold" text-anchor="middle">2</text>
+<text x="200" y="280" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">PONG</text>
+</svg>

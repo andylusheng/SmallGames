@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Connect Four</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:10px}
+h1{color:#fff;font-size:20px;margin-bottom:8px}
+#status{color:#4fc3f7;font-size:15px;margin-bottom:10px;font-weight:bold}
+#board{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;background:#0f3460;padding:8px;border-radius:12px;cursor:pointer;touch-action:manipulation}
+.cell{width:42px;height:42px;border-radius:50%;background:#16213e;transition:background .2s}
+.cell.red{background:#e94560}
+.cell.yellow{background:#ffc107}
+.cell.win{box-shadow:0 0 10px #fff;transform:scale(1.1)}
+#restart{margin-top:12px;padding:8px 20px;border:none;border-radius:8px;background:#4fc3f7;color:#1a1a2e;font-weight:bold;font-size:14px;cursor:pointer}
+#restart:hover{background:#81d4fa}
+</style>
+</head>
+<body>
+<h1>Connect Four</h1>
+<div id="status">🔴 Red's Turn</div>
+<div id="board"></div>
+<button id="restart">New Game</button>
+<script>
+const ROWS=6,COLS=7;
+let board,turn,gameOver;
+const boardEl=document.getElementById('board');
+const statusEl=document.getElementById('status');
+function init(){
+  board=Array.from({length:ROWS},()=>Array(COLS).fill(0));
+  turn=1;gameOver=false;
+  statusEl.textContent="🔴 Red's Turn";
+  render();
+}
+function render(){
+  boardEl.innerHTML='';
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      const cell=document.createElement('div');
+      cell.className='cell'+(board[r][c]===1?' red':board[r][c]===2?' yellow':'');
+      cell.dataset.col=c;
+      boardEl.appendChild(cell);
+    }
+  }
+}
+function drop(col){
+  if(gameOver)return;
+  for(let r=ROWS-1;r>=0;r--){
+    if(board[r][col]===0){
+      board[r][col]=turn;
+      if(checkWin(r,col)){
+        gameOver=true;
+        render();
+        highlightWin(r,col);
+        statusEl.textContent=turn===1?'🔴 Red Wins! 🎉':'🟡 Yellow Wins! 🎉';
+        return;
+      }
+      if(board[0].every(c=>c!==0)){
+        gameOver=true;render();
+        statusEl.textContent="It's a Draw!";
+        return;
+      }
+      turn=turn===1?2:1;
+      statusEl.textContent=turn===1?"🔴 Red's Turn":"🟡 Yellow's Turn";
+      render();
+      if(turn===2)setTimeout(aiMove,400);
+      return;
+    }
+  }
+}
+function aiMove(){
+  if(gameOver)return;
+  // simple AI: try to win, then block, then center preference
+  let col=findWinningMove(2);
+  if(col===-1)col=findWinningMove(1);
+  if(col===-1){
+    const prefs=[3,2,4,1,5,0,6];
+    for(let p of prefs){if(board[0][p]===0){col=p;break;}}
+  }
+  if(col>=0)drop(col);
+}
+function findWinningMove(player){
+  for(let c=0;c<COLS;c++){
+    for(let r=ROWS-1;r>=0;r--){
+      if(board[r][c]===0){
+        board[r][c]=player;
+        const win=checkWin(r,c);
+        board[r][c]=0;
+        if(win)return c;
+        break;
+      }
+    }
+  }
+  return -1;
+}
+function checkWin(r,c){
+  const p=board[r][c];
+  const dirs=[[0,1],[1,0],[1,1],[1,-1]];
+  for(let[dr,dc]of dirs){
+    let count=1;
+    for(let i=1;i<4;i++){const nr=r+dr*i,nc=c+dc*i;if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&board[nr][nc]===p)count++;else break;}
+    for(let i=1;i<4;i++){const nr=r-dr*i,nc=c-dc*i;if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&board[nr][nc]===p)count++;else break;}
+    if(count>=4)return true;
+  }
+  return false;
+}
+function highlightWin(r,c){
+  const p=board[r][c];
+  const dirs=[[0,1],[1,0],[1,1],[1,-1]];
+  for(let[dr,dc]of dirs){
+    let cells=[[r,c]];
+    for(let i=1;i<4;i++){const nr=r+dr*i,nc=c+dc*i;if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&board[nr][nc]===p)cells.push([nr,nc]);else break;}
+    for(let i=1;i<4;i++){const nr=r-dr*i,nc=c-dc*i;if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&board[nr][nc]===p)cells.push([nr,nc]);else break;}
+    if(cells.length>=4){
+      for(let[wr,wc]of cells){
+        const idx=wr*COLS+wc;
+        boardEl.children[idx].classList.add('win');
+      }
+      return;
+    }
+  }
+}
+boardEl.addEventListener('click',e=>{
+  const cell=e.target.closest('.cell');
+  if(!cell)return;
+  if(turn===2)return; // AI's turn
+  drop(+cell.dataset.col);
+});
+document.getElementById('restart').addEventListener('click',init);
+init();
+</script>
+<script>
+(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
+</script>
+</body>
+</html>

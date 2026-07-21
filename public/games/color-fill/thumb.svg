@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#1a1a2e"/>
+<rect x="80" y="30" width="24" height="24" fill="#e94560"/>
+<rect x="104" y="30" width="24" height="24" fill="#e94560"/>
+<rect x="128" y="30" width="24" height="24" fill="#4fc3f7"/>
+<rect x="152" y="30" width="24" height="24" fill="#ffc107"/>
+<rect x="176" y="30" width="24" height="24" fill="#4caf50"/>
+<rect x="80" y="54" width="24" height="24" fill="#e94560"/>
+<rect x="104" y="54" width="24" height="24" fill="#e94560"/>
+<rect x="128" y="54" width="24" height="24" fill="#e94560"/>
+<rect x="152" y="54" width="24" height="24" fill="#9c27b0"/>
+<rect x="176" y="54" width="24" height="24" fill="#4fc3f7"/>
+<circle cx="120" cy="180" r="20" fill="#e94560"/>
+<circle cx="170" cy="180" r="20" fill="#4fc3f7"/>
+<circle cx="220" cy="180" r="20" fill="#ffc107"/>
+<circle cx="270" cy="180" r="20" fill="#4caf50"/>
+<text x="200" y="240" font-size="14" fill="#4fc3f7" font-family="Arial" text-anchor="middle">Moves: 12/25 | 68%</text>
+<text x="200" y="285" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">🎨 COLOR FILL</text>
+</svg>

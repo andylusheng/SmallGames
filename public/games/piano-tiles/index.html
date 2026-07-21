@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Piano Tiles</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:6px;touch-action:none}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Score: <span id="sc">0</span> | Best: <span id="bs">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">Tap the black tiles • Don't miss or tap white!</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const cols=4,tileH=120;
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-70);
+cv.width=W;cv.height=H;
+const colW=W/cols;
+let tiles=[],score=0,best=+localStorage.getItem('pt-best')||0;
+let speed=3,gameOver=false,started=false;
+document.getElementById('bs').textContent=best;
+function addRow(){
+  const black=Math.floor(Math.random()*cols);
+  tiles.push({row:tiles.length,black, hit:false, missed:false});
+}
+function init(){
+  tiles=[];score=0;speed=3;gameOver=false;started=false;
+  for(let i=0;i<6;i++)addRow();
+  document.getElementById('sc').textContent=0;
+}
+function getY(idx){return H-(idx+1)*tileH+score*tileH*0;}
+function update(){
+  if(!started||gameOver)return;
+  speed=3+score*0.08;
+  for(let t of tiles)t.offset=(t.offset||0)+speed;
+  // check miss
+  for(let i=0;i<tiles.length;i++){
+    let t=tiles[i];
+    let y=H-tileH-(i* tileH)+(t.offset||0);
+    if(y>H&&!t.hit&&!t.missed&&t.black>=0){
+      // find the tile position
+    }
+  }
+  // remove passed tiles
+  while(tiles.length>0&&(tiles[0].offset||0)>tileH+10){
+    let t=tiles.shift();
+    if(!t.hit){gameOver=true;endGame();return;}
+  }
+  if(tiles.length<8)addRow();
+}
+function endGame(){
+  if(score>best){best=score;localStorage.setItem('pt-best',best);}
+  document.getElementById('bs').textContent=best;
+}
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  for(let i=0;i<tiles.length;i++){
+    let t=tiles[i];
+    let off=t.offset||0;
+    let y=H-(i+1)*tileH+off;
+    for(let c=0;c<cols;c++){
+      let x=c*colW;
+      if(c===t.black){
+        ctx.fillStyle=t.hit?'#4caf50':'#212121';
+        ctx.fillRect(x+1,y+1,colW-2,tileH-2);
+        if(t.hit){ctx.fillStyle='#fff';ctx.font='20px Arial';ctx.textAlign='center';ctx.fillText('✓',x+colW/2,y+tileH/2+7);}
+      }else{
+        ctx.fillStyle='#f5f5f5';
+        ctx.fillRect(x+1,y+1,colW-2,tileH-2);
+      }
+    }
+  }
+  // grid lines
+  ctx.strokeStyle='#ddd';ctx.lineWidth=1;
+  for(let c=1;c<cols;c++){ctx.beginPath();ctx.moveTo(c*colW,0);ctx.lineTo(c*colW,H);ctx.stroke();}
+  if(!started&&!gameOver){
+    ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#fff';ctx.font='bold 24px Arial';ctx.textAlign='center';
+    ctx.fillText('TAP TO START',W/2,H/2);
+  }
+  if(gameOver){
+    ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#e94560';ctx.font='bold 26px Arial';ctx.textAlign='center';
+    ctx.fillText('GAME OVER',W/2,H/2-20);
+    ctx.fillStyle='#fff';ctx.font='18px Arial';
+    ctx.fillText('Score: '+score,W/2,H/2+15);
+    ctx.fillText('Tap to retry',W/2,H/2+45);
+  }
+}
+function handleTap(px,py){
+  if(!started){started=true;return;}
+  if(gameOver){init();started=true;return;}
+  const col=Math.floor(px/colW);
+  // find lowest unhit tile
+  for(let i=0;i<tiles.length;i++){
+    let t=tiles[i];
+    let off=t.offset||0;
+    let y=H-(i+1)*tileH+off;
+    if(py>=y&&py<y+tileH){
+      if(col===t.black&&!t.hit){
+        t.hit=true;score++;
+        document.getElementById('sc').textContent=score;
+      }else{
+        gameOver=true;endGame();
+      }
+      return;
+    }
+  }
+}
+cv.addEventListener('pointerdown',e=>{
+  const r=cv.getBoundingClientRect();
+  handleTap(e.clientX-r.left,e.clientY-r.top);
+});
+function loop(){update();draw();requestAnimationFrame(loop);}
+init();loop();
+</script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Helicopter</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;border:2px solid #0f3460;touch-action:none}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Score: <span id="sc">0</span> | Best: <span id="bs">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">Hold to fly up • Release to fall • Avoid obstacles!</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80);
+cv.width=W;cv.height=H;
+let heli,obstacles,particles,score,best=+localStorage.getItem('heli-best')||0;
+let holding=false,gameOver=false,started=false,frame=0;
+document.getElementById('bs').textContent=best;
+function init(){
+  heli={x:60,y:H/2,vy:0,w:30,h:16};
+  obstacles=[];particles=[];score=0;frame=0;gameOver=false;started=false;
+  document.getElementById('sc').textContent=0;
+}
+function spawnObs(){
+  const gap=100+Math.random()*60;
+  const gapY=60+Math.random()*(H-120-gap);
+  obstacles.push({x:W+20,gapY,gap,speed:2.5+score*0.02,scored:false});
+}
+function update(){
+  if(!started||gameOver)return;
+  frame++;
+  heli.vy+=holding?-0.55:0.4;
+  heli.vy*=0.96;
+  heli.y+=heli.vy;
+  if(heli.y<0){heli.y=0;heli.vy=0;}
+  if(heli.y>H-heli.h){heli.y=H-heli.h;heli.vy=0;}
+  if(frame%90===0)spawnObs();
+  for(let o of obstacles){
+    o.x-=o.speed;
+    if(!o.scored&&o.x+heli.w<heli.x){o.scored=true;score++;document.getElementById('sc').textContent=score;}
+    // collision
+    if(heli.x+heli.w>o.x&&heli.x<o.x+18){
+      if(heli.y<o.gapY||heli.y+heli.h>o.gapY+o.gap){die();}
+    }
+  }
+  obstacles=obstacles.filter(o=>o.x>-30);
+  // particles
+  if(frame%3===0)particles.push({x:heli.x-4,y:heli.y+heli.h/2,vx:-1-Math.random(),vy:(Math.random()-0.5)*2,life:20});
+  for(let p of particles){p.x+=p.vx;p.y+=p.vy;p.life--;}
+  particles=particles.filter(p=>p.life>0);
+}
+function die(){
+  gameOver=true;
+  if(score>best){best=score;localStorage.setItem('heli-best',best);}
+  document.getElementById('bs').textContent=best;
+}
+function draw(){
+  ctx.fillStyle='#0f3460';ctx.fillRect(0,0,W,H);
+  // ceiling/floor
+  ctx.fillStyle='#16213e';ctx.fillRect(0,0,W,4);ctx.fillRect(0,H-4,W,4);
+  // obstacles
+  for(let o of obstacles){
+    ctx.fillStyle='#e94560';
+    ctx.fillRect(o.x,0,18,o.gapY);
+    ctx.fillRect(o.x,o.gapY+o.gap,18,H-o.gapY-o.gap);
+    ctx.fillStyle='#ff6b6b';
+    ctx.fillRect(o.x,0,4,o.gapY);
+    ctx.fillRect(o.x,o.gapY+o.gap,4,H-o.gapY-o.gap);
+  }
+  // particles
+  for(let p of particles){
+    ctx.globalAlpha=p.life/20;
+    ctx.fillStyle='#ffc107';
+    ctx.fillRect(p.x,p.y,3,3);
+  }
+  ctx.globalAlpha=1;
+  // helicopter
+  ctx.fillStyle='#4fc3f7';
+  ctx.fillRect(heli.x,heli.y,heli.w,heli.h);
+  ctx.fillStyle='#81d4fa';
+  ctx.fillRect(heli.x+heli.w-8,heli.y+3,8,6);
+  // rotor
+  ctx.strokeStyle='#fff';ctx.lineWidth=2;
+  const rw=frame%6<3?14:8;
+  ctx.beginPath();ctx.moveTo(heli.x+heli.w/2-rw,heli.y-3);ctx.lineTo(heli.x+heli.w/2+rw,heli.y-3);ctx.stroke();
+  if(!started&&!gameOver){
+    ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#fff';ctx.font='bold 22px Arial';ctx.textAlign='center';
+    ctx.fillText('HOLD TO FLY',W/2,H/2);
+  }
+  if(gameOver){
+    ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#e94560';ctx.font='bold 26px Arial';ctx.textAlign='center';
+    ctx.fillText('CRASHED!',W/2,H/2-15);
+    ctx.fillStyle='#fff';ctx.font='16px Arial';
+    ctx.fillText('Score: '+score+' | Tap to retry',W/2,H/2+20);
+  }
+}
+function loop(){update();draw();requestAnimationFrame(loop);}
+cv.addEventListener('pointerdown',e=>{e.preventDefault();if(gameOver){init();started=true;return;}started=true;holding=true;});
+cv.addEventListener('pointerup',()=>holding=false);
+cv.addEventListener('pointerleave',()=>holding=false);
+document.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();if(gameOver){init();started=true;return;}started=true;holding=true;}});
+document.addEventListener('keyup',e=>{if(e.code==='Space')holding=false;});
+init();loop();
+</script>
+</body>
+</html>

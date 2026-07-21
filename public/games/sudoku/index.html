@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Sudoku Lite</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:10px;color:#fff}
+h1{font-size:20px;margin-bottom:6px}
+.hud{display:flex;gap:16px;margin-bottom:8px;font-size:14px}
+.hud span{color:#4fc3f7;font-weight:bold}
+#grid{display:grid;grid-template-columns:repeat(6,1fr);gap:2px;background:#4fc3f7;padding:2px;border-radius:6px;margin-bottom:12px}
+.cell{width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;background:#16213e;cursor:pointer;border-radius:2px;transition:background .15s}
+.cell.given{color:#4fc3f7;background:#0f3460}
+.cell.selected{background:#1b5e20}
+.cell.error{background:#4a1020;color:#e94560}
+.cell:nth-child(3n){border-right:2px solid #4fc3f7}
+.cell:nth-child(n+19){border-top:2px solid #4fc3f7}
+#nums{display:flex;gap:8px;margin-bottom:10px}
+.num-btn{width:40px;height:40px;border-radius:8px;border:none;background:#0f3460;color:#fff;font-size:20px;font-weight:bold;cursor:pointer}
+.num-btn:active{background:#4fc3f7;color:#1a1a2e}
+#msg{font-size:14px;color:#aaa;min-height:20px}
+#msg.win{color:#4caf50;font-weight:bold}
+button{margin-top:8px;padding:10px 24px;border-radius:20px;border:none;background:#4fc3f7;color:#1a1a2e;font-weight:bold;font-size:15px;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>🔢 Sudoku Lite (6×6)</h1>
+<div class="hud">Errors: <span id="er">0</span> | Time: <span id="tm">0</span>s</div>
+<div id="grid"></div>
+<div id="nums"></div>
+<div id="msg">Fill each row, column & 2×3 box with 1-6</div>
+<button onclick="init()">New Puzzle</button>
+<script>
+const SIZE=6;let puzzle=[],solution=[],selected=null,errors=0,timer=0,timerIv=null;
+function generate(){
+  // Simple 6x6 sudoku generator
+  const base=[[1,2,3,4,5,6],[4,5,6,1,2,3],[2,3,4,5,6,1],[5,6,1,2,3,4],[3,4,5,6,1,2],[6,1,2,3,4,5]];
+  // Shuffle rows within bands and columns within stacks
+  const sol=base.map(r=>[...r]);
+  // Shuffle numbers
+  const perm=[1,2,3,4,5,6].sort(()=>Math.random()-.5);
+  for(let r=0;r<6;r++)for(let c=0;c<6;c++)sol[r][c]=perm[sol[r][c]-1];
+  solution=sol.map(r=>[...r]);
+  // Remove cells (keep ~20 given)
+  puzzle=sol.map(r=>[...r]);
+  let remove=16;
+  while(remove>0){
+    const r=Math.floor(Math.random()*6),c=Math.floor(Math.random()*6);
+    if(puzzle[r][c]!==0){puzzle[r][c]=0;remove--}
+  }
+}
+function init(){
+  errors=0;timer=0;selected=null;
+  document.getElementById('er').textContent=0;
+  document.getElementById('msg').textContent='Fill each row, column & 2×3 box with 1-6';
+  document.getElementById('msg').className='';
+  generate();render();renderNums();
+  clearInterval(timerIv);
+  timerIv=setInterval(()=>{timer++;document.getElementById('tm').textContent=timer},1000);
+}
+function render(){
+  const g=document.getElementById('grid');g.innerHTML='';
+  for(let r=0;r<6;r++)for(let c=0;c<6;c++){
+    const cell=document.createElement('div');
+    cell.className='cell';
+    if(puzzle[r][c]!==0&&isGiven(r,c)){cell.textContent=puzzle[r][c];cell.classList.add('given')}
+    else if(puzzle[r][c]!==0){
+      cell.textContent=puzzle[r][c];
+      if(puzzle[r][c]!==solution[r][c])cell.classList.add('error');
+    }
+    if(selected&&selected.r===r&&selected.c===c)cell.classList.add('selected');
+    cell.addEventListener('pointerdown',()=>{if(!isGiven(r,c)){selected={r,c};render()}});
+    g.appendChild(cell);
+  }
+}
+let givenCache=null;
+function isGiven(r,c){
+  if(!givenCache)givenCache=puzzle.map(row=>row.map(v=>v!==0));
+  return givenCache[r][c];
+}
+function renderNums(){
+  const n=document.getElementById('nums');n.innerHTML='';
+  for(let i=1;i<=6;i++){
+    const btn=document.createElement('button');
+    btn.className='num-btn';btn.textContent=i;
+    btn.addEventListener('pointerdown',()=>placeNum(i));
+    n.appendChild(btn);
+  }
+  const clr=document.createElement('button');
+  clr.className='num-btn';clr.textContent='✕';
+  clr.addEventListener('pointerdown',()=>placeNum(0));
+  n.appendChild(clr);
+}
+function placeNum(n){
+  if(!selected)return;
+  const{r,c}=selected;
+  if(isGiven(r,c))return;
+  puzzle[r][c]=n;
+  if(n!==0&&n!==solution[r][c]){errors++;document.getElementById('er').textContent=errors}
+  render();checkWin();
+}
+function checkWin(){
+  for(let r=0;r<6;r++)for(let c=0;c<6;c++){
+    if(puzzle[r][c]!==solution[r][c])return;
+  }
+  clearInterval(timerIv);
+  document.getElementById('msg').textContent='🎉 Solved in '+timer+'s!';
+  document.getElementById('msg').className='win';
+}
+init();
+</script>
+<script>
+(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
+</script>
+</body>
+</html>

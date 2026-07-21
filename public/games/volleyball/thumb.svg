@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#1a1a2e"/>
+<rect x="0" y="240" width="400" height="60" fill="#2d5a27"/>
+<rect x="196" y="140" width="8" height="100" fill="#fff"/>
+<line x1="196" y1="140" x2="204" y2="140" stroke="#ccc" stroke-width="2"/>
+<circle cx="120" cy="200" r="22" fill="#4fc3f7"/>
+<rect x="108" y="222" width="24" height="18" fill="#4fc3f7"/>
+<circle cx="280" cy="200" r="22" fill="#e94560"/>
+<rect x="268" y="222" width="24" height="18" fill="#e94560"/>
+<circle cx="200" cy="100" r="16" fill="#ffc107"/>
+<path d="M184 100 Q200 85 216 100" stroke="#ff8f00" stroke-width="2" fill="none"/>
+<path d="M184 100 Q200 115 216 100" stroke="#ff8f00" stroke-width="2" fill="none"/>
+<text x="200" y="285" text-anchor="middle" fill="#4fc3f7" font-size="24" font-family="Arial" font-weight="bold">VOLLEYBALL</text>
+</svg>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Bubble Pop</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a1628;overflow:hidden;font-family:Arial,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh}
+#ui{color:#fff;font-size:16px;margin-bottom:10px;text-align:center}
+canvas{border-radius:12px;cursor:pointer}
+#over{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;text-align:center;display:none;background:rgba(0,0,0,.8);padding:30px;border-radius:16px}
+#over h1{font-size:28px;color:#48dbfb;margin-bottom:10px}
+#over button{padding:12px 30px;font-size:16px;background:#6366f1;color:#fff;border:none;border-radius:8px;cursor:pointer}
+</style>
+</head>
+<body>
+<div id="ui">Score: <span id="sc">0</span> | Pops: <span id="pp">0</span></div>
+<canvas id="c"></canvas>
+<div id="over"><h1>No More Moves!</h1><p style="font-size:18px;margin-bottom:15px">Score: <span id="fs">0</span></p><button onclick="restart()">Play Again</button></div>
+<script>
+const c=document.getElementById('c'),x=c.getContext('2d');
+const COLS=8,ROWS=10,SIZE=Math.max(45,Math.floor(Math.min((innerWidth-16)/COLS,(innerHeight-100)/ROWS)));
+c.width=COLS*SIZE;c.height=ROWS*SIZE;
+const colors=['#ff6b6b','#feca57','#48dbfb','#ff9ff3','#54a0ff','#1dd1a1'];
+let grid=[],score=0,pops=0,animating=[];
+
+function init(){
+  grid=[];
+  for(let r=0;r<ROWS;r++){grid[r]=[];for(let col=0;col<COLS;col++)grid[r][col]={color:Math.floor(Math.random()*colors.length),pop:0}}
+}
+function getGroup(row,col){
+  if(row<0||row>=ROWS||col<0||col>=COLS||!grid[row][col])return[];
+  const color=grid[row][col].color,visited=new Set(),stack=[[row,col]],group=[];
+  while(stack.length){
+    const[r,cc]=stack.pop(),key=r+','+cc;
+    if(visited.has(key))continue;visited.add(key);
+    if(r<0||r>=ROWS||cc<0||cc>=COLS||!grid[r][cc]||grid[r][cc].color!==color)continue;
+    group.push([r,cc]);
+    stack.push([r-1,cc],[r+1,cc],[r,cc-1],[r,cc+1]);
+  }
+  return group;
+}
+function popGroup(group){
+  if(group.length<3)return;
+  const pts=group.length*group.length*5;
+  score+=pts;pops+=group.length;
+  document.getElementById('sc').textContent=score;
+  document.getElementById('pp').textContent=pops;
+  group.forEach(([r,col])=>{
+    animating.push({x:col*SIZE+SIZE/2,y:r*SIZE+SIZE/2,color:colors[grid[r][col].color],life:15});
+    grid[r][col]=null;
+  });
+  // gravity
+  for(let col=0;col<COLS;col++){
+    let write=ROWS-1;
+    for(let r=ROWS-1;r>=0;r--){if(grid[r][col]){grid[write][col]=grid[r][col];if(write!==r)grid[r][col]=null;write--}}
+    for(let r=write;r>=0;r--)grid[r][col]=null;
+  }
+  // check game over
+  setTimeout(checkGameOver,100);
+}
+function checkGameOver(){
+  for(let r=0;r<ROWS;r++)for(let col=0;col<COLS;col++){
+    if(grid[r][col]&&getGroup(r,col).length>=3)return;
+  }
+  document.getElementById('fs').textContent=score;
+  document.getElementById('over').style.display='block';
+}
+c.addEventListener('click',e=>{
+  const rect=c.getBoundingClientRect();
+  const col=Math.floor((e.clientX-rect.left)/SIZE);
+  const row=Math.floor((e.clientY-rect.top)/SIZE);
+  const group=getGroup(row,col);
+  if(group.length>=3)popGroup(group);
+});
+function draw(){
+  x.fillStyle='#0a1628';x.fillRect(0,0,c.width,c.height);
+  for(let r=0;r<ROWS;r++)for(let col=0;col<COLS;col++){
+    if(!grid[r][col])continue;
+    const cx=col*SIZE+SIZE/2,cy=r*SIZE+SIZE/2;
+    x.fillStyle=colors[grid[r][col].color];
+    x.beginPath();x.arc(cx,cy,SIZE/2-3,0,Math.PI*2);x.fill();
+    x.fillStyle='rgba(255,255,255,.3)';
+    x.beginPath();x.arc(cx-5,cy-5,SIZE/6,0,Math.PI*2);x.fill();
+  }
+  animating=animating.filter(a=>{
+    a.life--;x.globalAlpha=a.life/15;x.fillStyle=a.color;
+    x.beginPath();x.arc(a.x,a.y,SIZE/2*(1-a.life/15)+5,0,Math.PI*2);x.fill();
+    x.globalAlpha=1;return a.life>0;
+  });
+  requestAnimationFrame(draw);
+}
+function restart(){score=0;pops=0;document.getElementById('sc').textContent='0';
+  document.getElementById('pp').textContent='0';document.getElementById('over').style.display='none';init()}
+init();draw();
+</script>
+</body>
+</html>

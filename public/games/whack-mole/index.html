@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Whack a Mole</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:20px;color:#fff}
+h1{font-size:22px;margin-bottom:8px}
+.hud{display:flex;gap:16px;margin-bottom:16px;font-size:14px}
+.hud span{color:#4fc3f7;font-weight:bold}
+#timer{color:#e94560}
+#board{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:320px;width:90vw}
+.hole{aspect-ratio:1;border-radius:50%;background:#0f3460;display:flex;align-items:center;justify-content:center;font-size:40px;cursor:pointer;transition:transform .1s;user-select:none;border:3px solid #16213e}
+.hole:active{transform:scale(0.9)}
+.hole.active{background:#2e7d32;border-color:#4caf50;transform:scale(1.05)}
+.hole.bomb{background:#b71c1c;border-color:#e94560}
+#start{margin-top:16px;padding:10px 28px;border:none;border-radius:10px;background:#4fc3f7;color:#1a1a2e;font-size:15px;font-weight:bold;cursor:pointer}
+#msg{margin-top:10px;font-size:16px;min-height:24px;color:#ffc107}
+</style>
+</head>
+<body>
+<h1>🔨 Whack a Mole</h1>
+<div class="hud">Score: <span id="sc">0</span> | Time: <span id="timer">30</span>s | Best: <span id="bs">0</span></div>
+<div id="board"></div>
+<button id="start">Start Game</button>
+<div id="msg"></div>
+<script>
+const board=document.getElementById('board');
+let score=0,timeLeft=30,timer=null,moleTimer=null,active=false;
+let best=+localStorage.getItem('wm-best')||0;
+document.getElementById('bs').textContent=best;
+const holes=[];
+for(let i=0;i<9;i++){
+  const div=document.createElement('div');
+  div.className='hole';div.dataset.i=i;
+  div.addEventListener('pointerdown',()=>whack(i));
+  board.appendChild(div);holes.push(div);
+}
+function showMole(){
+  if(!active)return;
+  holes.forEach(h=>{h.className='hole';h.textContent='';});
+  const count=Math.random()>0.6?2:1;
+  const used=new Set();
+  for(let c=0;c<count;c++){
+    let idx;do{idx=Math.floor(Math.random()*9);}while(used.has(idx));
+    used.add(idx);
+    if(Math.random()<0.15){
+      holes[idx].className='hole bomb';holes[idx].textContent='💣';
+    }else{
+      holes[idx].className='hole active';holes[idx].textContent='🐹';
+    }
+  }
+  const delay=Math.max(500,1000-score*10);
+  moleTimer=setTimeout(showMole,delay);
+}
+function whack(i){
+  if(!active)return;
+  const h=holes[i];
+  if(h.classList.contains('active')){
+    score++;document.getElementById('sc').textContent=score;
+    h.textContent='💫';h.className='hole';
+  }else if(h.classList.contains('bomb')){
+    score=Math.max(0,score-3);document.getElementById('sc').textContent=score;
+    h.textContent='💥';h.className='hole';
+  }
+}
+function startGame(){
+  score=0;timeLeft=30;active=true;
+  document.getElementById('sc').textContent=0;
+  document.getElementById('timer').textContent=30;
+  document.getElementById('msg').textContent='';
+  document.getElementById('start').style.display='none';
+  showMole();
+  timer=setInterval(()=>{
+    timeLeft--;document.getElementById('timer').textContent=timeLeft;
+    if(timeLeft<=0){
+      clearInterval(timer);clearTimeout(moleTimer);active=false;
+      holes.forEach(h=>{h.className='hole';h.textContent='';});
+      document.getElementById('msg').textContent=`Game Over! Score: ${score}`;
+      document.getElementById('start').style.display='block';
+      document.getElementById('start').textContent='Play Again';
+      if(score>best){best=score;localStorage.setItem('wm-best',best);document.getElementById('bs').textContent=best;}
+    }
+  },1000);
+}
+document.getElementById('start').addEventListener('click',startGame);
+</script>
+<script>
+(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
+</script>
+</body>
+</html>

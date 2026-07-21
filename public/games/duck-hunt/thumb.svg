@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#87ceeb"/>
+<rect x="0" y="230" width="400" height="70" fill="#4caf50"/>
+<ellipse cx="150" cy="120" rx="25" ry="18" fill="#4caf50"/>
+<path d="M130 110 L110 95 L130 115" fill="#388e3c"/>
+<path d="M170 110 L190 95 L170 115" fill="#388e3c"/>
+<path d="M170 120 L185 118 L185 123" fill="#ff9800"/>
+<circle cx="160" cy="112" r="3" fill="#fff"/>
+<ellipse cx="280" cy="80" rx="20" ry="14" fill="#4caf50"/>
+<path d="M265 72 L250 60 L265 76" fill="#388e3c"/>
+<path d="M295 72 L310 60 L295 76" fill="#388e3c"/>
+<circle cx="288" cy="74" r="2.5" fill="#fff"/>
+<circle cx="100" cy="60" r="4" fill="#ff5722"/>
+<circle cx="320" cy="150" r="4" fill="#ff5722"/>
+<text x="200" y="285" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">🦆 DUCK HUNT</text>
+</svg>

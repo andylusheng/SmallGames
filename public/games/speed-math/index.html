@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Speed Math</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:20px;color:#fff}
+h1{font-size:22px;margin-bottom:8px}
+.hud{display:flex;gap:16px;margin-bottom:16px;font-size:14px}
+.hud span{color:#4fc3f7;font-weight:bold}
+#timer{color:#e94560}
+#problem{font-size:42px;font-weight:bold;margin:20px 0;min-height:56px}
+#answers{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:300px;width:90vw}
+.ans{padding:16px;border-radius:12px;border:2px solid #0f3460;background:#16213e;font-size:22px;font-weight:bold;color:#fff;cursor:pointer;transition:all .15s;text-align:center}
+.ans:hover{border-color:#4fc3f7;transform:scale(1.05)}
+.ans:active{transform:scale(0.95)}
+.ans.correct{background:#4caf50;border-color:#4caf50}
+.ans.wrong{background:#e94560;border-color:#e94560}
+#start{padding:12px 32px;border:none;border-radius:10px;background:#4fc3f7;color:#1a1a2e;font-size:16px;font-weight:bold;cursor:pointer;margin-top:20px}
+#msg{margin-top:12px;font-size:18px;font-weight:bold;min-height:28px}
+</style>
+</head>
+<body>
+<h1>🧮 Speed Math</h1>
+<div class="hud">Score: <span id="sc">0</span> | Time: <span id="timer">30</span>s | Best: <span id="bs">0</span></div>
+<div id="problem">Ready?</div>
+<div id="answers"></div>
+<button id="start">Start Game</button>
+<div id="msg"></div>
+<script>
+let score=0,timeLeft=30,timer=null,active=false;
+let best=+localStorage.getItem('sm-best')||0;
+document.getElementById('bs').textContent=best;
+function genProblem(){
+  const ops=['+','-','×'];
+  const op=ops[Math.floor(Math.random()*3)];
+  let a,b,ans;
+  if(op==='+'){a=Math.floor(Math.random()*50)+1;b=Math.floor(Math.random()*50)+1;ans=a+b;}
+  else if(op==='-'){a=Math.floor(Math.random()*50)+10;b=Math.floor(Math.random()*a);ans=a-b;}
+  else{a=Math.floor(Math.random()*12)+2;b=Math.floor(Math.random()*12)+2;ans=a*b;}
+  document.getElementById('problem').textContent=`${a} ${op} ${b} = ?`;
+  const answers=[ans];
+  while(answers.length<4){
+    const fake=ans+Math.floor(Math.random()*21)-10;
+    if(fake!==ans&&fake>=0&&!answers.includes(fake))answers.push(fake);
+  }
+  answers.sort(()=>Math.random()-0.5);
+  const el=document.getElementById('answers');
+  el.innerHTML='';
+  answers.forEach(a=>{
+    const btn=document.createElement('button');
+    btn.className='ans';btn.textContent=a;
+    btn.addEventListener('click',()=>check(btn,a,ans));
+    el.appendChild(btn);
+  });
+}
+function check(btn,picked,correct){
+  if(!active)return;
+  if(picked===correct){
+    btn.classList.add('correct');score++;
+    document.getElementById('sc').textContent=score;
+    setTimeout(genProblem,200);
+  }else{
+    btn.classList.add('wrong');
+    document.querySelectorAll('.ans').forEach(b=>{if(+b.textContent===correct)b.classList.add('correct');});
+    setTimeout(genProblem,500);
+  }
+}
+function startGame(){
+  score=0;timeLeft=30;active=true;
+  document.getElementById('sc').textContent=0;
+  document.getElementById('timer').textContent=30;
+  document.getElementById('msg').textContent='';
+  document.getElementById('start').style.display='none';
+  genProblem();
+  timer=setInterval(()=>{
+    timeLeft--;
+    document.getElementById('timer').textContent=timeLeft;
+    if(timeLeft<=0){
+      clearInterval(timer);active=false;
+      document.getElementById('problem').textContent='Time Up!';
+      document.getElementById('answers').innerHTML='';
+      document.getElementById('msg').textContent=`Final Score: ${score}`;
+      document.getElementById('msg').style.color='#4fc3f7';
+      document.getElementById('start').style.display='block';
+      document.getElementById('start').textContent='Play Again';
+      if(score>best){best=score;localStorage.setItem('sm-best',best);document.getElementById('bs').textContent=best;}
+    }
+  },1000);
+}
+document.getElementById('start').addEventListener('click',startGame);
+</script>
+<script>
+(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
+</script>
+</body>
+</html>

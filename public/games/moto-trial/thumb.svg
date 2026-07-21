@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#1a0533"/>
+<path d="M0 220 Q80 180 160 210 Q240 240 320 190 Q360 170 400 180 L400 300 L0 300Z" fill="#3e2723"/>
+<path d="M0 220 Q80 180 160 210 Q240 240 320 190 Q360 170 400 180" fill="none" stroke="#8d6e63" stroke-width="3"/>
+<circle cx="180" cy="195" r="12" fill="#333" stroke="#666" stroke-width="2"/>
+<circle cx="210" cy="195" r="12" fill="#333" stroke="#666" stroke-width="2"/>
+<path d="M180 195 L195 178 L210 195" fill="none" stroke="#e94560" stroke-width="3"/>
+<circle cx="195" cy="168" r="7" fill="#4fc3f7"/>
+<text x="200" y="285" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">🏍️ MOTO TRIAL</text>
+</svg>

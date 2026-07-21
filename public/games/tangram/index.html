@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Tangram</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:8px;font-size:14px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none}
+#controls{display:flex;gap:10px;margin-top:8px}
+#controls button{padding:6px 14px;background:#4fc3f7;border:none;border-radius:6px;color:#1a1a2e;font-weight:bold;cursor:pointer;font-size:13px}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Level: <span id="lv">1</span> | Best: <span id="bs">0</span></div>
+<canvas id="c"></canvas>
+<div id="controls"><button id="rotBtn">↻ Rotate</button><button id="nextBtn">Next Puzzle</button></div>
+<div id="msg">Drag pieces to match the target shape. Tap Rotate to turn selected piece.</div>
+<script>
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-120);
+const c=document.getElementById('c');c.width=W;c.height=H;const ctx=c.getContext('2d');
+let level=1,best=+localStorage.getItem('tangram-best')||0;
+document.getElementById('bs').textContent=best;
+const pieceColors=['#e94560','#4fc3f7','#4caf50','#ffc107','#9c27b0','#ff9800','#00bcd4'];
+const basePieces=[
+{pts:[[0,0],[80,0],[40,40]],x:50,y:200,rot:0},
+{pts:[[0,0],[80,0],[40,40]],x:150,y:200,rot:0},
+{pts:[[0,0],[40,0],[40,40],[0,40]],x:250,y:200,rot:0},
+{pts:[[0,0],[60,0],[30,30]],x:50,y:260,rot:0},
+{pts:[[0,0],[60,0],[30,30]],x:150,y:260,rot:0},
+{pts:[[0,0],[40,0],[20,40]],x:250,y:260,rot:0},
+{pts:[[0,0],[40,0],[20,40]],x:320,y:260,rot:0}
+];
+let pieces=[],selected=-1,dragOff={x:0,y:0};
+const targets=[
+{x:W/2,y:100,shape:[[0,-40],[40,0],[0,40],[-40,0]]},
+{x:W/2,y:100,shape:[[-40,-30],[40,-30],[40,30],[-40,30]]},
+{x:W/2,y:100,shape:[[0,-40],[50,20],[25,50],[-25,50],[-50,20]]}
+];
+function initPuzzle(){pieces=basePieces.map((p,i)=>({...p,pts:p.pts.map(pt=>[...pt]),x:30+i*50,y:220+((i%2)*50),rot:0}));selected=-1;}
+function rotatePts(pts,rot){let r=pts.map(p=>[...p]);for(let i=0;i<rot%4;i++){r=r.map(([x,y])=>[-y,x]);}return r;}
+function getTransformed(piece){const rp=rotatePts(piece.pts,piece.rot);const cx=rp.reduce((s,p)=>s+p[0],0)/rp.length;const cy=rp.reduce((s,p)=>s+p[1],0)/rp.length;return rp.map(([x,y])=>[piece.x+x-cx,piece.y+y-cy]);}
+function draw(){ctx.fillStyle='#0f3460';ctx.fillRect(0,0,W,H);
+const t=targets[(level-1)%targets.length];
+ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=2;ctx.setLineDash([5,5]);
+ctx.beginPath();t.shape.forEach(([x,y],i)=>{i===0?ctx.moveTo(t.x+x,t.y+y):ctx.lineTo(t.x+x,t.y+y);});ctx.closePath();ctx.stroke();ctx.setLineDash([]);
+ctx.fillStyle='rgba(255,255,255,0.05)';ctx.fill();
+pieces.forEach((p,i)=>{const tp=getTransformed(p);ctx.beginPath();tp.forEach(([x,y],j)=>{j===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.closePath();
+ctx.fillStyle=pieceColors[i%pieceColors.length];ctx.globalAlpha=i===selected?1:0.8;ctx.fill();ctx.globalAlpha=1;
+ctx.strokeStyle=i===selected?'#fff':'rgba(0,0,0,0.3)';ctx.lineWidth=i===selected?3:1;ctx.stroke();});
+document.getElementById('lv').textContent=level;}
+function pointInPoly(px,py,poly){let inside=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const[xi,yi]=poly[i],[xj,yj]=poly[j];if(((yi>py)!==(yj>py))&&(px<(xj-xi)*(py-yi)/(yj-yi)+xi))inside=!inside;}return inside;}
+c.addEventListener('pointerdown',e=>{const rect=c.getBoundingClientRect();const mx=e.clientX-rect.left,my=e.clientY-rect.top;
+for(let i=pieces.length-1;i>=0;i--){const tp=getTransformed(pieces[i]);if(pointInPoly(mx,my,tp)){selected=i;dragOff={x:mx-pieces[i].x,y:my-pieces[i].y};break;}}draw();});
+c.addEventListener('pointermove',e=>{if(selected===-1)return;const rect=c.getBoundingClientRect();pieces[selected].x=e.clientX-rect.left-dragOff.x;pieces[selected].y=e.clientY-rect.top-dragOff.y;draw();});
+c.addEventListener('pointerup',()=>{selected=-1;draw();});
+document.getElementById('rotBtn').addEventListener('click',()=>{if(selected>=0){pieces[selected].rot=(pieces[selected].rot+1)%4;draw();}else if(pieces.length>0){selected=pieces.length-1;pieces[selected].rot=(pieces[selected].rot+1)%4;draw();selected=-1;draw();}});
+document.getElementById('nextBtn').addEventListener('click',()=>{level++;if(level>best){best=level;localStorage.setItem('tangram-best',best);document.getElementById('bs').textContent=best;}initPuzzle();draw();});
+initPuzzle();draw();
+</script>
+</body>
+</html>

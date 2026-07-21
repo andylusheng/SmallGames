@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#1a1a2e"/>
+<rect x="100" y="60" width="80" height="80" rx="14" fill="#fff"/>
+<text x="140" y="115" font-size="40" text-anchor="middle">⚄</text>
+<rect x="220" y="60" width="80" height="80" rx="14" fill="#fff"/>
+<text x="260" y="115" font-size="40" text-anchor="middle">⚂</text>
+<text x="200" y="180" font-size="18" fill="#4caf50" font-family="Arial" font-weight="bold" text-anchor="middle">You Win!</text>
+<text x="140" y="210" font-size="14" fill="#4fc3f7" font-family="Arial" text-anchor="middle">You: 3</text>
+<text x="260" y="210" font-size="14" fill="#e94560" font-family="Arial" text-anchor="middle">CPU: 1</text>
+<text x="200" y="280" font-size="22" fill="#fff" font-family="Arial" font-weight="bold" text-anchor="middle">🎲 DICE DUEL</text>
+</svg>

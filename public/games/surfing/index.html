@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Surf Runner</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:14px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Score: <span id="sc">0</span> | Best: <span id="bs">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">← → or tap/hold sides to surf. Dodge rocks, collect stars!</div>
+<script>
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80);
+const c=document.getElementById('c');c.width=W;c.height=H;const ctx=c.getContext('2d');
+let score=0,best=+localStorage.getItem('surfing-best')||0,gameOver=false,speed=3,waveOffset=0;
+document.getElementById('bs').textContent=best;
+let player={x:W/2,y:H-70,w:20,h:24};
+let obstacles=[],coins=[],particles=[];
+let keys={};
+document.addEventListener('keydown',e=>{keys[e.key]=true;if(gameOver&&e.key===' ')reset();});
+document.addEventListener('keyup',e=>keys[e.key]=false);
+c.addEventListener('pointerdown',e=>{if(gameOver){reset();return;}const r=c.getBoundingClientRect();const x=e.clientX-r.left;if(x<W/2)keys['ArrowLeft']=true;else keys['ArrowRight']=true;});
+c.addEventListener('pointerup',()=>{keys['ArrowLeft']=false;keys['ArrowRight']=false;});
+function spawn(){if(Math.random()<0.4){obstacles.push({x:Math.random()*(W-40)+20,y:-30,w:28,h:20,type:'rock'});}
+else{coins.push({x:Math.random()*(W-30)+15,y:-20,r:10});}}
+function reset(){score=0;gameOver=false;speed=3;player.x=W/2;obstacles=[];coins=[];particles=[];document.getElementById('sc').textContent=0;}
+let spawnTimer=0;
+function update(){if(gameOver)return;
+speed=3+score*0.003;waveOffset+=0.05;
+if(keys['ArrowLeft']||keys['a'])player.x-=4.5;
+if(keys['ArrowRight']||keys['d'])player.x+=4.5;
+player.x=Math.max(15,Math.min(W-15,player.x));
+spawnTimer++;if(spawnTimer>Math.max(20,45-score*0.05)){spawnTimer=0;spawn();}
+obstacles.forEach(o=>o.y+=speed);
+obstacles=obstacles.filter(o=>{if(o.y>H+30)return false;
+if(Math.abs(o.x-player.x)<(o.w/2+player.w/2-6)&&Math.abs(o.y-player.y)<(o.h/2+player.h/2-6)){
+gameOver=true;if(score>best){best=score;localStorage.setItem('surfing-best',best);document.getElementById('bs').textContent=best;}
+for(let i=0;i<12;i++)particles.push({x:player.x,y:player.y,vx:(Math.random()-0.5)*5,vy:(Math.random()-0.5)*5,life:25,color:'#4fc3f7'});}
+return true;});
+coins.forEach(cn=>cn.y+=speed);
+coins=coins.filter(cn=>{if(cn.y>H+20)return false;
+if(Math.hypot(cn.x-player.x,cn.y-player.y)<cn.r+12){score+=5;document.getElementById('sc').textContent=score;
+for(let i=0;i<5;i++)particles.push({x:cn.x,y:cn.y,vx:(Math.random()-0.5)*3,vy:(Math.random()-0.5)*3,life:15,color:'#ffc107'});return false;}
+return true;});
+score++;document.getElementById('sc').textContent=score;
+particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.life--;});particles=particles.filter(p=>p.life>0);}
+function draw(){const grad=ctx.createLinearGradient(0,0,0,H);grad.addColorStop(0,'#0277bd');grad.addColorStop(1,'#01579b');ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+ctx.strokeStyle='rgba(255,255,255,0.15)';ctx.lineWidth=2;
+for(let i=0;i<6;i++){ctx.beginPath();for(let x=0;x<=W;x+=10){const y=H*0.2+i*60+Math.sin(x*0.02+waveOffset+i)*15;x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}ctx.stroke();}
+obstacles.forEach(o=>{ctx.fillStyle='#5d4037';ctx.beginPath();ctx.ellipse(o.x,o.y,o.w/2,o.h/2,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#795548';ctx.beginPath();ctx.ellipse(o.x-4,o.y-4,o.w/4,o.h/4,0,0,Math.PI*2);ctx.fill();});
+coins.forEach(cn=>{ctx.fillStyle='#ffc107';ctx.beginPath();for(let i=0;i<5;i++){const a=i*Math.PI*2/5-Math.PI/2;const r=i%2===0?cn.r:cn.r*0.5;ctx.lineTo(cn.x+Math.cos(a)*r,cn.y+Math.sin(a)*r);}ctx.closePath();ctx.fill();});
+if(!gameOver){ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(player.x,player.y+8,14,5,0,0,Math.PI*2);ctx.fill();
+ctx.fillStyle='#e94560';ctx.beginPath();ctx.arc(player.x,player.y-4,8,0,Math.PI*2);ctx.fill();
+ctx.fillStyle='#333';ctx.fillRect(player.x-2,player.y-12,4,8);}
+particles.forEach(p=>{ctx.globalAlpha=p.life/25;ctx.fillStyle=p.color;ctx.fillRect(p.x-2,p.y-2,4,4);});ctx.globalAlpha=1;
+if(gameOver){ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 22px Arial';ctx.textAlign='center';ctx.fillText('WIPEOUT! 🌊',W/2,H/2-15);ctx.font='14px Arial';ctx.fillText('Score: '+score+' | Best: '+best,W/2,H/2+15);ctx.fillText('Tap or Space to restart',W/2,H/2+40);}}
+function loop(){update();draw();requestAnimationFrame(loop);}
+loop();
+</script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Sokoban</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:10px;color:#fff}
+h1{font-size:20px;margin-bottom:6px}
+.hud{display:flex;gap:16px;margin-bottom:10px;font-size:14px}
+.hud span{color:#4fc3f7;font-weight:bold}
+#board{display:grid;gap:2px;background:#0f3460;padding:6px;border-radius:8px}
+.cell{width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;border-radius:4px}
+.wall{background:#37474f}
+.floor{background:#16213e}
+.target{background:#1b5e20}
+.box{background:#ff8f00}
+.box-on{background:#4caf50}
+.player{background:#16213e}
+#controls{display:grid;grid-template-columns:repeat(3,50px);gap:6px;margin-top:12px}
+#controls button{width:50px;height:50px;border-radius:10px;border:none;background:#0f3460;color:#fff;font-size:20px;cursor:pointer}
+#controls button:active{background:#4fc3f7}
+#msg{margin-top:8px;font-size:16px;color:#4caf50;min-height:24px}
+#reset{margin-top:8px;padding:6px 16px;border:none;border-radius:8px;background:#e94560;color:#fff;font-size:13px;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>📦 Sokoban</h1>
+<div class="hud">Level: <span id="lv">1</span> | Moves: <span id="mv">0</span></div>
+<div id="board"></div>
+<div id="controls">
+<div></div><button id="up">↑</button><div></div>
+<button id="left">←</button><button id="down">↓</button><button id="right">→</button>
+</div>
+<div id="msg"></div>
+<button id="reset">Reset Level</button>
+<script>
+const LEVELS=[
+["#####","#..##","#.$.#","#.$.#","#@..#","#####"],
+["######","#....#","#.$$ #","# .$.#","# @  #","######"],
+["#######","#     #","# .$$.#","# .@  #","# .$$.#","#     #","#######"],
+["######","#    #","# #$.#","# #.$#","# $. #","# @  #","######"],
+["#######","#  .  #","# #.# #","# $@$ #","# #.# #","#  .  #","#######"]
+];
+let level=0,moves=0,grid,playerPos,boxes,targets;
+const boardEl=document.getElementById('board');
+function loadLevel(){
+  const map=LEVELS[level];
+  grid=[];boxes=[];targets=[];moves=0;
+  document.getElementById('mv').textContent=0;
+  document.getElementById('lv').textContent=level+1;
+  document.getElementById('msg').textContent='';
+  for(let r=0;r<map.length;r++){
+    grid[r]=[];
+    for(let c=0;c<map[r].length;c++){
+      const ch=map[r][c];
+      if(ch==='#')grid[r][c]='wall';
+      else if(ch==='.'){grid[r][c]='target';targets.push({r,c});}
+      else if(ch==='$'){grid[r][c]='floor';boxes.push({r,c});}
+      else if(ch==='@'){grid[r][c]='floor';playerPos={r,c};}
+      else grid[r][c]='floor';
+    }
+  }
+  render();
+}
+function render(){
+  const rows=grid.length,cols=grid[0].length;
+  boardEl.style.gridTemplateColumns=`repeat(${cols},40px)`;
+  boardEl.innerHTML='';
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const div=document.createElement('div');
+      let cls='cell ';
+      const isBox=boxes.some(b=>b.r===r&&b.c===c);
+      const isTarget=targets.some(t=>t.r===r&&t.c===c);
+      const isPlayer=playerPos.r===r&&playerPos.c===c;
+      if(grid[r][c]==='wall')cls+='wall';
+      else if(isPlayer)cls+='player';
+      else if(isBox&&isTarget)cls+='box-on';
+      else if(isBox)cls+='box';
+      else if(isTarget)cls+='target';
+      else cls+='floor';
+      div.className=cls;
+      if(isPlayer)div.textContent='🧑';
+      else if(isBox)div.textContent=isTarget?'✅':'📦';
+      else if(isTarget)div.textContent='⭕';
+      boardEl.appendChild(div);
+    }
+  }
+}
+function move(dr,dc){
+  const nr=playerPos.r+dr,nc=playerPos.c+dc;
+  if(grid[nr]?.[nc]==='wall'||grid[nr]===undefined)return;
+  const boxIdx=boxes.findIndex(b=>b.r===nr&&b.c===nc);
+  if(boxIdx>=0){
+    const br=nr+dr,bc=nc+dc;
+    if(grid[br]?.[bc]==='wall'||grid[br]===undefined)return;
+    if(boxes.some(b=>b.r===br&&b.c===bc))return;
+    boxes[boxIdx]={r:br,c:bc};
+  }
+  playerPos={r:nr,c:nc};moves++;
+  document.getElementById('mv').textContent=moves;
+  render();
+  checkWin();
+}
+function checkWin(){
+  if(boxes.every(b=>targets.some(t=>t.r===b.r&&t.c===b.c))){
+    document.getElementById('msg').textContent='🎉 Level Complete!';
+    setTimeout(()=>{level=(level+1)%LEVELS.length;loadLevel();},1500);
+  }
+}
+document.getElementById('up').addEventListener('click',()=>move(-1,0));
+document.getElementById('down').addEventListener('click',()=>move(1,0));
+document.getElementById('left').addEventListener('click',()=>move(0,-1));
+document.getElementById('right').addEventListener('click',()=>move(0,1));
+document.getElementById('reset').addEventListener('click',loadLevel);
+document.addEventListener('keydown',e=>{
+  if(e.code==='ArrowUp'){e.preventDefault();move(-1,0);}
+  if(e.code==='ArrowDown'){e.preventDefault();move(1,0);}
+  if(e.code==='ArrowLeft'){e.preventDefault();move(0,-1);}
+  if(e.code==='ArrowRight'){e.preventDefault();move(0,1);}
+});
+loadLevel();
+</script>
+<script>
+(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
+</script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Duck Hunt</title>
+<style>
+*{margin:0;padding:0}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
+#ui{color:#fff;margin-bottom:6px;font-size:16px}
+#ui span{color:#4fc3f7;font-weight:bold}
+canvas{border-radius:8px;touch-action:none;cursor:crosshair}
+#msg{color:#aaa;margin-top:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="ui">Score: <span id="sc">0</span> | Time: <span id="tm">30</span>s | Missed: <span id="ms">0</span>/10 | Best: <span id="bs">0</span></div>
+<canvas id="c"></canvas>
+<div id="msg">Click/tap the ducks before they fly away!</div>
+<script>
+const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80);
+const c=document.getElementById('c');c.width=W;c.height=H;
+const ctx=c.getContext('2d');
+let score=0,missed=0,timeLeft=30,ducks=[],particles=[],gameOver=false,started=false,best=+localStorage.getItem('duck-hunt-best')||0;
+document.getElementById('bs').textContent=best;
+let timer=null;
+function spawnDuck(){const fromLeft=Math.random()>0.5;ducks.push({x:fromLeft?-30:W+30,y:H*0.2+Math.random()*H*0.5,vx:(fromLeft?1:-1)*(1.5+Math.random()*2),vy:-0.5-Math.random()*1.5,size:18+Math.random()*8,wing:0});}
+function startGame(){started=true;gameOver=false;score=0;missed=0;timeLeft=30;ducks=[];document.getElementById('sc').textContent=0;document.getElementById('ms').textContent=0;document.getElementById('tm').textContent=30;
+timer=setInterval(()=>{timeLeft--;document.getElementById('tm').textContent=timeLeft;if(timeLeft<=0){endGame();}},1000);
+for(let i=0;i<3;i++)setTimeout(spawnDuck,i*400);}
+function endGame(){clearInterval(timer);gameOver=true;started=false;if(score>best){best=score;localStorage.setItem('duck-hunt-best',best);document.getElementById('bs').textContent=best;}}
+c.addEventListener('pointerdown',e=>{if(!started){startGame();return;}if(gameOver){startGame();return;}const r=c.getBoundingClientRect();const mx=e.clientX-r.left,my=e.clientY-r.top;let hit=false;
+for(let i=ducks.length-1;i>=0;i--){const d=ducks[i];if(Math.hypot(mx-d.x,my-d.y)<d.size+8){hit=true;score+=10;document.getElementById('sc').textContent=score;for(let p=0;p<6;p++)particles.push({x:d.x,y:d.y,vx:(Math.random()-.5)*5,vy:(Math.random()-.5)*5,life:20,color:'#ffc107'});ducks.splice(i,1);break;}}
+if(!hit)particles.push({x:mx,y:my,vx:0,vy:0,life:8,color:'#ff5722'});});
+let spawnT=0;
+function update(){if(!started||gameOver)return;spawnT++;if(spawnT>50){spawnT=0;spawnDuck();}
+ducks.forEach((d,i)=>{d.x+=d.vx;d.y+=d.vy;d.vy+=0.02;d.wing+=0.2;if(d.x<-40||d.x>W+40||d.y<-40){ducks.splice(i,1);missed++;document.getElementById('ms').textContent=missed;if(missed>=10)endGame();}});
+particles.forEach((p,i)=>{p.x+=p.vx;p.y+=p.vy;p.life--;if(p.life<=0)particles.splice(i,1);});}
+function drawDuck(d){ctx.save();ctx.translate(d.x,d.y);ctx.fillStyle='#4caf50';ctx.beginPath();ctx.ellipse(0,0,d.size,d.size*0.7,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#388e3c';const wy=Math.sin(d.wing)*8;ctx.beginPath();ctx.moveTo(-5,-5);ctx.lineTo(-d.size-5,-5-wy);ctx.lineTo(-5,5);ctx.fill();ctx.beginPath();ctx.moveTo(5,-5);ctx.lineTo(d.size+5,-5-wy);ctx.lineTo(5,5);ctx.fill();ctx.fillStyle='#ff9800';ctx.beginPath();ctx.moveTo(d.size*0.7,0);ctx.lineTo(d.size+8,-2);ctx.lineTo(d.size+8,3);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(d.size*0.3,-d.size*0.2,3,0,Math.PI*2);ctx.fill();ctx.fillStyle='#000';ctx.beginPath();ctx.arc(d.size*0.3,-d.size*0.2,1.5,0,Math.PI*2);ctx.fill();ctx.restore();}
+function draw(){ctx.fillStyle='#87ceeb';ctx.fillRect(0,0,W,H);ctx.fillStyle='#4caf50';ctx.fillRect(0,H-40,W,40);ctx.fillStyle='#388e3c';for(let i=0;i<W;i+=20){ctx.beginPath();ctx.moveTo(i,H-40);ctx.lineTo(i+10,H-55);ctx.lineTo(i+20,H-40);ctx.fill();}
+ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(60,50,20,0,Math.PI*2);ctx.arc(80,45,25,0,Math.PI*2);ctx.arc(100,50,20,0,Math.PI*2);ctx.fill();
+ducks.forEach(drawDuck);
+particles.forEach(p=>{ctx.globalAlpha=p.life/20;ctx.fillStyle=p.color;ctx.fillRect(p.x-3,p.y-3,6,6);ctx.globalAlpha=1;});
+if(!started&&!gameOver){ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 24px Arial';ctx.textAlign='center';ctx.fillText('🦆 DUCK HUNT',W/2,H/2-20);ctx.font='16px Arial';ctx.fillText('Tap to Start!',W/2,H/2+20);}
+if(gameOver){ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#e94560';ctx.font='bold 28px Arial';ctx.textAlign='center';ctx.fillText('TIME UP!',W/2,H/2-20);ctx.fillStyle='#fff';ctx.font='16px Arial';ctx.fillText('Score: '+score+' | Tap to retry',W/2,H/2+20);}}
+function loop(){update();draw();requestAnimationFrame(loop);}
+loop();
+</script>
+</body>
+</html>
