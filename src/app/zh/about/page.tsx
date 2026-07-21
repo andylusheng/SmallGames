@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
-      <h1 className="text-3xl font-bold text-white">About PlayFree Games</h1>
+      <h1 className="text-3xl font-bold text-white">About ZeroPlay Games</h1>
 
       <div className="mt-8 space-y-6 text-sm leading-relaxed text-gray-300">
         <section>
@@ -15,7 +15,7 @@ export default function AboutPage() {
             Our Mission
           </h2>
           <p>
-            PlayFree Games is dedicated to providing the best free online gaming
+            ZeroPlay Games is dedicated to providing the best free online gaming
             experience. We believe games should be accessible to everyone — no
             downloads, no installations, no sign-ups required. Just click and
             play!
@@ -48,11 +48,11 @@ export default function AboutPage() {
         <section>
           <h2 className="mb-2 text-lg font-semibold text-white">Contact Us</h2>
           <p>
-            General inquiries: info@playfreegames.com
+            General inquiries: info@zeroplaygames.com
             <br />
-            Game submissions: developers@playfreegames.com
+            Game submissions: developers@zeroplaygames.com
             <br />
-            Advertising: ads@playfreegames.com
+            Advertising: ads@zeroplaygames.com
           </p>
         </section>
       </div>

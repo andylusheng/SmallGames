@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://playfreegames.com";
-const SITE_NAME = "PlayFree Games";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://zeroplaygames.com";
+const SITE_NAME = "ZeroPlay Games";
 
 export { SITE_URL, SITE_NAME };
 

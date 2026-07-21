@@ -84,7 +84,7 @@ export default function TermsPage() {
           </h2>
           <p>
             For questions about these terms, contact us at:
-            legal@playfreegames.com
+            legal@zeroplaygames.com
           </p>
         </section>
       </div>

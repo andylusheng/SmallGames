@@ -3,7 +3,7 @@ import { getAllGames, getCategories } from "@/lib/games";
 
 export const dynamic = "force-static";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://playfreegames.com";
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://zeroplaygames.com";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const games = getAllGames();

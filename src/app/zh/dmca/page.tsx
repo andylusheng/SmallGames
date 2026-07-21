@@ -61,7 +61,7 @@ export default function DmcaPage() {
         <section>
           <h2 className="mb-2 text-lg font-semibold text-white">Contact</h2>
           <p>
-            Send DMCA notices to: dmca@playfreegames.com
+            Send DMCA notices to: dmca@zeroplaygames.com
             <br />
             We will respond to valid notices within 48 hours.
           </p>

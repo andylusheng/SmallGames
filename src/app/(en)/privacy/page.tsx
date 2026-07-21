@@ -83,7 +83,7 @@ export default function PrivacyPage() {
           </h2>
           <p>
             If you have questions about this Privacy Policy, please contact us
-            at: privacy@playfreegames.com
+            at: privacy@zeroplaygames.com
           </p>
         </section>
       </div>
