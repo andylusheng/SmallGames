@@ -74,16 +74,27 @@ export function buildBreadcrumbJsonLd(game: Game, locale: string, t: (key: strin
 }
 
 function getGameFaqs(game: Game, locale: string): { q: string; a: string }[] {
+  const isEn = locale === "en";
   const seo = getGameSeo(game, locale);
   const custom = seo.faq;
-  if (custom && custom.length >= 3) return custom;
-  return [
+  const base = custom && custom.length >= 3 ? custom : [
     { q: `How to play ${game.title}?`, a: game.instructions },
     { q: `Is ${game.title} free to play?`, a: `Yes! ${game.title} is 100% free to play directly in your browser. No downloads, no sign-ups, no hidden fees. Just open the page and start playing instantly.` },
     { q: `Can I play ${game.title} on mobile?`, a: `${game.title} is fully optimized for mobile devices. It works on iPhone, iPad, and Android phones/tablets. Touch controls are supported — just open it in your mobile browser and play!` },
     { q: `What makes ${game.title} fun?`, a: `${game.title} combines simple controls with engaging gameplay that's easy to learn but hard to master. Challenge yourself to beat your high score — it's saved automatically in your browser!` },
     { q: `Do I need to download anything to play ${game.title}?`, a: `No download or installation required. ${game.title} is an HTML5 browser game that runs instantly. Your progress (high score) is saved locally in your browser using localStorage.` },
   ];
+  // P2-3: expanded FAQs — safety & offline questions for long-tail coverage
+  const extra = isEn ? [
+    { q: `Is ${game.title} safe for kids?`, a: `Yes! ${game.title} is family-friendly with no violence, gambling, or inappropriate content. It's safe for players of all ages — no account or personal information is ever required.` },
+    { q: `Can I play ${game.title} offline?`, a: `${game.title} requires an internet connection to load, but once loaded it runs entirely in your browser. Your high scores are saved locally, so you can track your progress even without an account.` },
+    { q: `How can I get better at ${game.title}?`, a: `Practice regularly and focus on one skill at a time. Check our Tips & Strategies section above for specific advice. Most players see big improvement within a few sessions — the key is patience and learning from each round.` },
+  ] : [
+    { q: `${game.title}适合小孩子玩吗？`, a: `适合！${game.title}内容健康，没有暴力、赌博或不当内容，全年龄段玩家都可以放心游玩，且无需注册账号或提供任何个人信息。` },
+    { q: `${game.title}可以离线玩吗？`, a: `${game.title}需要网络加载，但加载完成后完全在浏览器中运行。你的最高分会保存在本地，无需账号也能记录进度。` },
+    { q: `如何提高${game.title}的水平？`, a: `建议多加练习，每次专注提升一个技巧。参考上方的“技巧与攻略”部分获取具体建议，大多数玩家几局之后就能明显进步。` },
+  ];
+  return [...base, ...extra];
 }
 
 export default async function GamePageView({ locale, slug }: GamePageViewProps) {
@@ -155,6 +166,9 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
                   <Calendar className="h-4 w-4" />
                   {game.dateAdded}
                 </span>
+                <span className="flex items-center gap-1 text-gray-500">
+                  {isEn ? "Updated" : "更新"}: {new Date().toISOString().slice(0, 10)}
+                </span>
               </div>
 
               {/* Tags */}
@@ -199,6 +213,19 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
                   {longDescription.split("\n").map((para: string, i: number) => (
                     <p key={i}>{para}</p>
                   ))}
+                  {/* P2-1: in-content internal links */}
+                  <p className="rounded-lg bg-surface/50 p-3">
+                    {isEn ? `If you enjoy ${game.title}, you might also like ` : `如果你喜欢${game.title}，你可能也会喜欢`}
+                    {relatedGames.slice(0, 3).map((rg, i) => (
+                      <span key={rg.id}>
+                        <NextLink href={lp(locale, `/game/${rg.slug}`)} className="font-medium text-primary hover:underline">
+                          {rg.title}
+                        </NextLink>
+                        {i < 2 ? (isEn ? ", " : "、") : ""}
+                      </span>
+                    ))}
+                    {isEn ? " — all free to play instantly in your browser." : "——全部免费，浏览器即开即玩。"}
+                  </p>
                 </div>
               </section>
 
