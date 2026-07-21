@@ -26,6 +26,13 @@ export default function ZhLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="zh" className="dark">
       <head>
+        {/* GA4 */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-XV35XKZ474" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-XV35XKZ474');`,
+          }}
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
