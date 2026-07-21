@@ -16,6 +16,12 @@ export default function HomePage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6">
+      {/* SEO header: H1 + intro */}
+      <section className="mb-8">
+        <h1 className="text-2xl font-bold text-white lg:text-3xl">{t("home.h1")}</h1>
+        <p className="mt-3 max-w-4xl text-sm leading-relaxed text-gray-400">{t("home.intro")}</p>
+      </section>
+
       {/* Hero / Featured Section */}
       <section className="mb-8">
         <div className="mb-4 flex items-center gap-2">

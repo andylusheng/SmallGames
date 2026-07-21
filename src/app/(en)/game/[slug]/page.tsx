@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getGameBySlug } from "@/lib/games";
+import { buildAlternates } from "@/lib/metadata";
 import GamePageView, { gameStaticParams } from "@/views/GamePageView";
 
 interface Props {
@@ -18,6 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `Play ${game.title} Free Online - No Download`,
     description: game.description,
+    alternates: buildAlternates(`/game/${slug}`, "en"),
     openGraph: {
       title: `Play ${game.title} Free Online`,
       description: game.description,

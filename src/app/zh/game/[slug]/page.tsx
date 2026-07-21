@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getGameBySlug } from "@/lib/games";
+import { buildAlternates } from "@/lib/metadata";
 import GamePageView, { gameStaticParams } from "@/views/GamePageView";
 
 interface Props {
@@ -18,6 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${game.title} - 免费在线小游戏`,
     description: game.description,
+    alternates: buildAlternates(`/game/${slug}`, "zh"),
     openGraph: {
       title: `${game.title} - 免费在线玩`,
       description: game.description,

@@ -5,6 +5,24 @@ const SITE_NAME = "ZeroPlay Games";
 
 export { SITE_URL, SITE_NAME };
 
+/**
+ * Build self-referencing canonical + en/zh hreflang alternates for a page.
+ * @param path  page path without locale prefix, e.g. "" (home), "/puzzle", "/game/2048"
+ * @param locale  current locale, "en" or "zh"
+ */
+export function buildAlternates(path: string, locale: string) {
+  const enUrl = `${SITE_URL}${path}`;
+  const zhUrl = `${SITE_URL}/zh${path}`;
+  return {
+    canonical: locale === "zh" ? zhUrl : enUrl,
+    languages: {
+      en: enUrl,
+      zh: zhUrl,
+      "x-default": enUrl,
+    },
+  };
+}
+
 export function buildLocaleMetadata(locale: string): Metadata {
   const isEn = locale === "en";
   const prefix = isEn ? "" : "/zh";
@@ -35,9 +53,7 @@ export function buildLocaleMetadata(locale: string): Metadata {
       images: [`${SITE_URL}/og-image.png`],
     },
     robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
-    alternates: {
-      canonical: `${SITE_URL}${prefix}`,
-      languages: { en: SITE_URL, zh: `${SITE_URL}/zh` },
-    },
+    icons: { icon: [{ url: `${SITE_URL}/favicon.svg`, type: "image/svg+xml" }] },
+    alternates: buildAlternates("", locale),
   };
 }

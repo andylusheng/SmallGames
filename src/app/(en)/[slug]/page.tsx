@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getServerTranslations } from "@/lib/server-i18n";
+import { buildAlternates } from "@/lib/metadata";
 import CategoryPageView, { categoryStaticParams } from "@/views/CategoryPageView";
 
 interface Props {
@@ -17,6 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${name} Games - Play Free Online, No Download`,
     description: `Play the best free ${name} games online instantly. No download or sign-up required. Works on desktop and mobile.`,
+    alternates: buildAlternates(`/${slug}`, "en"),
   };
 }
 
