@@ -7,7 +7,7 @@ import { SITE_URL } from "@/lib/metadata";
 import GamePlayer from "@/components/GamePlayer";
 import GameGrid from "@/components/GameGrid";
 import AdBanner from "@/components/AdBanner";
-import { Star, Play, Tag, Calendar, CheckCircle2, Lightbulb, HelpCircle, Info, Sparkles } from "lucide-react";
+import { Star, Play, Tag, Calendar, Lightbulb, HelpCircle, Info, Sparkles, ShieldCheck, Download, Heart, MonitorSmartphone, BadgeCheck, Zap, Gift, Ban } from "lucide-react";
 
 interface GamePageViewProps {
   locale: string;
@@ -166,6 +166,22 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
                 ))}
               </div>
 
+              {/* Trust badges */}
+              <div className="mt-4 flex flex-wrap gap-2">
+                {[
+                  { icon: BadgeCheck, label: isEn ? "100% Free" : "完全免费" },
+                  { icon: Download, label: isEn ? "No Download" : "无需下载" },
+                  { icon: ShieldCheck, label: isEn ? "Kid-Friendly" : "儿童友好" },
+                  { icon: Ban, label: isEn ? "No Forced Ads" : "无强制广告" },
+                  { icon: MonitorSmartphone, label: isEn ? "All Devices" : "全设备支持" },
+                ].map(({ icon: Icon, label }) => (
+                  <span key={label} className="flex items-center gap-1.5 rounded-full border border-green-400/20 bg-green-400/5 px-3 py-1 text-xs font-medium text-green-300">
+                    <Icon className="h-3.5 w-3.5" />
+                    {label}
+                  </span>
+                ))}
+              </div>
+
               {/* Conversational hook */}
               <div className="mt-6 rounded-xl border border-primary/20 bg-primary/5 p-4">
                 <p className="flex items-start gap-2 text-sm leading-relaxed text-gray-200">
@@ -203,20 +219,25 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
                 </div>
               </section>
 
-              {/* Features */}
+              {/* Features — icon cards */}
               {features && features.length > 0 && (
                 <section className="mt-8">
                   <h2 className="text-xl font-semibold text-white">
                     {isEn ? `${game.title} Features` : `${game.title}游戏特色`}
                   </h2>
-                  <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-                    {features.map((f: string, i: number) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-400" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    {features.map((f: string, i: number) => {
+                      const FeatureIcon = [Zap, Star, ShieldCheck, Heart][i % 4];
+                      return (
+                        <div key={i} className="flex items-start gap-3 rounded-xl border border-white/10 bg-surface/50 p-4 transition-colors hover:border-primary/30">
+                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                            <FeatureIcon className="h-4.5 w-4.5 text-primary" />
+                          </span>
+                          <p className="pt-1.5 text-sm leading-relaxed text-gray-300">{f}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </section>
               )}
 
@@ -236,6 +257,46 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
                   </ul>
                 </section>
               )}
+
+              {/* Why Play Here */}
+              <section className="mt-8">
+                <h2 className="text-xl font-semibold text-white">
+                  {isEn ? `Why Play ${game.title} Here?` : `为什么在这里玩${game.title}？`}
+                </h2>
+                <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                  {[
+                    {
+                      icon: Download,
+                      title: isEn ? "vs App Stores" : "对比应用商店",
+                      desc: isEn
+                        ? "Skip the 500MB download and endless updates. Play instantly in your browser — zero storage used."
+                        : "跳过500MB下载和无尽更新，浏览器即开即玩，不占存储空间。",
+                    },
+                    {
+                      icon: Gift,
+                      title: isEn ? "vs Paid Games" : "对比付费游戏",
+                      desc: isEn
+                        ? `All the fun without the price tag. ${game.title} is 100% free with no hidden purchases.`
+                        : `乐趣不打折，价格为零。${game.title}完全免费，无隐藏消费。`,
+                    },
+                    {
+                      icon: ShieldCheck,
+                      title: isEn ? "vs Other Sites" : "对比其他网站",
+                      desc: isEn
+                        ? "No forced pop-ups or ad interruptions. Just a clean, fast gaming experience."
+                        : "没有强制弹窗和广告打断，只有干净流畅的游戏体验。",
+                    },
+                  ].map(({ icon: Icon, title, desc }) => (
+                    <div key={title} className="rounded-xl border border-white/10 bg-surface/50 p-4">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+                        <Icon className="h-4.5 w-4.5 text-primary" />
+                      </span>
+                      <h3 className="mt-3 text-sm font-semibold text-white">{title}</h3>
+                      <p className="mt-1.5 text-xs leading-relaxed text-gray-400">{desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
 
               {/* Quick Facts */}
               <section className="mt-8">
