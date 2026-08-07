@@ -3,8 +3,9 @@
 import React, { createContext, useContext } from "react";
 import en from "@/messages/en.json";
 import zh from "@/messages/zh.json";
+import zhTw from "@/messages/zh-tw.json";
 
-const messages: Record<string, any> = { en, zh };
+const messages: Record<string, any> = { en, zh, "zh-tw": zhTw };
 
 type MessagesContextType = {
   locale: string;
