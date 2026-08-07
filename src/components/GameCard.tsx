@@ -2,6 +2,7 @@
 
 import { Link } from "@/components/Link";
 import { trackEvent } from "@/lib/analytics";
+import { useTranslations } from "@/lib/i18n";
 import type { GameCardData } from "@/types/game-card";
 import { Play } from "lucide-react";
 
@@ -11,6 +12,7 @@ interface GameCardProps {
 }
 
 export default function GameCard({ game, trackingSource }: GameCardProps) {
+  const t = useTranslations();
   const handleClick = () => {
     if (trackingSource === "related") {
       trackEvent("related_game_click", {
@@ -49,7 +51,7 @@ export default function GameCard({ game, trackingSource }: GameCardProps) {
         </p>
         <div className="mt-2">
           <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
-            {game.category}
+            {t(`categories.${game.category}`)}
           </span>
         </div>
       </div>
