@@ -1,12 +1,14 @@
 import GameCard from "./GameCard";
 import type { GameCardData } from "@/types/game-card";
+import { getGameBySlug, getLocalizedGameDescription } from "@/lib/games";
 
 interface GameGridProps {
   games: GameCardData[];
   trackingSource?: "related" | "home" | "category" | "search";
+  locale?: string;
 }
 
-function toCardData(game: GameCardData): GameCardData {
+function toCardData(game: GameCardData, locale: string): GameCardData {
   const {
     id,
     title,
@@ -20,12 +22,13 @@ function toCardData(game: GameCardData): GameCardData {
     publishedAt,
     updatedAt,
   } = game;
+  const fullGame = getGameBySlug(slug);
 
   return {
     id,
     title,
     slug,
-    description,
+    description: fullGame ? getLocalizedGameDescription(fullGame, locale) : description,
     category,
     thumbnail,
     tags,
@@ -36,12 +39,13 @@ function toCardData(game: GameCardData): GameCardData {
   };
 }
 
-export default function GameGrid({ games, trackingSource }: GameGridProps) {
+export default function GameGrid({ games, trackingSource, locale = "en" }: GameGridProps) {
   if (games.length === 0) {
+    const emptyText = locale === "zh-tw" ? "找不到遊戲" : locale === "zh" ? "未找到游戏" : "No games found";
     return (
       <div className="flex flex-col items-center justify-center py-16 text-gray-400">
         <span className="text-5xl">🎮</span>
-        <p className="mt-4 text-lg">No games found</p>
+        <p className="mt-4 text-lg">{emptyText}</p>
       </div>
     );
   }
@@ -51,7 +55,7 @@ export default function GameGrid({ games, trackingSource }: GameGridProps) {
       {games.map((game) => (
         <GameCard
           key={game.id}
-          game={toCardData(game)}
+          game={toCardData(game, locale)}
           trackingSource={trackingSource}
         />
       ))}
