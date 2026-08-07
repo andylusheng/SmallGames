@@ -30,6 +30,18 @@ function findProperty(objectLiteral, name) {
   );
 }
 
+function literalSlug(objectLiteral) {
+  const slugProperty = findProperty(objectLiteral, "slug");
+  if (
+    slugProperty &&
+    ts.isPropertyAssignment(slugProperty) &&
+    ts.isStringLiteral(slugProperty.initializer)
+  ) {
+    return slugProperty.initializer.text;
+  }
+  return undefined;
+}
+
 const candidates = new Set();
 const sourceFiles = [...new Set(roots.flatMap(collectTypeScriptFiles))];
 
@@ -45,21 +57,31 @@ for (const sourcePath of sourceFiles) {
 
   function visit(node) {
     if (ts.isObjectLiteralExpression(node)) {
-      const slugProperty = findProperty(node, "slug");
+      const slug = literalSlug(node);
       const statusProperty = findProperty(node, "seoStatus");
 
       if (
-        slugProperty &&
+        slug &&
         statusProperty &&
-        ts.isPropertyAssignment(slugProperty) &&
         ts.isPropertyAssignment(statusProperty) &&
-        ts.isStringLiteral(slugProperty.initializer) &&
         ts.isStringLiteral(statusProperty.initializer) &&
         qaStatuses.has(statusProperty.initializer.text)
       ) {
-        candidates.add(slugProperty.initializer.text);
+        candidates.add(slug);
       }
     }
+
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === "reviewedProfile" &&
+      node.arguments.length > 0 &&
+      ts.isObjectLiteralExpression(node.arguments[0])
+    ) {
+      const slug = literalSlug(node.arguments[0]);
+      if (slug) candidates.add(slug);
+    }
+
     ts.forEachChild(node, visit);
   }
 

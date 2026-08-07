@@ -1,18 +1,46 @@
 import type { Metadata } from "next";
 import { getServerTranslations } from "@/lib/server-i18n";
 import { buildAlternates, SITE_URL } from "@/lib/metadata";
+import { TOPIC_SEO, getLocalizedTopicSeo } from "@/data/topic-seo";
 import CategoryPageView, { categoryStaticParams } from "@/views/CategoryPageView";
+import TopicPageView from "@/views/TopicPageView";
 
 interface Props {
   params: Promise<{ slug: string }>;
 }
 
+const explicitTopicKeys = new Set(["tap", "merge"]);
+const dynamicTopics = Object.values(TOPIC_SEO).filter((topic) => !explicitTopicKeys.has(topic.key));
+
+function findTopicBySlug(slug: string) {
+  return dynamicTopics.find((topic) => topic.path === `/${slug}`);
+}
+
 export function generateStaticParams() {
-  return categoryStaticParams();
+  return [
+    ...categoryStaticParams(),
+    ...dynamicTopics.map((topic) => ({ slug: topic.path.replace(/^\//, "") })),
+  ];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
+  const topic = findTopicBySlug(slug);
+  if (topic) {
+    const content = getLocalizedTopicSeo(topic.key, "zh")!;
+    return {
+      title: content.metaTitle,
+      description: content.metaDescription,
+      alternates: buildAlternates(topic.path, "zh"),
+      openGraph: {
+        title: content.metaTitle,
+        description: content.metaDescription,
+        type: "website",
+        url: `${SITE_URL}/zh${topic.path}`,
+      },
+    };
+  }
+
   const t = getServerTranslations("zh");
   const name = t(`categories.${slug}`);
   return {
@@ -28,7 +56,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function ZhCategoryPage({ params }: Props) {
+export default async function ZhBrowsePage({ params }: Props) {
   const { slug } = await params;
+  const topic = findTopicBySlug(slug);
+  if (topic) return <TopicPageView locale="zh" topic={topic.key} />;
   return <CategoryPageView locale="zh" slug={slug} />;
 }
