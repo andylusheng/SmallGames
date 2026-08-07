@@ -1,0 +1,112 @@
+name: Visual SEO QA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - "src/data/game-profiles.ts"
+      - "src/views/GamePageView.tsx"
+      - "public/games/**"
+      - ".github/workflows/visual-seo.yml"
+
+jobs:
+  quick-tap-screenshots:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci --legacy-peer-deps
+      - run: npm run build
+
+      - name: Set up Chrome
+        id: chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
+      - name: Capture Quick Tap desktop and mobile screenshots
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python3 -m http.server 4173 --directory out >/tmp/zeroplay-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+
+          for attempt in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+
+          if [[ -f out/game/quick-tap.html ]]; then
+            PAGE_URL="http://127.0.0.1:4173/game/quick-tap.html"
+          elif [[ -f out/game/quick-tap/index.html ]]; then
+            PAGE_URL="http://127.0.0.1:4173/game/quick-tap/"
+          else
+            echo "Quick Tap exported page was not found under out/game/"
+            find out/game -maxdepth 2 -type f | head -50 || true
+            exit 1
+          fi
+
+          GAME_URL="http://127.0.0.1:4173/games/quick-tap/index.html"
+          CHROME="${{ steps.chrome.outputs.chrome-path }}"
+          OUTPUT_DIR="$GITHUB_WORKSPACE/artifacts/quick-tap"
+          mkdir -p "$OUTPUT_DIR"
+
+          curl -fsS "$PAGE_URL" >/dev/null
+          curl -fsS "$GAME_URL" >/dev/null
+
+          "$CHROME" \
+            --headless=new \
+            --no-sandbox \
+            --disable-gpu \
+            --hide-scrollbars \
+            --force-device-scale-factor=1 \
+            --window-size=1440,1200 \
+            --virtual-time-budget=6000 \
+            --screenshot="$OUTPUT_DIR/page-desktop.png" \
+            "$PAGE_URL"
+
+          "$CHROME" \
+            --headless=new \
+            --no-sandbox \
+            --disable-gpu \
+            --hide-scrollbars \
+            --force-device-scale-factor=1 \
+            --window-size=390,844 \
+            --virtual-time-budget=6000 \
+            --screenshot="$OUTPUT_DIR/page-mobile.png" \
+            "$PAGE_URL"
+
+          "$CHROME" \
+            --headless=new \
+            --no-sandbox \
+            --disable-gpu \
+            --hide-scrollbars \
+            --force-device-scale-factor=1 \
+            --window-size=900,700 \
+            --virtual-time-budget=5000 \
+            --screenshot="$OUTPUT_DIR/game-runtime.png" \
+            "$GAME_URL"
+
+          test -s "$OUTPUT_DIR/page-desktop.png"
+          test -s "$OUTPUT_DIR/page-mobile.png"
+          test -s "$OUTPUT_DIR/game-runtime.png"
+
+          file "$OUTPUT_DIR"/*.png
+
+      - name: Upload visual QA screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: quick-tap-visual-seo
+          path: artifacts/quick-tap/*.png
+          if-no-files-found: error
+          retention-days: 30
