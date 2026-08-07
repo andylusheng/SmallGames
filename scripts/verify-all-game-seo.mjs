@@ -6,6 +6,7 @@ const inventory = JSON.parse(fs.readFileSync("src/data/games.json", "utf8"));
 const inventorySlugs = new Set(inventory.map((game) => game.slug));
 const profileRoots = ["src/data/game-profiles.ts", "src/data/game-profiles"];
 const factories = new Set(["reviewedProfile", "optimizedProfile", "catalogProfile"]);
+const sourceStatuses = new Set(["reviewed", "optimized"]);
 
 function files(target) {
   if (!fs.existsSync(target)) return [];
@@ -34,9 +35,16 @@ for (const sourcePath of [...new Set(profileRoots.flatMap(files))]) {
     if (ts.isObjectLiteralExpression(node)) {
       const slug = slugFrom(node);
       const status = findProp(node, "seoStatus");
-      if (slug && status && ts.isPropertyAssignment(status) && ts.isStringLiteral(status.initializer) && status.initializer.text === "optimized") found.add(slug);
+      if (
+        slug && status && ts.isPropertyAssignment(status) &&
+        ts.isStringLiteral(status.initializer) && sourceStatuses.has(status.initializer.text)
+      ) found.add(slug);
     }
-    if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && factories.has(node.expression.text) && node.arguments[0] && ts.isObjectLiteralExpression(node.arguments[0])) {
+    if (
+      ts.isCallExpression(node) && ts.isIdentifier(node.expression) &&
+      factories.has(node.expression.text) && node.arguments[0] &&
+      ts.isObjectLiteralExpression(node.arguments[0])
+    ) {
       const slug = slugFrom(node.arguments[0]);
       if (slug) found.add(slug);
     }
