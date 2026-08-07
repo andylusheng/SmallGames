@@ -19,7 +19,7 @@ import { SITE_URL } from "@/lib/metadata";
 import GamePlayer from "@/components/GamePlayer";
 import GameGrid from "@/components/GameGrid";
 import AdBanner from "@/components/AdBanner";
-import { Download, Gift, Heart, HelpCircle, Info, Lightbulb, ShieldCheck, Sparkles, Star, Tag, Zap } from "lucide-react";
+import { Download, Gift, HelpCircle, Info, Lightbulb, ShieldCheck, Sparkles, Star, Tag, Zap } from "lucide-react";
 
 interface GamePageViewProps {
   locale: string;
@@ -52,19 +52,44 @@ export function buildGameJsonLd(game: Game, locale: string) {
     inLanguage: locale === "en" ? "en" : "zh",
     datePublished: game.publishedAt,
     dateModified: game.updatedAt,
-    offers: { "@type": "Offer", price: "0", priceCurrency: "USD", availability: "https://schema.org/InStock" },
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+    },
   };
 }
 
+function getGameFaqs(game: Game, locale: string): { q: string; a: string }[] {
+  const p2 = getLocalizedGameProfile(game, locale);
+  if (p2?.faq?.length) return p2.faq;
+
+  if (locale === "en") {
+    return [
+      { q: `How do I play ${game.title}?`, a: game.instructions },
+      { q: `Is ${game.title} free to play?`, a: `Yes. ${game.title} is free to play in your browser. The site may display advertising, but no account or download is required to start.` },
+      { q: `Can I play ${game.title} on mobile?`, a: `You can open ${game.title} in a mobile browser. Control support varies by game; if touch controls are not available, use a desktop browser and keyboard or mouse.` },
+      { q: `Do I need to download ${game.title}?`, a: `No. ${game.title} runs as an HTML5 browser game and does not require an app installation.` },
+    ];
+  }
+
+  return [
+    { q: `${game.title}怎么玩？`, a: game.instructions },
+    { q: `${game.title}免费吗？`, a: `是的。${game.title}可以在浏览器中免费游玩。网站可能展示广告，但开始游戏不需要注册账号或下载安装。` },
+    { q: `手机上能玩${game.title}吗？`, a: `你可以使用手机浏览器打开${game.title}。不同游戏的触屏支持情况不同；如果无法触控操作，请使用电脑浏览器和键盘或鼠标。` },
+    { q: `玩${game.title}需要下载吗？`, a: `不需要。${game.title}是HTML5网页游戏，无需安装应用。` },
+  ];
+}
+
 export function buildFaqJsonLd(game: Game, locale: string) {
-  const faqs = getGameFaqs(game, locale);
   return {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: faqs.map((f) => ({
+    mainEntity: getGameFaqs(game, locale).map((item) => ({
       "@type": "Question",
-      name: f.q,
-      acceptedAnswer: { "@type": "Answer", text: f.a },
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
     })),
   };
 }
@@ -90,34 +115,6 @@ export function buildBreadcrumbJsonLd(game: Game, locale: string, t: (key: strin
   };
 }
 
-function getGameFaqs(game: Game, locale: string): { q: string; a: string }[] {
-  const optimized = getLocalizedGameProfile(game, locale);
-  if (optimized?.faq?.length) return optimized.faq;
-
-  const isEn = locale === "en";
-  if (isEn) {
-    return [
-      { q: `How do I play ${game.title}?`, a: game.instructions },
-      { q: `Is ${game.title} free to play?`, a: `Yes. ${game.title} is free to play in your browser. The site may display advertising, but no account or download is required to start.` },
-      { q: `Can I play ${game.title} on mobile?`, a: `You can open ${game.title} in a mobile browser. Control support varies by game; if touch controls are not available, use a desktop browser and keyboard or mouse.` },
-      { q: `Do I need to download ${game.title}?`, a: `No. ${game.title} runs as an HTML5 browser game and does not require an app installation.` },
-    ];
-  }
-
-  return [
-    { q: `${game.title}怎么玩？`, a: game.instructions },
-    { q: `${game.title}免费吗？`, a: `是的。${game.title}可以在浏览器中免费游玩。网站可能展示广告，但开始游戏不需要注册账号或下载安装。` },
-    { q: `手机上能玩${game.title}吗？`, a: `你可以使用手机浏览器打开${game.title}。不同游戏的触屏支持情况不同；如果无法触控操作，请使用电脑浏览器和键盘或鼠标。` },
-    { q: `玩${game.title}需要下载吗？`, a: `不需要。${game.title}是HTML5网页游戏，无需安装应用。` },
-  ];
-}
-
-const topicLabels: Record<string, { en: string; zh: string }> = {
-  tap: { en: "Tap Games", zh: "点击类游戏" },
-  reaction: { en: "Reaction Games", zh: "反应类游戏" },
-  "score-challenge": { en: "Score Challenge Games", zh: "高分挑战游戏" },
-};
-
 export default async function GamePageView({ locale, slug }: GamePageViewProps) {
   const game = getGameBySlug(slug);
   if (!game) notFound();
@@ -125,23 +122,21 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
   const t = getServerTranslations(locale);
   const isEn = locale === "en";
   const profile = getGameProfile(game);
-  const optimizedContent = getLocalizedGameProfile(game, locale);
+  const p2 = getLocalizedGameProfile(game, locale);
   const pageSeo = getGamePageSeo(game, locale);
   const primaryTopic = profile?.mechanics.gameplayTopics[0];
   const topicGames = primaryTopic ? getGamesByGameplayTopic(primaryTopic, game.slug, 6) : [];
   const topicHubHref = primaryTopic ? getTopicHubHref(primaryTopic, locale) : undefined;
   const topicContent = primaryTopic ? getLocalizedTopicSeo(primaryTopic, locale) : undefined;
   const relatedGames = getRelatedGames(game, 8);
-  const categoryGames = getGamesByCategory(game.category).filter((g) => g.id !== game.id).slice(0, 4);
-
-  const seo = getGameSeo(game, locale);
-  const longDescription = seo.longDescription || game.description;
-  const features = seo.features;
-  const tips = optimizedContent?.tips ?? seo.tips;
-  const difficulty = seo.difficulty || (isEn ? "Easy" : "简单");
+  const categoryGames = getGamesByCategory(game.category).filter((item) => item.id !== game.id).slice(0, 4);
+  const fallbackSeo = getGameSeo(game, locale);
+  const longDescription = fallbackSeo.longDescription || game.description;
+  const aboutParagraphs = p2?.about ?? longDescription.split("\n").filter(Boolean);
+  const howToPlaySteps = p2?.howToPlay ?? game.instructions.split(/(?<=\.)\s+(?=[A-Z])/);
+  const tips = p2?.tips ?? fallbackSeo.tips;
   const faqs = getGameFaqs(game, locale);
-  const aboutParagraphs = optimizedContent?.about ?? longDescription.split("\n").filter(Boolean);
-  const howToPlaySteps = optimizedContent?.howToPlay ?? game.instructions.split(/(?<=\.)\s+(?=[A-Z])/);
+  const difficulty = fallbackSeo.difficulty || (isEn ? "Easy" : "简单");
   const localize = (value: { en: string; zh: string }) => (isEn ? value.en : value.zh);
 
   const infoRows: string[][] = [
@@ -154,11 +149,9 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
   ];
 
   if (profile?.mechanics.durationSeconds) {
-    infoRows.push([
-      isEn ? "Round Length" : "单局时长",
-      isEn ? `${profile.mechanics.durationSeconds} seconds` : `${profile.mechanics.durationSeconds}秒`,
-    ]);
+    infoRows.push([isEn ? "Round Length" : "单局时长", isEn ? `${profile.mechanics.durationSeconds} seconds` : `${profile.mechanics.durationSeconds}秒`]);
   }
+
   if (profile?.mechanics.controls.length) {
     const controlLabels: Record<string, { en: string; zh: string }> = {
       mouse: { en: "Mouse", zh: "鼠标" },
@@ -185,46 +178,36 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
           {topicHubHref && topicContent ? (
             <NextLink href={topicHubHref} className="hover:text-primary">{topicContent.label}</NextLink>
           ) : (
-            <NextLink href={lp(locale, `/${game.category}`)} className="hover:text-primary">
-              {t(`categories.${game.category}`)}
-            </NextLink>
+            <NextLink href={lp(locale, `/${game.category}`)} className="hover:text-primary">{t(`categories.${game.category}`)}</NextLink>
           )}
           <span>/</span>
           <span className="text-white">{game.title}</span>
         </nav>
 
-        {optimizedContent && (
-          <header className="mb-6 max-w-4xl">
-            <h1 className="text-3xl font-bold tracking-tight text-white lg:text-4xl">{pageSeo.h1}</h1>
-            <p className="mt-3 text-base leading-relaxed text-gray-300 lg:text-lg">{pageSeo.intro}</p>
+        {p2 && (
+          <header className="mb-5 max-w-4xl">
+            <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl">{pageSeo.h1}</h1>
+            <p className="mt-2 text-sm leading-relaxed text-gray-300 sm:text-base lg:text-lg">{pageSeo.intro}</p>
           </header>
         )}
 
-        <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
-          <div>
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
+          <main className="min-w-0">
             <GamePlayer gameUrl={game.gameUrl} title={game.title} slug={game.slug} />
 
-            <div className="mt-6">
-              {!optimizedContent && (
-                <h1 className="text-2xl font-bold text-white lg:text-3xl">{pageSeo.h1}</h1>
-              )}
+            <div className="mt-5">
+              {!p2 && <h1 className="text-2xl font-bold text-white lg:text-3xl">{pageSeo.h1}</h1>}
 
-              <div className={`${optimizedContent ? "" : "mt-3"} flex flex-wrap items-center gap-4 text-sm text-gray-400`}>
+              <div className={`${p2 ? "" : "mt-3"} flex flex-wrap items-center gap-4 text-sm text-gray-400`}>
                 <span className="flex items-center gap-1">
                   <Tag className="h-4 w-4" />
-                  <NextLink href={lp(locale, `/${game.category}`)} className="text-primary hover:underline">
-                    {t(`categories.${game.category}`)}
-                  </NextLink>
+                  <NextLink href={lp(locale, `/${game.category}`)} className="text-primary hover:underline">{t(`categories.${game.category}`)}</NextLink>
                 </span>
-                <span className="flex items-center gap-1 text-gray-500">
-                  {isEn ? "Updated" : "更新"}: {game.updatedAt}
-                </span>
+                <span className="text-gray-500">{isEn ? "Updated" : "更新"}: {game.updatedAt}</span>
               </div>
 
               <div className="mt-3 flex flex-wrap gap-2">
-                {game.tags.map((tag) => (
-                  <span key={tag} className="rounded-full bg-surface px-3 py-1 text-xs text-gray-300">#{tag}</span>
-                ))}
+                {game.tags.map((tag) => <span key={tag} className="rounded-full bg-surface px-3 py-1 text-xs text-gray-300">#{tag}</span>)}
               </div>
 
               <div className="mt-4 flex flex-wrap gap-2">
@@ -239,76 +222,64 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
                 ))}
               </div>
 
-              {!optimizedContent && (
+              {!p2 && (
                 <div className="mt-6 rounded-xl border border-primary/20 bg-primary/5 p-4">
-                  <p className="flex items-start gap-2 text-sm leading-relaxed text-gray-200">
-                    <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                    {getGameHook(game.category, game.title, locale)}
-                  </p>
+                  <p className="flex items-start gap-2 text-sm leading-relaxed text-gray-200"><Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" />{getGameHook(game.category, game.title, locale)}</p>
                 </div>
               )}
 
-              <section className="mt-8">
+              <section className="mt-7">
                 <h2 className="text-xl font-semibold text-white">{isEn ? `About ${game.title}` : `关于${game.title}`}</h2>
-                <div className="mt-3 space-y-3 text-sm leading-relaxed text-gray-300">
-                  {aboutParagraphs.map((para, i) => <p key={i}>{para}</p>)}
-                </div>
+                <div className="mt-3 space-y-3 text-sm leading-relaxed text-gray-300">{aboutParagraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div>
               </section>
 
-              <section className="mt-8">
+              <section className="mt-7">
                 <h2 className="text-xl font-semibold text-white">{isEn ? `How to Play ${game.title}` : `${game.title}怎么玩`}</h2>
                 <div className="mt-3 space-y-2 text-sm leading-relaxed text-gray-300">
-                  {howToPlaySteps.map((step, i) => (
-                    <p key={i} className="flex gap-2">
-                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">{i + 1}</span>
-                      <span>{step}</span>
-                    </p>
+                  {howToPlaySteps.map((step, index) => (
+                    <p key={index} className="flex gap-2"><span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">{index + 1}</span><span>{step}</span></p>
                   ))}
                 </div>
               </section>
 
-              {optimizedContent?.rules?.length ? (
-                <section className="mt-8">
+              {p2?.rules?.length ? (
+                <section className="mt-7">
                   <h2 className="text-xl font-semibold text-white">{isEn ? `${game.title} Rules` : `${game.title}游戏规则`}</h2>
                   <ul className="mt-3 space-y-2">
-                    {optimizedContent.rules.map((rule, i) => (
-                      <li key={i} className="flex gap-2 text-sm leading-relaxed text-gray-300">
-                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                        <span>{rule}</span>
-                      </li>
-                    ))}
+                    {p2.rules.map((rule, index) => <li key={index} className="flex gap-2 text-sm leading-relaxed text-gray-300"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" /><span>{rule}</span></li>)}
                   </ul>
                 </section>
               ) : null}
 
               {profile?.mechanics.scoring.length ? (
-                <section className="mt-8">
+                <section className="mt-7">
                   <h2 className="text-xl font-semibold text-white">
-                    {profile.mechanics.scoringTitle
-                      ? localize(profile.mechanics.scoringTitle)
-                      : isEn ? `${game.title} Scoring` : `${game.title}计分规则`}
+                    {profile.mechanics.scoringTitle ? localize(profile.mechanics.scoringTitle) : isEn ? `${game.title} Scoring` : `${game.title}计分规则`}
                   </h2>
-                  <div className="mt-3 overflow-hidden rounded-xl border border-white/10">
-                    <table className="w-full text-sm">
+                  <div className="mt-3 overflow-x-auto rounded-xl border border-white/10">
+                    <table className="w-full min-w-[520px] text-sm">
                       <thead className="bg-surface">
                         <tr>
                           <th className="px-4 py-3 text-left font-semibold text-gray-200">{isEn ? "Action" : "操作"}</th>
-                          <th className="px-4 py-3 text-left font-semibold text-gray-200">
-                            {profile.mechanics.scoringValueLabel
-                              ? localize(profile.mechanics.scoringValueLabel)
-                              : isEn ? "Points" : "分数"}
-                          </th>
-                          <th className="hidden px-4 py-3 text-left font-semibold text-gray-200 sm:table-cell">{isEn ? "How it works" : "说明"}</th>
+                          <th className="px-4 py-3 text-left font-semibold text-gray-200">{profile.mechanics.scoringValueLabel ? localize(profile.mechanics.scoringValueLabel) : isEn ? "Points" : "分数"}</th>
+                          <th className="px-4 py-3 text-left font-semibold text-gray-200">{isEn ? "How it works" : "说明"}</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {profile.mechanics.scoring.map((rule) => (
-                          <tr key={rule.id} className="border-t border-white/5">
-                            <td className="px-4 py-3 text-white">{localize(rule.label)}</td>
-                            <td className="px-4 py-3 font-semibold text-primary">+{rule.points}</td>
-                            <td className="hidden px-4 py-3 text-gray-400 sm:table-cell">{rule.note ? localize(rule.note) : "—"}</td>
-                          </tr>
-                        ))}
+                        {profile.mechanics.scoring.map((rule) => {
+                          const value = rule.points !== undefined
+                            ? `${rule.points > 0 ? "+" : ""}${rule.points}`
+                            : rule.value
+                              ? localize(rule.value)
+                              : "—";
+                          return (
+                            <tr key={rule.id} className="border-t border-white/5">
+                              <td className="px-4 py-3 text-white">{localize(rule.label)}</td>
+                              <td className="px-4 py-3 font-semibold text-primary">{value}</td>
+                              <td className="px-4 py-3 text-gray-400">{rule.note ? localize(rule.note) : "—"}</td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
@@ -316,7 +287,7 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
               ) : null}
 
               {profile && (
-                <section className="mt-8">
+                <section className="mt-7">
                   <h2 className="text-xl font-semibold text-white">{isEn ? `${game.title} Game Mechanics` : `${game.title}玩法机制`}</h2>
                   <div className="mt-3 grid gap-3 sm:grid-cols-2">
                     <div className="rounded-xl border border-white/10 bg-surface/50 p-4">
@@ -331,114 +302,72 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
                     )}
                   </div>
                   <ul className="mt-3 space-y-2">
-                    {profile.mechanics.specialMechanics.map((mechanic, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm leading-relaxed text-gray-300">
-                        <Zap className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                        {localize(mechanic)}
-                      </li>
-                    ))}
-                    {profile.mechanics.progress && (
-                      <li className="flex items-start gap-2 text-sm leading-relaxed text-gray-300">
-                        <Star className="mt-0.5 h-4 w-4 shrink-0 text-yellow-400" />
-                        {localize(profile.mechanics.progress)}
-                      </li>
-                    )}
+                    {profile.mechanics.specialMechanics.map((item, index) => <li key={index} className="flex items-start gap-2 text-sm leading-relaxed text-gray-300"><Zap className="mt-0.5 h-4 w-4 shrink-0 text-primary" />{localize(item)}</li>)}
+                    {profile.mechanics.progress && <li className="flex items-start gap-2 text-sm leading-relaxed text-gray-300"><Star className="mt-0.5 h-4 w-4 shrink-0 text-yellow-400" />{localize(profile.mechanics.progress)}</li>}
                   </ul>
                 </section>
               )}
 
-              {!optimizedContent && features && features.length > 0 && (
-                <section className="mt-8">
+              {!p2 && fallbackSeo.features?.length ? (
+                <section className="mt-7">
                   <h2 className="text-xl font-semibold text-white">{isEn ? `${game.title} Features` : `${game.title}游戏特色`}</h2>
-                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                    {features.map((f, i) => {
-                      const FeatureIcon = [Zap, Star, ShieldCheck, Heart][i % 4];
-                      return (
-                        <div key={i} className="flex items-start gap-3 rounded-xl border border-white/10 bg-surface/50 p-4 transition-colors hover:border-primary/30">
-                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10"><FeatureIcon className="h-4.5 w-4.5 text-primary" /></span>
-                          <p className="pt-1.5 text-sm leading-relaxed text-gray-300">{f}</p>
-                        </div>
-                      );
-                    })}
-                  </div>
+                  <ul className="mt-3 grid gap-3 sm:grid-cols-2">{fallbackSeo.features.map((feature, index) => <li key={index} className="rounded-xl border border-white/10 bg-surface/50 p-4 text-sm leading-relaxed text-gray-300">{feature}</li>)}</ul>
                 </section>
-              )}
+              ) : null}
 
-              {tips && tips.length > 0 && (
-                <section className="mt-8">
+              {tips?.length ? (
+                <section className="mt-7">
                   <h2 className="text-xl font-semibold text-white">{isEn ? "Tips & Strategies" : "技巧与攻略"}</h2>
-                  <ul className="mt-3 space-y-2">
-                    {tips.map((tip, i) => <li key={i} className="flex items-start gap-2 text-sm text-gray-300"><Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-yellow-400" />{tip}</li>)}
-                  </ul>
+                  <ul className="mt-3 space-y-2">{tips.map((tip, index) => <li key={index} className="flex items-start gap-2 text-sm leading-relaxed text-gray-300"><Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-yellow-400" />{tip}</li>)}</ul>
                 </section>
-              )}
+              ) : null}
 
-              <section className="mt-8">
-                <h2 className="text-xl font-semibold text-white">{isEn ? `Why Play ${game.title} Here?` : `为什么在这里玩${game.title}？`}</h2>
-                <div className="mt-3 grid gap-3 sm:grid-cols-3">
-                  {[
-                    { icon: Download, title: isEn ? "Browser Play" : "浏览器游玩", desc: isEn ? "Start in your browser without installing a separate app." : "直接在浏览器中开始，无需安装单独的应用。" },
-                    { icon: Gift, title: isEn ? "Free Access" : "免费访问", desc: isEn ? `${game.title} is free to start and does not require an account.` : `${game.title}可以免费开始，无需注册账号。` },
-                    { icon: ShieldCheck, title: isEn ? "Quick Restart" : "快速重开", desc: isEn ? "Restart the game from the player controls whenever you want another round." : "随时使用播放器控制栏重新开始下一局。" },
-                  ].map(({ icon: Icon, title, desc }) => (
-                    <div key={title} className="rounded-xl border border-white/10 bg-surface/50 p-4">
-                      <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10"><Icon className="h-4.5 w-4.5 text-primary" /></span>
-                      <h3 className="mt-3 text-sm font-semibold text-white">{title}</h3>
-                      <p className="mt-1.5 text-xs leading-relaxed text-gray-400">{desc}</p>
-                    </div>
-                  ))}
-                </div>
-              </section>
-
-              <section className="mt-8">
+              <section className="mt-7">
                 <h2 className="flex items-center gap-2 text-xl font-semibold text-white"><Info className="h-5 w-5 text-primary" />{isEn ? "Game Info" : "游戏信息"}</h2>
                 <div className="mt-3 overflow-hidden rounded-lg border border-white/10">
-                  <table className="w-full text-sm"><tbody>
-                    {infoRows.map(([label, value]) => <tr key={label} className="border-b border-white/5 last:border-0"><td className="bg-surface px-4 py-2.5 font-medium text-gray-300">{label}</td><td className="px-4 py-2.5 text-white">{value}</td></tr>)}
-                  </tbody></table>
+                  <table className="w-full text-sm"><tbody>{infoRows.map(([label, value]) => <tr key={label} className="border-b border-white/5 last:border-0"><td className="bg-surface px-4 py-2.5 font-medium text-gray-300">{label}</td><td className="px-4 py-2.5 text-white">{value}</td></tr>)}</tbody></table>
                 </div>
               </section>
 
-              <section className="mt-8">
+              <section className="mt-7">
                 <h2 className="flex items-center gap-2 text-xl font-semibold text-white"><HelpCircle className="h-5 w-5 text-primary" />{isEn ? "Frequently Asked Questions" : "常见问题"}</h2>
-                <div className="mt-3 space-y-3">
-                  {faqs.map((faq, i) => <details key={i} className="group rounded-lg border border-white/10 bg-surface/50"><summary className="cursor-pointer px-4 py-3 text-sm font-medium text-white transition-colors hover:text-primary">{faq.q}</summary><p className="border-t border-white/5 px-4 py-3 text-sm leading-relaxed text-gray-300">{faq.a}</p></details>)}
-                </div>
+                <div className="mt-3 space-y-3">{faqs.map((faq, index) => <details key={index} className="group rounded-lg border border-white/10 bg-surface/50"><summary className="cursor-pointer px-4 py-3 text-sm font-medium text-white transition-colors hover:text-primary">{faq.q}</summary><p className="border-t border-white/5 px-4 py-3 text-sm leading-relaxed text-gray-300">{faq.a}</p></details>)}</div>
               </section>
 
               {primaryTopic && topicGames.length > 0 ? (
                 <section className="mt-8">
                   <div className="flex flex-wrap items-center justify-between gap-3">
-                    <h2 className="text-xl font-semibold text-white">
-                      {isEn ? `More ${topicContent?.label ?? topicLabels[primaryTopic]?.en ?? primaryTopic} Like ${game.title}` : `更多${topicContent?.label ?? topicLabels[primaryTopic]?.zh ?? primaryTopic}`}
-                    </h2>
-                    {topicHubHref && topicContent && (
-                      <NextLink href={topicHubHref} className="text-sm font-medium text-primary hover:underline">
-                        {isEn ? `View all ${topicContent.label}` : `查看全部${topicContent.label}`}
-                      </NextLink>
-                    )}
+                    <h2 className="text-xl font-semibold text-white">{isEn ? `More ${topicContent?.label ?? primaryTopic} Like ${game.title}` : `更多${topicContent?.label ?? primaryTopic}`}</h2>
+                    {topicHubHref && topicContent && <NextLink href={topicHubHref} className="text-sm font-medium text-primary hover:underline">{isEn ? `View all ${topicContent.label}` : `查看全部${topicContent.label}`}</NextLink>}
                   </div>
-                  <p className="mt-2 text-sm text-gray-400">
-                    {isEn ? `Continue with games built around the same ${primaryTopic} mechanic.` : `继续体验围绕${topicContent?.label ?? topicLabels[primaryTopic]?.zh ?? primaryTopic}机制设计的游戏。`}
-                  </p>
-                  <div className="mt-3"><GameGrid games={topicGames} trackingSource="related" /></div>
+                  <p className="mt-2 text-sm text-gray-400">{isEn ? `Continue with games built around the same ${primaryTopic} mechanic.` : `继续体验围绕${topicContent?.label ?? primaryTopic}机制设计的游戏。`}</p>
+                  <div className="mt-4"><GameGrid games={topicGames} trackingSource="related" /></div>
                 </section>
-              ) : categoryGames.length > 0 ? (
-                <section className="mt-8"><h2 className="text-xl font-semibold text-white">{isEn ? `More ${t(`categories.${game.category}`)} Games` : `更多${t(`categories.${game.category}`)}游戏`}</h2><div className="mt-3"><GameGrid games={categoryGames} trackingSource="related" /></div></section>
+              ) : relatedGames.length > 0 ? (
+                <section className="mt-8">
+                  <h2 className="text-xl font-semibold text-white">{isEn ? "Related Games" : "相关游戏"}</h2>
+                  <div className="mt-4"><GameGrid games={relatedGames.slice(0, 6)} trackingSource="related" /></div>
+                </section>
               ) : null}
+
+              <AdBanner className="mt-8" />
             </div>
-            <AdBanner className="mt-6" />
-          </div>
+          </main>
 
           <aside className="hidden lg:block">
-            <AdBanner format="rectangle" className="mb-6" />
-            <div><h3 className="mb-4 text-lg font-semibold text-white">{t("game.relatedGames")}</h3><div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
-              {relatedGames.slice(0, 6).map((rg) => <NextLink key={rg.id} href={lp(locale, `/game/${rg.slug}`)} className="group flex items-center gap-3 rounded-lg border border-white/5 bg-surface p-3 transition-colors hover:border-primary/30"><img src={rg.thumbnail} alt={rg.title} className="h-12 w-12 shrink-0 rounded-lg object-cover" loading="lazy" /><div className="min-w-0"><p className="truncate text-sm font-medium text-white group-hover:text-primary">{rg.title}</p><p className="text-xs capitalize text-gray-500">{rg.category}</p></div></NextLink>)}
-            </div></div>
+            <div className="sticky top-24 rounded-xl border border-white/10 bg-surface/40 p-4">
+              <h2 className="text-sm font-semibold text-white">{isEn ? `More ${t(`categories.${game.category}`)} Games` : `更多${t(`categories.${game.category}`)}游戏`}</h2>
+              <div className="mt-3 space-y-3">
+                {categoryGames.map((item) => (
+                  <NextLink key={item.slug} href={lp(locale, `/game/${item.slug}`)} className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-white/5">
+                    <img src={item.thumbnail} alt="" className="h-12 w-12 rounded-lg object-cover" loading="lazy" />
+                    <div className="min-w-0"><div className="truncate text-sm font-medium text-white">{item.title}</div><div className="mt-0.5 line-clamp-1 text-xs text-gray-500">{item.description}</div></div>
+                  </NextLink>
+                ))}
+              </div>
+            </div>
           </aside>
         </div>
-
-        {relatedGames.length > 0 && <section className="mt-8 lg:hidden"><h3 className="mb-4 text-lg font-semibold text-white">{t("game.relatedGames")}</h3><GameGrid games={relatedGames} trackingSource="related" /></section>}
       </div>
     </>
   );
