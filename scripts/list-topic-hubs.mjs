@@ -1,9 +1,14 @@
 import fs from "node:fs";
+import path from "node:path";
 import ts from "typescript";
 
-const sourcePath = "src/data/topic-seo.ts";
-const sourceText = fs.readFileSync(sourcePath, "utf8");
-const sourceFile = ts.createSourceFile(sourcePath, sourceText, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+const sourcePaths = ["src/data/topic-seo.ts"];
+const topicDir = "src/data/topic-seo";
+if (fs.existsSync(topicDir)) {
+  for (const name of fs.readdirSync(topicDir)) {
+    if (name.endsWith(".ts")) sourcePaths.push(path.join(topicDir, name));
+  }
+}
 
 function propertyName(node) {
   if (ts.isIdentifier(node) || ts.isStringLiteral(node) || ts.isNumericLiteral(node)) return node.text;
@@ -18,22 +23,27 @@ function findProperty(objectLiteral, name) {
 
 const hubs = [];
 
-function visit(node) {
-  if (ts.isObjectLiteralExpression(node)) {
-    const keyProp = findProperty(node, "key");
-    const pathProp = findProperty(node, "path");
-    if (
-      keyProp && pathProp &&
-      ts.isPropertyAssignment(keyProp) && ts.isStringLiteral(keyProp.initializer) &&
-      ts.isPropertyAssignment(pathProp) && ts.isStringLiteral(pathProp.initializer)
-    ) {
-      hubs.push({ key: keyProp.initializer.text, path: pathProp.initializer.text });
-    }
-  }
-  ts.forEachChild(node, visit);
-}
+for (const sourcePath of sourcePaths) {
+  const sourceText = fs.readFileSync(sourcePath, "utf8");
+  const sourceFile = ts.createSourceFile(sourcePath, sourceText, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
 
-visit(sourceFile);
+  function visit(node) {
+    if (ts.isObjectLiteralExpression(node)) {
+      const keyProp = findProperty(node, "key");
+      const pathProp = findProperty(node, "path");
+      if (
+        keyProp && pathProp &&
+        ts.isPropertyAssignment(keyProp) && ts.isStringLiteral(keyProp.initializer) &&
+        ts.isPropertyAssignment(pathProp) && ts.isStringLiteral(pathProp.initializer)
+      ) {
+        hubs.push({ key: keyProp.initializer.text, path: pathProp.initializer.text });
+      }
+    }
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sourceFile);
+}
 
 const unique = [...new Map(hubs.map((hub) => [hub.key, hub])).values()].sort((a, b) => a.key.localeCompare(b.key));
 if (unique.length === 0) throw new Error("No topic hubs found for Visual SEO QA");
