@@ -6,27 +6,35 @@ on:
     branches: [master]
     paths:
       - "src/data/game-profiles.ts"
+      - "src/data/game-profiles/**"
+      - "src/data/topic-seo.ts"
       - "src/views/GamePageView.tsx"
+      - "src/views/TopicPageView.tsx"
       - "src/components/GamePlayer.tsx"
       - "src/app/**/game/**"
+      - "src/app/**/tap-games/**"
       - "src/messages/**"
       - "public/games/**"
-      - "scripts/list-optimized-games.mjs"
+      - "scripts/list-p2-qa-games.mjs"
       - ".github/workflows/visual-seo.yml"
   push:
     branches: [master]
     paths:
       - "src/data/game-profiles.ts"
+      - "src/data/game-profiles/**"
+      - "src/data/topic-seo.ts"
       - "src/views/GamePageView.tsx"
+      - "src/views/TopicPageView.tsx"
       - "src/components/GamePlayer.tsx"
       - "src/app/**/game/**"
+      - "src/app/**/tap-games/**"
       - "src/messages/**"
       - "public/games/**"
-      - "scripts/list-optimized-games.mjs"
+      - "scripts/list-p2-qa-games.mjs"
       - ".github/workflows/visual-seo.yml"
 
 jobs:
-  optimized-game-screenshots:
+  p2-game-screenshots:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -39,15 +47,15 @@ jobs:
       - run: npm ci --legacy-peer-deps
       - run: npm run build
 
-      - name: Discover optimized games
+      - name: Discover P2 QA games
         id: targets
         shell: bash
         run: |
           set -euo pipefail
-          node scripts/list-optimized-games.mjs
-          TARGETS_JSON="$(node scripts/list-optimized-games.mjs --json)"
+          node scripts/list-p2-qa-games.mjs
+          TARGETS_JSON="$(node scripts/list-p2-qa-games.mjs --json)"
           echo "json=$TARGETS_JSON" >> "$GITHUB_OUTPUT"
-          echo "Optimized games: $TARGETS_JSON" >> "$GITHUB_STEP_SUMMARY"
+          echo "P2 QA games: $TARGETS_JSON" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Set up Chrome
         id: chrome
@@ -55,7 +63,7 @@ jobs:
         with:
           chrome-version: stable
 
-      - name: Capture optimized game visual evidence
+      - name: Capture P2 game visual evidence
         shell: bash
         run: |
           set -euo pipefail
@@ -74,9 +82,9 @@ jobs:
           curl -fsS http://127.0.0.1:4173/ >/dev/null
 
           CHROME="${{ steps.chrome.outputs.chrome-path }}"
-          mapfile -t SLUGS < <(node scripts/list-optimized-games.mjs)
+          mapfile -t SLUGS < <(node scripts/list-p2-qa-games.mjs)
 
-          echo "## Captured pages" >> "$GITHUB_STEP_SUMMARY"
+          echo "## Captured P2 game pages" >> "$GITHUB_STEP_SUMMARY"
 
           for SLUG in "${SLUGS[@]}"; do
             if [[ -f "out/game/${SLUG}.html" ]]; then
@@ -144,7 +152,7 @@ jobs:
       - name: Upload visual QA evidence
         uses: actions/upload-artifact@v4
         with:
-          name: optimized-game-visual-seo
+          name: p2-game-visual-seo
           path: artifacts/visual-seo/**/*.png
           if-no-files-found: error
           retention-days: 30
