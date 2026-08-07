@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const name = t(`categories.${slug}`);
   return {
     title: `${name} Games - Play Free Online, No Download`,
-    description: `Play the best free ${name} games online instantly. No download or sign-up required. Works on desktop and mobile.`,
+    description: `Play the best free ${name} games online instantly. No download or sign-up required. Browse on desktop or mobile; control support varies by title.`,
     alternates: buildAlternates(`/${slug}`, "en"),
     openGraph: {
       title: `${name} Games - Play Free Online`,
