@@ -1,0 +1,81 @@
+import type { TopicSeoConfig } from "@/data/topic-seo";
+
+export const CLASSIC_TOPIC_SEO: TopicSeoConfig = {
+  key: "classic",
+  path: "/classic-games",
+  primaryKeyword: "classic games online",
+  secondaryKeywords: ["classic browser games", "retro games online", "tetris online", "minesweeper online", "pong online"],
+  updatedAt: "2026-08-07",
+  content: {
+    en: {
+      label: "Classic Games",
+      metaTitle: "Classic Games Online – Tetris, Minesweeper, Pong & More",
+      metaDescription: "Play 8 classic browser games: Tetris, Minesweeper, Tic Tac Toe, Pong, Space Invaders, Brick Breaker, Pac-Man Lite and Frogger.",
+      h1: "Free Classic Games Online – Puzzle, Arcade & Retro Browser Games",
+      intro: "Play eight recognizable rule systems rebuilt as lightweight browser games—from line clearing and mine logic to paddle rallies, maze dots and road crossing.",
+      about: [
+        "Classic games are grouped here because their core rules are immediately recognizable and self-contained, not because they share one control scheme. Tetris is a falling-block puzzle; Minesweeper is deduction; Tic Tac Toe is a solved 3×3 board game; Pong is paddle timing; the remaining arcade-inspired titles use waves, bricks, mazes and crossings.",
+        "Each game page documents the specific implementation on ZeroPlay, including board size, scoring, lives, level growth, touch support and whether progress is actually saved.",
+      ],
+      playStylesTitle: "Choose a Classic Game by Core Rule",
+      playStyles: [
+        { gameSlug: "tetris", title: "Falling-block line clear", description: "10×20 board, seven tetromino families and 100/300/500/800 × level line-clear scoring with mobile touch controls." },
+        { gameSlug: "minesweeper", title: "Mine deduction", description: "10×10 board with 10 mines and a guaranteed mine-free 3×3 zone around the first dig." },
+        { gameSlug: "tic-tac-toe", title: "3×3 board strategy", description: "Play X against Easy AI or a minimax Unbeatable mode while session wins/draws/losses are tracked." },
+        { gameSlug: "pong", title: "First-to-7 paddle duel", description: "Control the left paddle against a CPU while the ball gains 5% horizontal speed after every paddle return." },
+        { gameSlug: "space-invaders", title: "Scaling alien waves", description: "Start with 3 lives, clear 8-column formations and survive more rows plus faster movement on higher waves." },
+        { gameSlug: "brick-breaker", title: "Paddle and bricks", description: "Start with 3 lives, earn 10 points per destroyed brick and clear 3 + level rows across seven columns." },
+        { gameSlug: "pac-man", title: "Maze dots and ghosts", description: "Eat 10-point dots in an 11×11 maze, avoid three ghosts and keep score across repeated maze clears." },
+        { gameSlug: "frogger", title: "Road and river crossing", description: "Cross nine rows, dodge cars, ride moving logs and earn 50 points every time the frog reaches the top." },
+      ],
+      howItWorksTitle: "Why These Classic Games Still Feel Different",
+      howItWorks: [
+        "Puzzle classics create pressure through board state: every placement or reveal changes the future decision space.",
+        "Paddle classics create pressure through trajectory and speed, where timing and contact position matter more than long-term board planning.",
+        "Arcade wave games use lives and escalating enemies or bricks to turn survival into repeated short feedback loops.",
+        "Maze and crossing games reward route reading—choosing where to move next while hazards continue moving around the player.",
+      ],
+      faq: [
+        { q: "Which classic game supports mobile Tetris controls?", a: "The ZeroPlay Tetris runtime includes visible buttons for left, rotate, soft drop, right and hard drop." },
+        { q: "Which classic game guarantees a safe first move?", a: "Minesweeper places mines only after the first dig and excludes that cell plus its eight neighbors." },
+        { q: "Which classic games save a best score?", a: "Pac-Man Lite and Frogger save best scores locally. Several others, including Tetris, Pong and Brick Breaker, do not persist scores after reload." },
+        { q: "Which classic games end at 7 points?", a: "Pong uses a first-to-7 match. Table Tennis also uses first to 7, but it belongs primarily to the Reaction topic rather than this Classic set." },
+      ],
+    },
+    zh: {
+      label: "经典游戏",
+      metaTitle: "经典游戏在线玩 – Tetris、扫雷、Pong等浏览器小游戏",
+      metaDescription: "在线玩8款经典浏览器游戏：Tetris、Minesweeper、Tic Tac Toe、Pong、Space Invaders、Brick Breaker、Pac-Man Lite、Frogger。",
+      h1: "免费经典游戏 – 拼图、街机与复古浏览器玩法",
+      intro: "一次体验8套熟悉规则：消行、扫雷推理、井字棋、球拍对战、外星波次、打砖块、迷宫吃豆和青蛙过河。",
+      about: [
+        "经典游戏在这里是因为规则体系本身足够清晰、可识别，而不是因为操作方式相同。Tetris是下落方块拼图，Minesweeper是逻辑推理，Tic Tac Toe是3×3棋盘，Pong强调球拍时机，其余街机玩法则围绕波次、砖块、迷宫和穿越。",
+        "每个独立页面都会写清ZeroPlay当前实现的真实数据：棋盘尺寸、计分、生命、等级变化、触控支持和实际是否保存进度。",
+      ],
+      playStylesTitle: "按核心规则选择经典游戏",
+      playStyles: [
+        { gameSlug: "tetris", title: "下落方块消行", description: "10×20棋盘、7类四格方块，单/双/三/四行按100/300/500/800×Level计分，并提供手机触控按钮。" },
+        { gameSlug: "minesweeper", title: "扫雷推理", description: "10×10棋盘10颗雷，第一次Dig点击格及周围3×3区域保证无雷。" },
+        { gameSlug: "tic-tac-toe", title: "3×3棋盘策略", description: "执X对战Easy AI或minimax Unbeatable，并统计当前会话胜平负。" },
+        { gameSlug: "pong", title: "先到7分球拍对战", description: "控制左球拍对CPU，每次球拍回击让水平球速提高5%。" },
+        { gameSlug: "space-invaders", title: "外星波次", description: "开局3条命，清除8列编队；波次越高，行数和移动速度越高。" },
+        { gameSlug: "brick-breaker", title: "挡板打砖块", description: "开局3条命，每砖10分；Level越高，3+Level行的砖块区域越大。" },
+        { gameSlug: "pac-man", title: "迷宫吃豆与幽灵", description: "11×11迷宫每颗豆10分，躲避3个幽灵，清空豆后重置迷宫但保留分数。" },
+        { gameSlug: "frogger", title: "公路与河流穿越", description: "穿过9行，躲车辆、踩移动木头，每次到达顶部获得50分。" },
+      ],
+      howItWorksTitle: "不同经典游戏为什么体验完全不同",
+      howItWorks: [
+        "拼图经典通过棋盘状态制造压力，每次放置或揭开都会改变后续决策空间。",
+        "球拍经典通过轨迹和速度制造压力，击球时机和接触位置比长期棋盘规划更重要。",
+        "街机波次玩法用生命、敌人或砖块升级，把生存拆成连续短反馈。",
+        "迷宫和穿越玩法强调路线判断，玩家需要在周围危险持续运动时选择下一步。",
+      ],
+      faq: [
+        { q: "哪款经典游戏有手机Tetris按钮？", a: "ZeroPlay的Tetris Runtime提供左移、旋转、软降、右移和硬降触控按钮。" },
+        { q: "哪款保证第一次点击安全？", a: "Minesweeper会在第一次Dig后才放雷，并排除该格及周围8格。" },
+        { q: "哪些经典游戏保存最高分？", a: "Pac-Man Lite和Frogger会本地保存Best；Tetris、Pong、Brick Breaker等当前不会在刷新后保存分数。" },
+        { q: "哪款经典游戏先到7分？", a: "Pong使用先到7分规则。Table Tennis也先到7分，但它主要归入Reaction Topic。" },
+      ],
+    },
+  },
+};
