@@ -16,30 +16,31 @@
 - **传统浏览分类**：9。
 - **当前 SEO 阶段**：P0/P1 已完成，P2 按 Gameplay Topic 批次推进。
 
-ZeroPlay 的目标不是把大量小游戏堆成一个普通门户，而是建立一个可扩展的搜索主题网络：
+ZeroPlay 的目标不是把大量小游戏堆成普通门户，而是建立可扩展的搜索主题网络：
 
 ```text
 L0  Free Play Games / Free Online Games
 │
 ├── L1  Gameplay Topic Hub
 │   ├── Tap Games              /tap-games
-│   ├── Merge Games            /merge-games        （后续）
-│   ├── Defense Games          /defense-games      （后续）
+│   ├── Merge Games            /merge-games
+│   ├── Defense Games          /defense-games      （下一批）
 │   ├── Memory Games           （候选）
 │   ├── Reaction Games         （候选）
 │   └── Number Games           （候选）
 │
 ├── L2  独立游戏主题
 │   ├── Quick Tap              /game/quick-tap
-│   ├── Tap Tower              /game/tap-tower
-│   ├── Tap Tycoon             /game/tap-tycoon
+│   ├── Hex Merge              /game/hex-merge
+│   ├── Merge Defense          /game/merge-defense
+│   ├── 2048                   /game/2048
 │   └── ...
 │
 └── L3  游戏内长尾搜索意图
     ├── how to play
     ├── rules
     ├── controls
-    ├── scoring
+    ├── scoring / rewards
     ├── win / fail / end condition
     ├── tips / strategy
     ├── best score / progress
@@ -49,11 +50,11 @@ L0  Free Play Games / Free Online Games
 
 ### 核心原则
 
-1. **一个游戏页面承接该游戏的一组同主题长尾词。** 不为每个长尾词创建一个薄页面。
-2. **一个 Topic Hub 承接玩法级需求。** Hub 解释这类玩法，并把用户导向真实可玩的子游戏。
+1. **一个游戏页面承接该游戏的一组同主题长尾词。** 不为每个长尾词创建薄页面。
+2. **一个 Topic Hub 承接玩法级需求。** Hub 解释玩法差异，并导向真实可玩的子游戏。
 3. **内容来自真实产品机制。** 源码、真实试玩、GSC Query 和已有产品数据是事实源；AI 负责组织表达，不负责发明规则。
-4. **Topic 一次做完整。** 不再随机优化一个游戏、隔几天再优化另一个游戏。
-5. **只有达到 Definition of Done 的页面才标记为 `optimized`。**
+4. **Topic 一次做完整。** 源码核验、Profile、Hub、双向内链、Build、Visual QA 作为同一批次交付。
+5. **只有达到 Definition of Done 的页面才标记为 `optimized`。** 自动截图不能代替真人移动端试玩。
 
 ---
 
@@ -74,7 +75,7 @@ L0  Free Play Games / Free Online Games
 | Topic Hub | `/{topic}-games`；中文 `/zh/{topic}-games` |
 | Analytics | GA4 + 游戏行为事件 |
 | Build CI | GitHub Actions：install + production build |
-| Visual QA | GitHub Actions：P2 游戏 + Topic Hub 自动截图 Artifact |
+| Visual QA | GitHub Actions：`reviewed + optimized` 游戏 + 全部正式 Topic Hub 自动截图 Artifact |
 
 ### 2.1 路由与索引策略
 
@@ -82,7 +83,7 @@ L0  Free Play Games / Free Online Games
 |---|---|---|---|
 | 首页 | `/` | `/zh` | index |
 | 传统分类 | `/{category}` | `/zh/{category}` | index |
-| Gameplay Topic | `/tap-games` 等 | `/zh/tap-games` 等 | index |
+| Gameplay Topic | `/tap-games` `/merge-games` | `/zh/tap-games` `/zh/merge-games` | index |
 | 游戏 SEO 页 | `/game/{slug}` | `/zh/game/{slug}` | index |
 | 原始游戏 Runtime | `/games/{slug}/index.html` | 共用 | `X-Robots-Tag: noindex, follow` |
 | 搜索页 | `/search` | `/zh/search` | `noindex, follow`，不进 sitemap |
@@ -114,7 +115,7 @@ NODE_VERSION=22
 NEXT_PUBLIC_SITE_URL=https://zeroplaygames.com
 ```
 
-仓库存在 `.npmrc`：
+仓库 `.npmrc`：
 
 ```text
 legacy-peer-deps=true
@@ -145,10 +146,13 @@ legacy-peer-deps=true
 
 ### 3.2 Gameplay Topic 负责搜索主题
 
-当前/候选 Topic：
+正式 Topic：
 
 - **Tap Games**：Quick Tap、Tap Tower、Tap Tycoon、Balloon Pop、Gravity Flip、Color Switch
 - **Merge Games**：Hex Merge、Merge Defense、Pet Merge、2048
+
+下一批/候选 Topic：
+
 - **Defense Games**：Tower Defense、Plant Defense、Merge Defense
 - **Memory Games**：Memory Cards、Memory Sequence、Reaction Speed Test
 - **Reaction Games**：Quick Tap、Reaction Speed Test、Whack-a-Mole、Fruit Catch、Avoid Blocks、Tile Hop、Table Tennis
@@ -180,8 +184,8 @@ Topic 是否正式建立 URL，要看：
 
 ```text
 100 total
-94 generated
-5 reviewed
+90 generated
+9 reviewed
 1 optimized
 ```
 
@@ -251,13 +255,13 @@ Topic 是否正式建立 URL，要看：
 | Idle Factory | `idle-factory` | 升级生产线提升工厂产出。 | generated |
 | Lemonade Stand | `lemonade-stand` | 经营柠檬水小生意并提升收益。 | generated |
 | Tap Tycoon | `tap-tycoon` | 点击赚钱并投资8类主动/被动收益升级。 | **reviewed** |
-| Pet Merge | `pet-merge` | 合并相同宠物解锁更高级动物。 | generated |
+| Pet Merge | `pet-merge` | 5×5棋盘任意位置合并同tier宠物；满盘不会自动结束。 | **reviewed** |
 
 ### 4.5 Puzzle（22）
 
 | Game | Slug | 简介 | SEO |
 |---|---|---|---|
-| 2048 | `2048` | 滑动并合并相同数字直到更高数值。 | generated |
+| 2048 | `2048` | 4×4滑动合并；有效移动后90%生成2、10%生成4；Best不持久化。 | **reviewed** |
 | Tetris | `tetris` | 旋转落块并完成整行。 | generated |
 | Bubble Pop | `bubble-pop` | 匹配同色泡泡并清除。 | generated |
 | Minesweeper | `minesweeper` | 根据数字提示排除隐藏地雷。 | generated |
@@ -326,15 +330,15 @@ Topic 是否正式建立 URL，要看：
 | Connect Four | `connect-four` | 先在棋盘上连成四子。 | generated |
 | Gomoku | `gomoku` | 五子棋，先形成连续五子。 | generated |
 | Chess Puzzle | `chess-puzzle` | 寻找国际象棋战术最佳着法。 | generated |
-| Merge Defense | `merge-defense` | 合并单位强化防线并抵挡波次。 | generated |
+| Merge Defense | `merge-defense` | 10塔位合并升级并抵挡随波次增强的敌人。 | **reviewed** |
 | Plant Defense | `plant-defense` | 布置和升级植物守住路线。 | generated |
-| Hex Merge | `hex-merge` | 合并相同数字六边形并避免棋盘塞满。 | generated |
+| Hex Merge | `hex-merge` | 5×5六边形棋盘合并相邻同数字格；满盘且无可合并项才结束。 | **reviewed** |
 
 ---
 
 ## 5. memorytest.io 拆解后形成的 SEO 生产原则
 
-参考站：`memorytest.io`。我们学习的是产品与 SEO 的结合方式，不复制其具体文案。
+参考站：`memorytest.io`。我们学习的是产品与 SEO 的结合方式，不复制具体文案。
 
 ### 5.1 最值得复制的部分
 
@@ -416,7 +420,7 @@ Game Player
 3. Objective
 4. Controls
 5. Rules / Mechanics
-6. Scoring / Earnings（适用时）
+6. Scoring / Earnings / Rewards（适用时）
 7. Win / Fail / End Condition
 8. Duration / Levels / Rounds（适用时）
 9. Best Score / Progress（真实存在才写）
@@ -424,6 +428,8 @@ Game Player
 11. 游戏专属 FAQ
 12. Same-topic Related Games
 13. Topic Hub backlink
+
+固定分数可以直接展示数值；动态公式应在 Rules / FAQ 中明确说明，并可在表格中使用真实示例，不为了统一 UI 编造固定分值。
 
 ### 6.3 Metadata
 
@@ -498,9 +504,7 @@ CI 390×844 Screenshot
 
 ---
 
-## 8. Topic Batch Standard：以后一次优化一个主题
-
-这是当前正式执行方式。
+## 8. Topic Batch Standard：一次优化一个主题
 
 ### Step 1：确定 Topic
 
@@ -515,15 +519,13 @@ GSC Query / impressions / ranking opportunity
 
 ### Step 2：一次读完 Topic 所有游戏源码
 
-不是先写一篇 SEO，再看下一个。
-
 统一提取：
 
 ```text
 objective
 controls
 duration / levels / rounds
-scoring / income
+scoring / income / rewards
 reward / penalty
 special mechanics
 win / fail / end condition
@@ -534,14 +536,12 @@ mobile/touch implementation
 
 ### Step 3：一次建立整组 P2 Profile
 
-目录按 Topic 拆分：
-
 ```text
 src/data/game-profiles.ts
     类型定义 + 聚合入口
 
 src/data/game-profiles/tap.ts
-src/data/game-profiles/merge.ts       （后续）
+src/data/game-profiles/merge.ts
 src/data/game-profiles/defense.ts     （后续）
 ```
 
@@ -554,7 +554,18 @@ testedMobile: false
 
 ### Step 4：建立 Topic Hub
 
-每个正式 Topic Hub 至少包含：
+Topic SEO 同样按主题拆文件：
+
+```text
+src/data/topic-seo.ts
+    类型定义 + 聚合入口
+
+src/data/topic-seo/tap.ts
+src/data/topic-seo/merge.ts
+src/data/topic-seo/defense.ts        （后续）
+```
+
+每个正式 Hub 至少包含：
 
 ```text
 独立 Primary / Secondary Keywords
@@ -568,8 +579,6 @@ CollectionPage + ItemList
 Breadcrumb
 ```
 
-Hub 不是把六张卡片堆起来，而是解释“这些游戏为什么属于同一玩法、各自解决什么不同需求”。
-
 ### Step 5：双向内链
 
 ```text
@@ -582,24 +591,20 @@ Game A Game B Game C
 Related same-topic links
 ```
 
-游戏 Breadcrumb 也优先使用：
+P2 游戏 Breadcrumb 优先：
 
 ```text
-Home > Tap Games > Quick Tap
+Home > Merge Games > Hex Merge
 ```
 
-而不是只有：
-
-```text
-Home > Casual > Quick Tap
-```
+而不是只依赖传统 `Strategy / Puzzle / Idle` 分类。
 
 ### Step 6：自动 QA
 
 `.github/workflows/visual-seo.yml`：
 
 - 自动发现 `reviewed + optimized` 的 P2 游戏。
-- 自动发现已注册 Topic Hub。
+- 自动扫描 `src/data/topic-seo/*.ts` 发现正式 Topic Hub。
 - 构建静态站。
 - Headless Chrome 截图。
 - Artifact 保留30天。
@@ -621,50 +626,33 @@ topics/{topic}/page-mobile.png
 
 ### Step 7：人工试玩
 
-自动 QA 通过后，人工检查 Topic 内尚未验证的游戏，尤其是移动端触控。
+自动 QA 通过后，人工检查尚未验证的游戏，尤其是移动端触控。
 
-### Step 8：整组晋级
+### Step 8：晋级
 
 满足标准的游戏：
 
 ```text
 reviewed
-→ testedMobile=true（如果已实际验证触控）
+→ testedMobile=true（实际验证触控后）
 → optimized
 ```
 
-然后才开始下一个 Topic。
+下一 Topic 的代码/内容批次可以在上一 Topic 的人工移动验收排队期间继续，但任何未人工通过的游戏仍必须保持 `reviewed`，不能提前算作完成。
 
 ---
 
-## 9. Tap Games：第一个完整 Topic 批次
+## 9. Tap Games：第一个正式 Topic 批次
 
 ### 9.1 Topic Hub
 
 ```text
 EN: https://zeroplaygames.com/tap-games
 ZH: https://zeroplaygames.com/zh/tap-games
+Primary: tap games
 ```
 
-Primary：
-
-```text
-tap games
-```
-
-Secondary：
-
-```text
-tap games online
-one tap games
-click games online
-tapping games
-tap reaction games
-```
-
-Hub 不是传统 Arcade/Casual 分类，而是按真实的“Tap 作为核心输入”组织：
-
-| 游戏 | Tap 被用来做什么 | 当前 P2 状态 |
+| 游戏 | Tap 被用来做什么 | P2 |
 |---|---|---|
 | Quick Tap | 快速重新锁定随机目标，20秒冲分 | optimized |
 | Tap Tower | 决定移动方块落下时机与重叠宽度 | reviewed |
@@ -673,113 +661,186 @@ Hub 不是传统 Arcade/Casual 分类，而是按真实的“Tap 作为核心输
 | Gravity Flip | 一键反转重力穿过障碍 | reviewed |
 | Color Switch | 控制高度并匹配旋转障碍颜色 | reviewed |
 
-### 9.2 Quick Tap
+### 9.2 已确认真实机制
 
-真实机制：
+**Quick Tap**
 
-- 20秒。
-- 普通目标 +1。
-- 金色目标 15% 概率、+3。
-- 命中后目标随机换位。
-- 空点不扣分。
-- Best Score 保存 localStorage。
-- 用户已人工移动端试玩通过。
-- `testedMobile=true`。
-- `seoStatus=optimized`。
+- 20秒；普通目标 +1；金色目标15%概率、+3。
+- 命中后随机换位；空点不扣分。
+- Best 保存 localStorage。
+- 用户已人工移动端试玩，`testedMobile=true`，`optimized`。
 
-### 9.3 Tap Tower
+**Tap Tower**
 
-真实源码事实：
+- 点击/触屏/Space 落下方块。
+- 普通重叠 +1；横向误差 `<5px` Perfect +2。
+- 非 Perfect 只保留重叠宽度。
+- 速度 `2.5 + score × 0.15`。
+- 完全落空或剩余宽度 `<8px` 结束。
+- Best 保存 localStorage。
 
-- 点击/触屏/Space 落下移动方块。
-- 普通成功重叠 +1。
-- 与上一层横向误差 `<5px`：Perfect +2，并保留完整宽度。
-- 非 Perfect 只保留实际重叠宽度。
-- 新方块速度：`2.5 + score × 0.15`。
-- 完全落空结束。
-- 剩余宽度 `<8px` 结束。
-- Best Score 保存 localStorage。
-- 当前 `reviewed`，等待人工移动端试玩后晋级。
+**Tap Tycoon**
 
-### 9.4 Tap Tycoon
-
-真实源码事实：
-
-- 开局 $1 / tap。
-- 主动点击收益 + 被动每秒收益两条路线。
-- 8类升级：Auto Clicker、Better Tap、Worker、Factory、Golden Touch、Corporation、Mega Tap、Empire。
-- 升级价格：`floor(baseCost × 1.15^level)`。
-- 被动收入每0.1秒结算一次。
-- `Total earned` 不因购买升级而减少。
-- 只保存历史最高累计收入；刷新后现金、升级、tap power、perSec 重置。
+- 开局 $1/tap；主动点击 + 被动每秒收益。
+- 8类升级；价格 `floor(baseCost × 1.15^level)`。
+- 被动收益每0.1秒结算。
+- 只保存历史最高累计收入，不保存当前升级状态。
 - 没有固定 Game Over。
-- 当前 `reviewed`，等待人工移动端试玩后晋级。
 
-### 9.5 Balloon Pop
+**Balloon Pop**
 
-真实源码事实：
+- 最长30秒；每个气球 +1；漏掉10个提前结束。
+- 分数越高，生成间隔越短、上升速度越高。
 
-- 一局最长30秒。
-- 戳破任何气球 +1。
-- 气球飞出顶部 Miss +1。
-- Miss 达到10提前结束。
-- 生成间隔随分数由50帧逐步压缩，最低20帧。
-- 新气球上升速度包含 `score × 0.02`。
-- 空点不扣分。
-- 当前 `reviewed`，等待人工移动端试玩后晋级。
+**Gravity Flip**
 
-### 9.6 Gravity Flip
+- 点击/触屏/Space 反转重力并把垂直速度归零。
+- 障碍每70帧生成；通过 +1；障碍速度 `3 + score × 0.04`。
+- 撞障碍结束；Best 保存 localStorage。
 
-真实源码事实：
+**Color Switch**
 
-- 点击/触屏/Space 反转上下重力。
-- 每次反转同时把垂直速度归零。
-- 重力加速度 0.5/update。
-- 障碍每70帧生成。
-- 缺口随机 90～130px。
-- 障碍生成速度：`3 + score × 0.04`。
-- 通过一个障碍 +1。
-- 碰到缺口以外障碍立即结束。
-- Best Score 保存 localStorage。
-- 当前 `reviewed`，等待人工移动端试玩后晋级。
+- 点击/触屏/Space 将垂直速度设为 -8；重力 +0.35/update。
+- 障碍为四色圆环/杆；通过 +1 后随机切换球色。
+- 碰错颜色或掉出底部结束；Best 保存 localStorage。
 
-### 9.7 Color Switch
-
-真实源码事实：
-
-- 点击/触屏/Space 将垂直速度设为 -8。
-- 重力每次更新 +0.35。
-- 障碍随机为四段颜色圆环或杆状结构。
-- 障碍旋转速度随机 0.02～0.04。
-- 通过一个障碍 +1。
-- 每得1分，小球随机切换为4种颜色之一。
-- 下一障碍生成在当前最高障碍上方160px。
-- 碰错颜色或掉出底部结束。
-- Best Score 保存 localStorage。
-- 当前 `reviewed`，等待人工移动端试玩后晋级。
-
-### 9.8 Tap Topic 完成条件
-
-当前代码、内容、Hub、内链、sitemap、Build 和自动视觉 QA 已进入同一批次验证流程。
-
-最终完成还需要：
+### 9.3 Tap Topic 剩余门槛
 
 ```text
-Tap Tower     人工移动试玩
-Tap Tycoon    人工移动试玩
-Balloon Pop   人工移动试玩
-Gravity Flip  人工移动试玩
-Color Switch  人工移动试玩
-        ↓
-5 个 testedMobile=true
-5 个 reviewed→optimized
-        ↓
-Tap Topic = 6 optimized
+Tap Tower / Tap Tycoon / Balloon Pop / Gravity Flip / Color Switch
+→ 人工移动端试玩
+→ testedMobile=true
+→ reviewed → optimized
 ```
 
 ---
 
-## 10. 内部链接标准
+## 10. Merge Games：第二个正式 Topic 批次
+
+### 10.1 Topic Hub
+
+```text
+EN: https://zeroplaygames.com/merge-games
+ZH: https://zeroplaygames.com/zh/merge-games
+Primary: merge games
+```
+
+Secondary：
+
+```text
+merge games online
+number merge games
+merge puzzle games
+tower merge games
+pet merge games
+```
+
+| 游戏 | 核心 Merge 规则 | P2 |
+|---|---|---|
+| Hex Merge | 相邻同数字六边形合并升级 | reviewed |
+| Merge Defense | 同等级防御塔合并成高一级塔 | reviewed |
+| Pet Merge | 任意位置同tier宠物直接合并 | reviewed |
+| 2048 | 整盘滑动时相同数字碰撞合并 | reviewed |
+
+### 10.2 Hex Merge
+
+源码事实：
+
+- 5×5错位六边形棋盘，一个格子最多6邻居。
+- 只有相邻、非空、数字相同才能合并。
+- 成功后目标格 +1级，来源格清空。
+- 得分公式：`新目标等级 × 2`。
+- 每次成功合并后随机空位生成1～3级新格。
+- 棋盘满并不立即结束；只有满盘且无相邻同数字组合才 Game Over。
+- Best 保存 localStorage。
+- 当前结束后需要刷新页面重开。
+- `reviewed / testedMobile=false`。
+
+### 10.3 Merge Defense
+
+源码事实：
+
+- 10个塔位；开局50金币、Wave 1、20 HP。
+- 1级塔价格20金币；满塔位时购买费用退回。
+- 两个同等级塔合并成高1级塔，同时 +5金币；最高10级。
+- N级塔单次攻击造成N伤害，而且高等级攻击间隔更短。
+- 第N波敌人数 `3 + 2N`。
+- 敌人HP `2 + N`；速度 `0.3 + 0.05N`。
+- 击杀奖励 `3 + 当前波次`金币。
+- 敌人漏过防线 -1 HP；HP归0结束。
+- Best 保存最高到达波次到 localStorage。
+- Game Over 后当前实现需要双击 Buy Tower 重开。
+- `containsViolence=true`。
+- `reviewed / testedMobile=false`。
+
+### 10.4 Pet Merge
+
+源码事实：
+
+- 5×5，共25格。
+- 两个相同内部tier宠物可以直接合并，**不要求相邻**。
+- 合并后目标内部tier +1，来源格清空。
+- HUD 显示 `Level = 内部tier + 1`。
+- 得分公式是 `2^新内部tier`，因此：
+
+```text
+显示 Level 2 → +2
+显示 Level 3 → +4
+显示 Level 4 → +8
+```
+
+- Add Pet 在随机空位生成低tier宠物；当前真实生成只使用内部tier 0/1/2。
+- 25格满不会自动 Game Over，只会阻止 Add Pet；如果还有重复tier仍能合并。
+- Reset 清盘并重新放入3个宠物。
+- Best 保存 localStorage，但当前棋盘不持久化。
+- `reviewed / testedMobile=false`。
+
+### 10.5 2048
+
+源码事实：
+
+- 4×4棋盘。
+- 键盘方向键或触屏滑动；滑动 `<30px` 被忽略。
+- 相同数字合并后，新格数值直接加入 score，例如 `8+8→16` 同时 +16分。
+- 每次真正改变棋盘的有效移动后生成一个新格：90% 为2，10% 为4。
+- 满16格且不存在横向/纵向相同邻格时 Game Over。
+- **当前 Best 只存在本次页面会话内存，不写 localStorage；刷新后重置。**
+- 当前棋盘也不持久化。
+- `reviewed / testedMobile=false`。
+
+### 10.6 Merge Topic 已完成与剩余门槛
+
+已完成：
+
+```text
+4个游戏真实源码核验
+4个 P2 Profile
+EN/ZH 独立 metadata + 页面内容
+/merge-games + /zh/merge-games
+Hub ↔ Game 双向内链
+CollectionPage / ItemList / Breadcrumb / FAQ Schema
+sitemap
+Production build
+Visual SEO QA
+4×(desktop + mobile + runtime)
+Merge Hub desktop + mobile
+```
+
+剩余：
+
+```text
+Hex Merge
+Merge Defense
+Pet Merge
+2048
+→ 人工移动端试玩
+→ testedMobile=true
+→ reviewed → optimized
+```
+
+---
+
+## 11. 内部链接标准
 
 优先级：
 
@@ -788,41 +849,38 @@ Tap Topic = 6 optimized
 3. 传统分类。
 4. 泛热门推荐。
 
-对于已经进入正式 Topic 的游戏：
+正式 Topic 游戏示例：
 
 ```text
-Breadcrumb:
-Home > Tap Games > Tap Tower
+Home > Merge Games > Hex Merge
 
 正文末尾:
-More Tap Games Like Tap Tower
-+ View all Tap Games
+More Merge Games Like Hex Merge
++ View all Merge Games
 ```
 
 传统分类仍保留在 Game Info / 标签和站点导航中，但不再是唯一语义层级。
 
 ---
 
-## 11. 技术 SEO 基线（P0/P1）
-
-当前已经建立的规则：
+## 12. 技术 SEO 基线（P0/P1）
 
 - 自引用 canonical。
 - English / 中文 hreflang，含 x-default。
 - 原始 `/games/*` Runtime 使用 `X-Robots-Tag: noindex, follow`。
-- 搜索页 `noindex, follow`，且不进 sitemap。
+- 搜索页 `noindex, follow`，不进 sitemap。
 - robots 不阻止搜索引擎抓取 `_next` 必要资源。
 - sitemap 只提交应该索引的页面。
-- Topic Hub 正式建立后加入 sitemap。
+- 正式 Topic Hub 自动加入 sitemap。
 - sitemap lastModified 使用真实/稳定日期，不在每次构建时全部变成今天。
 - 不输出假 rating / plays / reviews。
-- P2 游戏使用真实 `publishedAt / updatedAt`。
+- P2 游戏使用可追溯的 `publishedAt / updatedAt`。
 - 中文 P2 页面维护独立 metadata。
-- 首页和 Search 使用轻量数据，避免把全量 SEO 数据送入客户端。
+- P2 Profile 的已核验 Description 优先用于站内卡片和 Search Index，避免旧 `games.json` 文案污染。
 
 ---
 
-## 12. Analytics 与 SEO 验证闭环
+## 13. Analytics 与 SEO 验证闭环
 
 当前 GA4 事件：
 
@@ -852,11 +910,11 @@ GSC impressions
 判断方式：
 
 - 有曝光、没点击：先看 Title / Description / intent。
-- 有点击、没 `game_start`：先看首屏和页面/搜索意图是否匹配。
-- `game_start` 高但 30秒留存低：优先修游戏本身，而不是继续写 SEO 文案。
-- 出现新的高相关 Query：回填对应游戏页 FAQ / Rules / Title，而不是自动新建 URL。
+- 有点击、没 `game_start`：看首屏和页面/搜索意图是否匹配。
+- `game_start` 高但30秒留存低：优先修游戏本身，而不是继续写 SEO 文案。
+- 出现新的高相关 Query：回填对应页面 FAQ / Rules / Title，不自动新建 URL。
 
-### 12.1 早期 GSC 基线（截至 2026-08-04）
+### 13.1 早期 GSC 基线（截至 2026-08-04）
 
 - 13 clicks
 - 872 impressions
@@ -872,16 +930,15 @@ tap tower game
 tap tycoon
 no download just tap to play
 merge defense
+hex merge
 gem crush
 ```
 
-这也是为什么第一批正式 Topic 选择 Tap。
-
 ---
 
-## 13. CI / Visual SEO QA
+## 14. CI / Visual SEO QA
 
-### 13.1 Build CI
+### 14.1 Build CI
 
 `.github/workflows/ci.yml`
 
@@ -893,7 +950,7 @@ npm run build
 
 生产构建不通过，不合并。
 
-### 13.2 Visual SEO QA
+### 14.2 Visual SEO QA
 
 `.github/workflows/visual-seo.yml`
 
@@ -901,7 +958,7 @@ npm run build
 
 ```text
 reviewed + optimized P2 games
-+ registered Topic Hubs
++ src/data/topic-seo/*.ts 中注册的 Topic Hubs
 ```
 
 脚本：
@@ -926,43 +983,47 @@ p2-visual-seo/
         └── page-mobile.png
 ```
 
-用途：
+用途：页面是否构建、首屏/响应式、Runtime 加载、Topic Hub、翻译 key、事实卡片和视觉回归。Artifact 保留30天。
 
-- 页面是否真正构建出来。
-- H1/首屏是否正常。
-- 响应式是否明显断版/溢出。
-- 游戏 Runtime 是否能加载。
-- Topic Hub 是否渲染。
-- 翻译 key 是否直接暴露。
-- 结构改动后的视觉回归。
+当前 Merge PR 验收时，自动 QA 覆盖：
 
-Artifact 保留30天。
+```text
+10 个 P2 游戏（1 optimized + 9 reviewed）
+2 个 Topic Hub（Tap + Merge）
+```
 
 ---
 
-## 14. 关键代码与数据职责
+## 15. 关键代码与数据职责
 
 ```text
 public/games/{slug}/
     真实 HTML5 Runtime，玩法事实最终来源
 
 src/data/games.json
-    100 个正式游戏基础库存
+    100 个正式游戏基础库存；generated 游戏 fallback
 
 src/data/zh-seo.json
     未进入 P2 游戏的历史中文 fallback
 
 src/data/game-profiles.ts
-    P2 类型定义 + Topic profile 聚合入口
+    P2 类型定义 + Profile 聚合入口
 
 src/data/game-profiles/tap.ts
-    Tap Topic 6 个游戏的真实机制、关键词和双语内容
+    Tap Topic 6 个游戏真实机制、关键词和双语内容
+
+src/data/game-profiles/merge.ts
+    Merge Topic 4 个游戏真实机制、关键词和双语内容
 
 src/data/topic-seo.ts
-    正式 Gameplay Topic 的关键词、Hub 双语内容和路径
+    Topic 类型定义 + Hub 配置聚合入口
+
+src/data/topic-seo/tap.ts
+src/data/topic-seo/merge.ts
+    各 Topic 独立关键词、Hub 双语内容和路径
 
 src/lib/games.ts
-    游戏读取、P2 profile、metadata、Topic 游戏关系
+    游戏读取、P2 profile、metadata、Topic 关系；P2 描述优先覆盖旧库存描述
 
 src/views/GamePageView.tsx
     单游戏 P2 页面
@@ -972,10 +1033,15 @@ src/views/TopicPageView.tsx
 
 src/app/(en)/tap-games/page.tsx
 src/app/zh/tap-games/page.tsx
-    Tap Hub 路由与 metadata
+src/app/(en)/merge-games/page.tsx
+src/app/zh/merge-games/page.tsx
+    正式 Topic Hub 路由与 metadata
 
 src/app/sitemap.ts
     Static / Category / Topic / Game sitemap
+
+scripts/generate-game-index.js
+    Search 索引；P2 metaDescription 优先于旧 games.json description
 
 .github/workflows/ci.yml
     Production build CI
@@ -989,15 +1055,16 @@ docs/README.md
 
 ### 数据一致性规则
 
-- `games.json` 正式游戏必须有对应 `/public/games/{slug}/index.html`。
+- `games.json` 正式游戏必须有 `/public/games/{slug}/index.html`。
 - `public/games/` 不保留未进入库存的孤立游戏。
 - 真实规则以源码与试玩为最终依据。
 - 文档和 SEO 文案不能反向定义不存在的玩法。
-- `publishedAt / updatedAt / scoring / controls` 必须可追溯到 Git、源码或人工 QA。
+- `publishedAt / updatedAt / scoring / controls / saved progress` 必须可追溯到 Git、源码或人工 QA。
+- P2 Profile 建立后，站内卡片、Topic Hub、Search Index 应优先使用 P2 已核验描述，避免多入口出现相互冲突的规则。
 
 ---
 
-## 15. 新游戏开发标准
+## 16. 新游戏开发标准
 
 新增游戏不能只满足“能打开”。
 
@@ -1027,13 +1094,13 @@ objective / controls / score / end condition 是什么？
 
 ---
 
-## 16. 广告、UI 与声明规则
+## 17. 广告、UI 与声明规则
 
 ### UI
 
 - 移动端优先。
-- H1 + 一句话机制说明要让搜索用户立即理解页面。
-- 玩家应尽快进入 Game Player。
+- H1 + 一句话机制说明让搜索用户立即理解页面。
+- 玩家尽快进入 Game Player。
 - 规则表、计分表和真实产品事实优先于装饰性长文。
 
 ### 广告
@@ -1058,18 +1125,18 @@ Safe for everyone
 
 ---
 
-## 17. 当前技术债
+## 18. 当前技术债
 
 1. Next.js 15.5.2 存在安全升级提示，后续升级到已修复版本。
 2. `@cloudflare/next-on-pages` 已不是当前正式部署方式；站点现在是静态 `output: export`，后续删除旧依赖和 `pages:build/pages:deploy` 脚本。
-3. 其余未进入 P2 的 `generated` 游戏仍使用基础日期/历史生成内容，进入对应 Topic 时逐批迁移。
-4. Topic Hub 当前先从 Tap 开始，不能一次性批量生成几十个空 Hub。
+3. 90 个尚未进入 P2 的 `generated` 游戏仍使用基础日期/历史生成内容，进入对应 Topic 时逐批迁移。
+4. Topic Hub 只在真实玩法集群形成时建立；当前正式 Hub 为 Tap、Merge，不批量生成空 Hub。
 
 ---
 
-## 18. 当前执行顺序
+## 19. 当前执行顺序
 
-### 正在执行：Tap Topic
+### 已完成代码/内容批次：Tap Topic
 
 ```text
 Quick Tap      optimized
@@ -1081,36 +1148,35 @@ Color Switch   reviewed
 Tap Hub        implemented
 ```
 
-代码/内容/Hub/双向内链/sitemap/自动 Visual QA 作为一个 PR 批次交付。
+剩余：5 个 reviewed 游戏人工移动端试玩后晋级。
 
-剩余门槛：5 个新 Tap 游戏的人工移动端试玩，然后统一晋级 `optimized`。
-
-### 下一 Topic
-
-Tap 完成后，不再随机挑单页；下一批优先：
+### 当前批次：Merge Topic
 
 ```text
-Merge Games
-├── Hex Merge
-├── Merge Defense
-├── Pet Merge
-└── 2048
+Hex Merge       reviewed
+Merge Defense   reviewed
+Pet Merge       reviewed
+2048            reviewed
+Merge Hub        implemented
 ```
 
-完成 Merge 后，再推进：
+源码、P2 内容、Hub、双向内链、sitemap、Build、Visual QA 已完成。剩余：4 个游戏人工移动端试玩后晋级。
+
+### 下一 Topic
 
 ```text
 Defense Games
 ├── Tower Defense
 ├── Plant Defense
-└── Merge Defense
+└── Merge Defense（已有 P2 Profile，可复用真实机制）
 ```
 
 最终节奏：
 
 ```text
-一个 Topic 做完整
+一个 Topic 做完整代码/内容/自动QA
 → 上线
+→ 人工移动验收决定 reviewed→optimized
 → GSC/GA4 观察
 → 下一个 Topic
 ```
@@ -1124,7 +1190,7 @@ Defense Games
 
 ---
 
-## 19. 文档维护规则
+## 20. 文档维护规则
 
 1. `docs/` 只保留 `README.md`。
 2. 新增/删除游戏，同步更新总数、分类、库存。
