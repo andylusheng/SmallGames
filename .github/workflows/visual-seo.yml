@@ -7,6 +7,7 @@ on:
     paths:
       - "src/data/game-profiles.ts"
       - "src/views/GamePageView.tsx"
+      - "src/messages/**"
       - "public/games/**"
       - ".github/workflows/visual-seo.yml"
 
