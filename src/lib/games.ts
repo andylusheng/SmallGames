@@ -8,6 +8,7 @@ import {
   type SupportedLocale,
 } from "@/data/game-profiles";
 import { toZhTwDeep, toZhTwText } from "@/data/zh-tw/convert";
+import { buildEsFallbackSeo, buildEsGameContent } from "@/data/es/localize";
 
 export type SeoStatus = "generated" | "reviewed" | "optimized";
 
@@ -83,24 +84,15 @@ function sanitizeSeoContent(seo: RawGameSeo): GameSeo {
   ];
 
   const features = seo.features?.filter(
-    (feature) =>
-      !blockedFeaturePhrases.some((phrase) =>
-        feature.toLowerCase().includes(phrase.toLowerCase())
-      )
+    (feature) => !blockedFeaturePhrases.some((phrase) => feature.toLowerCase().includes(phrase.toLowerCase()))
   );
 
-  return {
-    longDescription,
-    features,
-    tips: seo.tips,
-    difficulty: seo.difficulty,
-  };
+  return { longDescription, features, tips: seo.tips, difficulty: seo.difficulty };
 }
 
 const games: Game[] = (localGamesData as RawGame[]).map((rawGame) => {
   const { dateAdded: _dateAdded, plays: _plays, rating: _rating, faq: _faq, ...game } = rawGame;
   const profile = getGameProfileConfig(rawGame.slug);
-
   return {
     ...game,
     description: profile?.content.en.metaDescription ?? game.description,
@@ -113,61 +105,41 @@ const games: Game[] = (localGamesData as RawGame[]).map((rawGame) => {
   };
 });
 
-export function getAllGames(): Game[] {
-  return games;
-}
-
-export function getGameBySlug(slug: string): Game | undefined {
-  return games.find((game) => game.slug === slug);
-}
-
+export function getAllGames(): Game[] { return games; }
+export function getGameBySlug(slug: string): Game | undefined { return games.find((game) => game.slug === slug); }
 export function getFeaturedGames(limit?: number): Game[] {
   const result = games.filter((game) => game.featured);
   return typeof limit === "number" ? result.slice(0, limit) : result;
 }
-
 export function getPopularGames(limit = 8): Game[] {
   const curated = games.filter((game) => game.popular);
   const fallback = games.filter((game) => !game.popular);
   return [...curated, ...fallback].slice(0, limit);
 }
-
 export function getNewGames(limit = 8): Game[] {
-  return [...games]
-    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
-    .slice(0, limit);
+  return [...games].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0, limit);
 }
-
 export function getGamesByCategory(category: string): Game[] {
   if (category === "all") return games;
   return games.filter((game) => game.category === category);
 }
-
 export function getRelatedGames(game: Game, limit = 4): Game[] {
-  return games
-    .filter(
-      (candidate) =>
-        candidate.id !== game.id &&
-        (candidate.category === game.category ||
-          candidate.tags.some((tag) => game.tags.includes(tag)))
-    )
-    .slice(0, limit);
+  return games.filter((candidate) => candidate.id !== game.id && (candidate.category === game.category || candidate.tags.some((tag) => game.tags.includes(tag)))).slice(0, limit);
 }
-
 export function getGamesByGameplayTopic(topic: string, excludeSlug?: string, limit = 6): Game[] {
   const members = GAMEPLAY_TOPIC_MEMBERS[topic] ?? [];
-  return members
-    .filter((slug) => slug !== excludeSlug)
-    .map((slug) => getGameBySlug(slug))
-    .filter((game): game is Game => Boolean(game))
-    .slice(0, limit);
+  return members.filter((slug) => slug !== excludeSlug).map((slug) => getGameBySlug(slug)).filter((game): game is Game => Boolean(game)).slice(0, limit);
 }
-
-export function getAllSlugs(): string[] {
-  return games.map((game) => game.slug);
-}
+export function getAllSlugs(): string[] { return games.map((game) => game.slug); }
 
 export function getGameSeo(game: Game, locale: string): GameSeo {
+  if (locale === "es") {
+    const profile = getGameProfile(game);
+    if (profile) {
+      const es = buildEsGameContent(profile, game);
+      return { longDescription: es.about.join("\n"), tips: es.tips };
+    }
+  }
   if (locale === "zh" || locale === "zh-tw") {
     const localized = (zhSeoData as Record<string, RawGameSeo>)[game.slug];
     if (localized) {
@@ -175,13 +147,7 @@ export function getGameSeo(game: Game, locale: string): GameSeo {
       return locale === "zh-tw" ? toZhTwDeep(sanitized) : sanitized;
     }
   }
-
-  return sanitizeSeoContent({
-    longDescription: game.longDescription,
-    features: game.features,
-    tips: game.tips,
-    difficulty: game.difficulty,
-  });
+  return sanitizeSeoContent({ longDescription: game.longDescription, features: game.features, tips: game.tips, difficulty: game.difficulty });
 }
 
 export function getGameProfile(gameOrSlug: Game | string): GameSeoProfile | undefined {
@@ -189,13 +155,14 @@ export function getGameProfile(gameOrSlug: Game | string): GameSeoProfile | unde
   return getGameProfileConfig(slug);
 }
 
-export function getLocalizedGameProfile(
-  gameOrSlug: Game | string,
-  locale: string
-): LocalizedGameSeoContent | undefined {
+export function getLocalizedGameProfile(gameOrSlug: Game | string, locale: string): LocalizedGameSeoContent | undefined {
   const profile = getGameProfile(gameOrSlug);
   if (!profile) return undefined;
   if (locale === "zh-tw") return toZhTwDeep(profile.content.zh);
+  if (locale === "es") {
+    const game = typeof gameOrSlug === "string" ? getGameBySlug(gameOrSlug) : gameOrSlug;
+    return game ? buildEsGameContent(profile, game) : undefined;
+  }
   const supportedLocale: SupportedLocale = locale === "zh" ? "zh" : "en";
   return profile.content[supportedLocale];
 }
@@ -207,16 +174,11 @@ function compactMetaDescription(value: string, maxLength = 160): string {
 }
 
 export function getGamePageSeo(game: Game, locale: string): GamePageSeo {
+  if (locale === "es") return buildEsFallbackSeo(getGameProfile(game), game);
   const optimized = getLocalizedGameProfile(game, locale);
   if (optimized) {
-    return {
-      metaTitle: optimized.metaTitle,
-      metaDescription: optimized.metaDescription,
-      h1: optimized.h1,
-      intro: optimized.intro,
-    };
+    return { metaTitle: optimized.metaTitle, metaDescription: optimized.metaDescription, h1: optimized.h1, intro: optimized.intro };
   }
-
   const isEn = locale === "en";
   const localizedSeo = getGameSeo(game, locale);
   const localizedDescription = localizedSeo.longDescription?.split("\n").find(Boolean) || game.description;
@@ -231,11 +193,13 @@ export function getGamePageSeo(game: Game, locale: string): GamePageSeo {
 
 export function getLocalizedGameDescription(game: Game, locale: string): string {
   if (locale === "en") return game.description;
+  if (locale === "es") {
+    const profile = getGameProfile(game);
+    return profile ? buildEsGameContent(profile, game).metaDescription : `Juega a ${game.title} gratis en tu navegador.`;
+  }
   const profile = getLocalizedGameProfile(game, locale);
   if (profile) return profile.metaDescription;
   return locale === "zh-tw" ? toZhTwText(game.description) : game.description;
 }
 
-export function getCategories(): string[] {
-  return Array.from(new Set(games.map((game) => game.category)));
-}
+export function getCategories(): string[] { return Array.from(new Set(games.map((game) => game.category))); }

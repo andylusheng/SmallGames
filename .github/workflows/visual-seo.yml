@@ -10,6 +10,7 @@ on:
       - "src/data/topic-seo.ts"
       - "src/data/topic-seo/**"
       - "src/data/zh-tw/**"
+      - "src/data/es/**"
       - "src/lib/games.ts"
       - "src/lib/i18n.tsx"
       - "src/lib/server-i18n.ts"
@@ -39,6 +40,7 @@ on:
       - "src/data/topic-seo.ts"
       - "src/data/topic-seo/**"
       - "src/data/zh-tw/**"
+      - "src/data/es/**"
       - "src/lib/games.ts"
       - "src/lib/i18n.tsx"
       - "src/lib/server-i18n.ts"
@@ -166,6 +168,19 @@ jobs:
           capture_page "$ZHTW_GAME" "$GITHUB_WORKSPACE/artifacts/visual-seo/zh-tw/quick-tap"
           capture_page "$ZHTW_TOPIC" "$GITHUB_WORKSPACE/artifacts/visual-seo/zh-tw/tap-games"
           echo "- zh-tw home, category, game and topic desktop/mobile" >> "$GITHUB_STEP_SUMMARY"
+
+          echo "## Spanish locale smoke QA" >> "$GITHUB_STEP_SUMMARY"
+          ES_HOME="$(resolve_page_url /es)"
+          ES_ACTION="$(resolve_page_url /es/action)"
+          ES_GAME="$(resolve_page_url /es/game/quick-tap)"
+          ES_TOPIC="$(resolve_page_url /es/tap-games)"
+          curl -fsS "$ES_HOME" | grep -q 'Juegos online gratis'
+          curl -fsS "$ES_GAME" | grep -q 'inLanguage'
+          capture_page "$ES_HOME" "$GITHUB_WORKSPACE/artifacts/visual-seo/es/home"
+          capture_page "$ES_ACTION" "$GITHUB_WORKSPACE/artifacts/visual-seo/es/action-category"
+          capture_page "$ES_GAME" "$GITHUB_WORKSPACE/artifacts/visual-seo/es/quick-tap"
+          capture_page "$ES_TOPIC" "$GITHUB_WORKSPACE/artifacts/visual-seo/es/tap-games"
+          echo "- es home, category, game and topic desktop/mobile" >> "$GITHUB_STEP_SUMMARY"
 
           echo "## Captured P2 game pages" >> "$GITHUB_STEP_SUMMARY"
           mapfile -t SLUGS < <(node scripts/list-p2-qa-games.mjs)

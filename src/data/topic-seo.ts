@@ -1,5 +1,6 @@
 import type { SupportedLocale } from "@/data/game-profiles";
 import { toZhTwDeep } from "@/data/zh-tw/convert";
+import { getEsTopicSeo } from "@/data/es/topic-seo";
 import { TAP_TOPIC_SEO } from "@/data/topic-seo/tap";
 import { MERGE_TOPIC_SEO } from "@/data/topic-seo/merge";
 import { DEFENSE_TOPIC_SEO } from "@/data/topic-seo/defense";
@@ -51,14 +52,13 @@ export const TOPIC_SEO: Record<string, TopicSeoConfig> = {
   idle: IDLE_TOPIC_SEO,
 };
 
-export function getTopicSeoConfig(topic: string): TopicSeoConfig | undefined {
-  return TOPIC_SEO[topic];
-}
+export function getTopicSeoConfig(topic: string): TopicSeoConfig | undefined { return TOPIC_SEO[topic]; }
 
 export function getLocalizedTopicSeo(topic: string, locale: string): LocalizedTopicSeoContent | undefined {
   const config = getTopicSeoConfig(topic);
   if (!config) return undefined;
   if (locale === "zh-tw") return toZhTwDeep(config.content.zh);
+  if (locale === "es") return getEsTopicSeo(topic);
   const supportedLocale: SupportedLocale = locale === "zh" ? "zh" : "en";
   return config.content[supportedLocale];
 }
