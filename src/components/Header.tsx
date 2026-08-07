@@ -14,49 +14,39 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-dark/95 backdrop-blur-sm">
       <div className="mx-auto max-w-7xl px-4">
-        <div className="flex h-16 items-center justify-between gap-4">
-          {/* Logo */}
-          <Link href="/" className="flex shrink-0 items-center gap-2">
-            <Gamepad2 className="h-8 w-8 text-primary" />
-            <span className="text-xl font-bold text-white">
+        <div className="flex h-14 items-center justify-between gap-4 md:h-16">
+          <Link href="/" className="flex shrink-0 items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
+            <Gamepad2 className="h-7 w-7 text-primary md:h-8 md:w-8" />
+            <span className="text-lg font-bold text-white sm:text-xl">
               {t("site.name")}
             </span>
           </Link>
 
-          {/* Desktop Search */}
-          <div className="hidden flex-1 max-w-md md:block">
+          <div className="hidden max-w-md flex-1 md:block">
             <SearchBar />
           </div>
 
-          {/* Mobile menu button */}
           <button
-            className="md:hidden rounded-lg p-2 text-gray-400 hover:bg-surface hover:text-white"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="rounded-lg p-2 text-gray-400 hover:bg-surface hover:text-white md:hidden"
+            onClick={() => setMobileMenuOpen((open) => !open)}
             aria-label="Toggle menu"
+            aria-expanded={mobileMenuOpen}
           >
-            {mobileMenuOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
-        </div>
-
-        {/* Mobile Search */}
-        <div className="pb-3 md:hidden">
-          <SearchBar />
         </div>
       </div>
 
-      {/* Category Navigation */}
       <div className="hidden border-t border-white/5 md:block">
         <CategoryNav />
       </div>
 
-      {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="border-t border-white/10 bg-dark md:hidden">
-          <CategoryNav />
+          <div className="mx-auto max-w-7xl px-4 pt-3">
+            <SearchBar />
+          </div>
+          <CategoryNav mobileMenu onNavigate={() => setMobileMenuOpen(false)} />
         </div>
       )}
     </header>
