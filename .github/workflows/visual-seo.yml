@@ -9,7 +9,11 @@ on:
       - "src/data/game-profiles/**"
       - "src/data/topic-seo.ts"
       - "src/data/topic-seo/**"
+      - "src/data/zh-tw/**"
       - "src/lib/games.ts"
+      - "src/lib/i18n.tsx"
+      - "src/lib/server-i18n.ts"
+      - "src/lib/metadata.ts"
       - "src/views/GamePageView.tsx"
       - "src/views/TopicPageView.tsx"
       - "src/views/HomePageView.tsx"
@@ -34,7 +38,11 @@ on:
       - "src/data/game-profiles/**"
       - "src/data/topic-seo.ts"
       - "src/data/topic-seo/**"
+      - "src/data/zh-tw/**"
       - "src/lib/games.ts"
+      - "src/lib/i18n.tsx"
+      - "src/lib/server-i18n.ts"
+      - "src/lib/metadata.ts"
       - "src/views/GamePageView.tsx"
       - "src/views/TopicPageView.tsx"
       - "src/views/HomePageView.tsx"
@@ -145,6 +153,19 @@ jobs:
             --screenshot="$TETRIS_OUTPUT/runtime-mobile.png" "$TETRIS_URL"
           test -s "$TETRIS_OUTPUT/runtime-mobile.png"
           echo "- home, action category, Tetris page, Tetris mobile runtime" >> "$GITHUB_STEP_SUMMARY"
+
+          echo "## Traditional Chinese locale smoke QA" >> "$GITHUB_STEP_SUMMARY"
+          ZHTW_HOME="$(resolve_page_url /zh-tw)"
+          ZHTW_ACTION="$(resolve_page_url /zh-tw/action)"
+          ZHTW_GAME="$(resolve_page_url /zh-tw/game/quick-tap)"
+          ZHTW_TOPIC="$(resolve_page_url /zh-tw/tap-games)"
+          curl -fsS "$ZHTW_HOME" | grep -q '免費線上'
+          curl -fsS "$ZHTW_GAME" | grep -q 'zh-TW'
+          capture_page "$ZHTW_HOME" "$GITHUB_WORKSPACE/artifacts/visual-seo/zh-tw/home"
+          capture_page "$ZHTW_ACTION" "$GITHUB_WORKSPACE/artifacts/visual-seo/zh-tw/action-category"
+          capture_page "$ZHTW_GAME" "$GITHUB_WORKSPACE/artifacts/visual-seo/zh-tw/quick-tap"
+          capture_page "$ZHTW_TOPIC" "$GITHUB_WORKSPACE/artifacts/visual-seo/zh-tw/tap-games"
+          echo "- zh-tw home, category, game and topic desktop/mobile" >> "$GITHUB_STEP_SUMMARY"
 
           echo "## Captured P2 game pages" >> "$GITHUB_STEP_SUMMARY"
           mapfile -t SLUGS < <(node scripts/list-p2-qa-games.mjs)
