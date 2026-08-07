@@ -4,7 +4,7 @@ import ts from "typescript";
 
 const roots = ["src/data/game-profiles.ts", "src/data/game-profiles"];
 const qaStatuses = new Set(["reviewed", "optimized"]);
-const profileFactories = new Set(["reviewedProfile", "optimizedProfile"]);
+const profileFactories = new Set(["reviewedProfile", "optimizedProfile", "catalogProfile"]);
 
 function collectTypeScriptFiles(target) {
   if (!fs.existsSync(target)) return [];
@@ -19,9 +19,7 @@ function collectTypeScriptFiles(target) {
 }
 
 function propertyName(node) {
-  if (ts.isIdentifier(node) || ts.isStringLiteral(node) || ts.isNumericLiteral(node)) {
-    return node.text;
-  }
+  if (ts.isIdentifier(node) || ts.isStringLiteral(node) || ts.isNumericLiteral(node)) return node.text;
   return undefined;
 }
 
@@ -33,11 +31,7 @@ function findProperty(objectLiteral, name) {
 
 function literalSlug(objectLiteral) {
   const slugProperty = findProperty(objectLiteral, "slug");
-  if (
-    slugProperty &&
-    ts.isPropertyAssignment(slugProperty) &&
-    ts.isStringLiteral(slugProperty.initializer)
-  ) {
+  if (slugProperty && ts.isPropertyAssignment(slugProperty) && ts.isStringLiteral(slugProperty.initializer)) {
     return slugProperty.initializer.text;
   }
   return undefined;
@@ -48,35 +42,21 @@ const sourceFiles = [...new Set(roots.flatMap(collectTypeScriptFiles))];
 
 for (const sourcePath of sourceFiles) {
   const sourceText = fs.readFileSync(sourcePath, "utf8");
-  const sourceFile = ts.createSourceFile(
-    sourcePath,
-    sourceText,
-    ts.ScriptTarget.Latest,
-    true,
-    ts.ScriptKind.TS,
-  );
+  const sourceFile = ts.createSourceFile(sourcePath, sourceText, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
 
   function visit(node) {
     if (ts.isObjectLiteralExpression(node)) {
       const slug = literalSlug(node);
       const statusProperty = findProperty(node, "seoStatus");
-
       if (
-        slug &&
-        statusProperty &&
-        ts.isPropertyAssignment(statusProperty) &&
-        ts.isStringLiteral(statusProperty.initializer) &&
-        qaStatuses.has(statusProperty.initializer.text)
-      ) {
-        candidates.add(slug);
-      }
+        slug && statusProperty && ts.isPropertyAssignment(statusProperty) &&
+        ts.isStringLiteral(statusProperty.initializer) && qaStatuses.has(statusProperty.initializer.text)
+      ) candidates.add(slug);
     }
 
     if (
-      ts.isCallExpression(node) &&
-      ts.isIdentifier(node.expression) &&
-      profileFactories.has(node.expression.text) &&
-      node.arguments.length > 0 &&
+      ts.isCallExpression(node) && ts.isIdentifier(node.expression) &&
+      profileFactories.has(node.expression.text) && node.arguments.length > 0 &&
       ts.isObjectLiteralExpression(node.arguments[0])
     ) {
       const slug = literalSlug(node.arguments[0]);
@@ -91,12 +71,8 @@ for (const sourcePath of sourceFiles) {
 
 const result = [...candidates].sort();
 
-if (result.length === 0) {
-  throw new Error("No reviewed or optimized games found for P2 Visual SEO QA");
-}
+if (result.length === 0) throw new Error("No optimized games found for Visual SEO QA");
+if (result.length !== 100) throw new Error(`Visual SEO QA discovered ${result.length} games; expected exactly 100`);
 
-if (process.argv.includes("--json")) {
-  process.stdout.write(`${JSON.stringify(result)}\n`);
-} else {
-  process.stdout.write(`${result.join("\n")}\n`);
-}
+if (process.argv.includes("--json")) process.stdout.write(`${JSON.stringify(result)}\n`);
+else process.stdout.write(`${result.join("\n")}\n`);
