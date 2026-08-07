@@ -1,7 +1,9 @@
 "use client";
 
-import { useTranslations } from "@/lib/i18n";
+import { useLocale, useTranslations } from "@/lib/i18n";
 import { Link } from "@/components/Link";
+import NextLink from "next/link";
+import { usePathname } from "next/navigation";
 import { Gamepad2, Menu, X } from "lucide-react";
 import { useState } from "react";
 import SearchBar from "./SearchBar";
@@ -9,7 +11,14 @@ import CategoryNav from "./CategoryNav";
 
 export default function Header() {
   const t = useTranslations();
+  const locale = useLocale();
+  const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const languageLink = locale === "en"
+    ? { href: `/zh-tw${pathname === "/" ? "" : pathname}`, label: "繁體中文" }
+    : locale === "zh-tw"
+      ? { href: pathname.replace(/^\/zh-tw(?=\/|$)/, "") || "/", label: "English" }
+      : null;
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-dark/95 backdrop-blur-sm">
@@ -26,14 +35,24 @@ export default function Header() {
             <SearchBar />
           </div>
 
-          <button
-            className="rounded-lg p-2 text-gray-400 hover:bg-surface hover:text-white md:hidden"
-            onClick={() => setMobileMenuOpen((open) => !open)}
-            aria-label="Toggle menu"
-            aria-expanded={mobileMenuOpen}
-          >
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+          <div className="flex items-center gap-1.5">
+            {languageLink && (
+              <NextLink
+                href={languageLink.href}
+                className="rounded-lg px-2.5 py-2 text-xs font-medium text-gray-300 transition-colors hover:bg-surface hover:text-white md:text-sm"
+              >
+                {languageLink.label}
+              </NextLink>
+            )}
+            <button
+              className="rounded-lg p-2 text-gray-400 hover:bg-surface hover:text-white md:hidden"
+              onClick={() => setMobileMenuOpen((open) => !open)}
+              aria-label="Toggle menu"
+              aria-expanded={mobileMenuOpen}
+            >
+              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
         </div>
       </div>
 

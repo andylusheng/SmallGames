@@ -1,0 +1,61 @@
+{
+  "site": {
+    "name": "ZeroPlay Games",
+    "tagline": "免費線上遊戲 - 無需下載"
+  },
+  "nav": {
+    "home": "首頁",
+    "categories": "分類",
+    "search": "搜尋遊戲...",
+    "newGames": "最新遊戲",
+    "popular": "熱門遊戲"
+  },
+  "categories": {
+    "all": "全部遊戲",
+    "action": "動作",
+    "puzzle": "益智",
+    "arcade": "街機",
+    "racing": "賽車",
+    "sports": "體育",
+    "shooting": "射擊",
+    "strategy": "策略",
+    "casual": "休閒",
+    "idle": "放置",
+    "adventure": "冒險"
+  },
+  "home": {
+    "h1": "免費線上小遊戲 - 無需下載、無需註冊",
+    "intro": "歡迎來到 ZeroPlay Games——你的免費線上遊戲站。100 款 HTML5 遊戲涵蓋益智、街機、動作、賽車、體育、策略等類型，直接在瀏覽器中開玩。每款遊戲都能免費開始，無需下載或安裝。你可以使用電腦或手機瀏覽；實際操作方式依遊戲而異。",
+    "featured": "精選遊戲",
+    "newGames": "最新遊戲",
+    "popularGames": "熱門遊戲",
+    "allGames": "全部遊戲",
+    "playNow": "立即遊玩",
+    "loadMore": "載入更多"
+  },
+  "game": {
+    "play": "開始遊戲",
+    "fullscreen": "全螢幕",
+    "share": "分享",
+    "relatedGames": "相關遊戲",
+    "loading": "遊戲載入中...",
+    "clickToPlay": "點擊開始",
+    "about": "遊戲介紹",
+    "instructions": "操作說明",
+    "tips": "旋轉裝置以獲得更好的體驗"
+  },
+  "footer": {
+    "about": "關於我們",
+    "privacy": "隱私權政策",
+    "terms": "服務條款",
+    "dmca": "DMCA",
+    "contact": "聯絡我們",
+    "copyright": "版權所有。",
+    "description": "在瀏覽器中暢玩 100 款免費線上遊戲。無需下載、無需註冊，點開即可玩！"
+  },
+  "search": {
+    "placeholder": "搜尋遊戲...",
+    "noResults": "找不到遊戲",
+    "results": "款遊戲"
+  }
+}

@@ -32,5 +32,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Generated search index
+# Generated search indexes
 public/games-index.json
+public/games-index-zh-tw.json

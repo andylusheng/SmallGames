@@ -27,7 +27,7 @@ interface CategoryNavProps {
 export default function CategoryNav({ mobileMenu = false, onNavigate }: CategoryNavProps) {
   const t = useTranslations();
   const pathname = usePathname();
-  const normalizedPath = pathname.replace(/^\/zh(?=\/|$)/, "") || "/";
+  const normalizedPath = pathname.replace(/^\/(?:zh-tw|zh)(?=\/|$)/, "") || "/";
 
   const itemClass = (active: boolean) =>
     `flex items-center gap-2 rounded-lg text-sm font-medium transition-colors ${

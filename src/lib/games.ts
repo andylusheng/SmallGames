@@ -7,6 +7,7 @@ import {
   type LocalizedGameSeoContent,
   type SupportedLocale,
 } from "@/data/game-profiles";
+import { toZhTwDeep, toZhTwText } from "@/data/zh-tw/convert";
 
 export type SeoStatus = "generated" | "reviewed" | "optimized";
 
@@ -167,9 +168,12 @@ export function getAllSlugs(): string[] {
 }
 
 export function getGameSeo(game: Game, locale: string): GameSeo {
-  if (locale === "zh") {
+  if (locale === "zh" || locale === "zh-tw") {
     const localized = (zhSeoData as Record<string, RawGameSeo>)[game.slug];
-    if (localized) return sanitizeSeoContent(localized);
+    if (localized) {
+      const sanitized = sanitizeSeoContent(localized);
+      return locale === "zh-tw" ? toZhTwDeep(sanitized) : sanitized;
+    }
   }
 
   return sanitizeSeoContent({
@@ -191,6 +195,7 @@ export function getLocalizedGameProfile(
 ): LocalizedGameSeoContent | undefined {
   const profile = getGameProfile(gameOrSlug);
   if (!profile) return undefined;
+  if (locale === "zh-tw") return toZhTwDeep(profile.content.zh);
   const supportedLocale: SupportedLocale = locale === "zh" ? "zh" : "en";
   return profile.content[supportedLocale];
 }
@@ -215,15 +220,20 @@ export function getGamePageSeo(game: Game, locale: string): GamePageSeo {
   const isEn = locale === "en";
   const localizedSeo = getGameSeo(game, locale);
   const localizedDescription = localizedSeo.longDescription?.split("\n").find(Boolean) || game.description;
-
-  return {
-    metaTitle: isEn
-      ? `Play ${game.title} Free Online - No Download`
-      : `${game.title} - 免费在线小游戏`,
+  const fallback = {
+    metaTitle: isEn ? `Play ${game.title} Free Online - No Download` : `${game.title} - 免费在线小游戏`,
     metaDescription: compactMetaDescription(localizedDescription),
     h1: isEn ? `${game.title} - Free Online Game` : `${game.title} - 免费在线游戏`,
     intro: compactMetaDescription(localizedDescription, 220),
   };
+  return locale === "zh-tw" ? toZhTwDeep(fallback) : fallback;
+}
+
+export function getLocalizedGameDescription(game: Game, locale: string): string {
+  if (locale === "en") return game.description;
+  const profile = getLocalizedGameProfile(game, locale);
+  if (profile) return profile.metaDescription;
+  return locale === "zh-tw" ? toZhTwText(game.description) : game.description;
 }
 
 export function getCategories(): string[] {
