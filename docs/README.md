@@ -18,7 +18,7 @@
 - **当前游戏数**：100。
 - **当前传统分类数**：9。
 
-ZeroPlay 不再以“把 100 个小游戏堆成门户”为最终目标，而是建立一个可扩展的主题网络：
+ZeroPlay 不以“把大量小游戏堆成门户”为最终目标，而是建立一个可扩展的主题网络：
 
 ```text
 Free Play Games / Free Online Games
@@ -63,10 +63,12 @@ Free Play Games / Free Online Games
 | TypeScript | 6.x |
 | CSS | Tailwind CSS 4 |
 | Hosting | Cloudflare Pages |
+| Build mode | `output: "export"`，静态输出到 `out/` |
 | Game runtime | `/public/games/{slug}/index.html`，iframe 加载 |
 | SEO page | `/game/{slug}`；中文 `/zh/game/{slug}` |
 | Analytics | GA4 + 游戏行为事件 |
 | Build validation | GitHub Actions：`npm ci --legacy-peer-deps` + `npm run build` |
+| Visual validation | `Visual SEO QA`：自动抓取所有 `optimized` 游戏桌面/移动/Runtime 截图 |
 | Current SEO phase | P0/P1 已完成；P2 内容优化进行中 |
 | Game SEO status | 当前 **99/100 `generated`，1/100 `optimized`（Quick Tap）** |
 
@@ -114,7 +116,7 @@ localized metaTitle / metaDescription / h1 / intro
 localized about / howToPlay / rules / tips / faq
 ```
 
-原则：**真实玩法字段优先于历史生成文案。** 页面内容由结构化产品事实驱动，而不是按分类批量扩写。
+原则：**真实玩法字段优先于历史生成文案。页面内容由结构化产品事实驱动，而不是按分类批量扩写。**
 
 ---
 
@@ -133,7 +135,7 @@ localized about / howToPlay / rules / tips / faq
 | `strategy` | 策略 | 7 |
 | **Total** |  | **100** |
 
-传统分类主要解决**浏览与导航**；未来 SEO 增长优先使用“玩法机制主题”组织搜索需求。
+传统分类主要解决**浏览与导航**；SEO 增长优先使用“玩法机制主题”组织搜索需求。
 
 ### 3.1 当前/候选玩法主题集群
 
@@ -355,7 +357,7 @@ L3 默认通过 L2 页面的不同内容模块承接，不自动拆成多个 URL
 5. **内容不可随便换产品名复用**：具体数字、规则、评分都来自这个产品，因此信息唯一性高。
 6. **页面轻、任务明确**：没有为了“SEO 字数”堆大量无关模块。
 
-### 6.2 我们要复制的不是文案，而是生产逻辑
+### 6.2 我们复制的是生产逻辑
 
 ```text
 真实搜索需求
@@ -369,6 +371,8 @@ L3 默认通过 L2 页面的不同内容模块承接，不自动拆成多个 URL
 Title / H1 / Description
     ↓
 How to Play / Rules / Scoring / Win-Fail / Tips / FAQ
+    ↓
+人工试玩 + Visual SEO QA
     ↓
 同机制游戏内链
     ↓
@@ -387,11 +391,9 @@ GSC + 行为数据验证
 
 ## 7. ZeroPlay 游戏页 SEO 标准（P2 Page Standard）
 
-每个进入 `optimized` 状态的游戏页必须满足下面标准。
+**`optimized` 不是“写完文案”的状态，而是一个 Definition of Done。** 每个游戏页必须满足下列产品、内容、技术和 QA 标准后，才能标记为 `optimized`。
 
-### 7.1 首屏
-
-推荐结构：
+### 7.1 首屏标准
 
 ```text
 Breadcrumb
@@ -401,29 +403,29 @@ Game Player
 关键事实：时间 / 操作 / 目标 / 计分（适用时）
 ```
 
-H1 不要求机械加入所有关键词，但必须让用户和搜索引擎立刻知道页面是什么。
+H1 不机械堆关键词，但必须让用户和搜索引擎立刻知道页面是什么。
 
-### 7.2 必备内容模块
+### 7.2 内容模块标准
 
 根据游戏实际情况使用，不能为了凑模板编造：
 
-1. **About / What is [Game]**：用产品事实解释游戏，不写通用广告话术。
+1. **About / What is [Game]**：用产品事实解释游戏。
 2. **How to Play**：真实操作步骤。
 3. **Objective**：玩家目标。
-4. **Controls**：mouse / touch / keyboard，以及移动端实际支持情况。
+4. **Controls**：mouse / touch / keyboard，并与源码及人工测试一致。
 5. **Rules / Mechanics**：核心规则、速度变化、生成逻辑、特殊元素。
-6. **Scoring System**：有分数则必须说明如何得分、奖励/惩罚；无分数不要硬造。
-7. **Win / Fail Condition**：什么时候赢、什么时候结束或失败。
+6. **Scoring System**：有分数则解释奖励/惩罚；无分数不要硬造。
+7. **Win / Fail / End Condition**：真实结束、胜负或失败条件。
 8. **Duration / Levels**：有明确局时、关卡、回合时才展示。
 9. **Best Score / Progress**：只有真实存在 localStorage/账户/关卡记录时展示。
-10. **Tips & Strategies**：技巧必须能从规则推导或经实际试玩验证。
-11. **FAQ**：优先来自 GSC / 真实产品问题，而不是全站统一四问。
-12. **Related Games**：优先同机制，其次同分类，形成主题内链。
-13. **Screenshots / Visual Evidence**：属于推荐增强项，优先使用真实游戏截图；没有真实素材时不允许用虚构截图代替。
+10. **Tips & Strategies**：必须能从规则推导或经实际试玩验证。
+11. **FAQ**：优先来自 GSC 和真实产品问题，不使用全站统一四问作为最终内容。
+12. **Related Games**：优先同机制，其次同搜索意图，再到传统分类。
+13. **Visual Evidence**：必须保留真实页面/游戏视觉 QA 证据；用户页面是否额外展示截图，根据搜索意图决定，不为了凑内容强塞截图。
 
 ### 7.3 Metadata 标准
 
-**Title** 不再全部机械使用 `Play {name} Free Online - No Download`。根据主意图定制，例如：
+Title 不再统一使用 `Play {name} Free Online - No Download`，而是围绕主意图和真实机制定制，例如：
 
 ```text
 Quick Tap Game – 20-Second Tap Challenge
@@ -431,40 +433,111 @@ Tap Tower Game – Stack the Tower Online
 Hex Merge – Free Number Merge Puzzle Online
 ```
 
-标准：
+要求：
 
 - 主关键词尽量靠前。
-- 说明游戏最独特的机制。
-- 不写页面里不存在的功能。
-- Description 说明目标 + 玩法 + 1~2 个具体事实，不堆关键词。
-- English / 中文分别维护，不允许中文页沿用英文 meta description。
+- 表达游戏最独特的真实机制。
+- 不写页面不存在的能力。
+- Description 说明目标 + 玩法 + 1~2 个具体事实，不堆词。
+- English / 中文分别维护，不允许中文页复用英文 description。
 
-### 7.4 Structured Data
+### 7.4 Structured Data 标准
 
 - `VideoGame`：只输出可验证属性。
 - `BreadcrumbList`：与真实页面层级一致。
-- `FAQPage`：仅在页面真正显示相同 FAQ 时输出；不把它视为排名捷径。
+- `FAQPage`：页面显示什么，Schema 就输出什么。
 - 禁止虚构 `AggregateRating`、ratingCount、plays、reviews。
 
 ### 7.5 内容质量红线
 
-禁止以下写法成为主内容：
+禁止以下写法成为核心内容：
 
-- “easy to learn, hard to master” 类可套 100 个页面的话术。
-- 无依据的 “works on every device / kid-friendly / safe / no ads / scientifically proven”。
-- 假播放量、假评分、假发布日期、每天自动刷新更新时间。
+- 可直接套 100 个页面的 “easy to learn, hard to master”。
+- 无依据的 `works on every device / kid-friendly / safe / no ads / scientifically proven`。
+- 假播放量、假评分、假发布日期、自动把更新时间刷成今天。
 - 只替换游戏名的 FAQ / Features / Tips。
 - 为关键词密度重复主词。
 
-**判断标准：把游戏名删掉后，如果一段话还能原封不动用于另外几十个游戏，这段话通常不是合格的核心 SEO 内容。**
+**判断标准：删掉游戏名后，如果一段话还能原封不动用于几十个游戏，这段话通常不是合格的核心 SEO 内容。**
+
+### 7.6 P2 Visual SEO QA 标准
+
+所有 `optimized` 游戏统一执行 `.github/workflows/visual-seo.yml`。
+
+自动流程：
+
+```text
+npm ci --legacy-peer-deps
+        ↓
+npm run build
+        ↓
+scripts/list-optimized-games.mjs
+自动发现 game-profiles.ts 中所有 seoStatus=optimized 的游戏
+        ↓
+启动 out/ 静态服务器
+        ↓
+Chrome Headless 截图
+        ↓
+Artifact 留档 30 天
+```
+
+每个 `optimized` 游戏必须至少生成 3 张真实截图：
+
+| 截图 | Viewport | 用途 |
+|---|---|---|
+| `page-desktop.png` | `1440 × 1200` | 桌面首屏、H1、播放器、导航视觉回归 |
+| `page-mobile.png` | `390 × 844` | 移动端布局、首屏、溢出/遮挡视觉回归 |
+| `game-runtime.png` | `900 × 700` | `/games/{slug}/index.html` 原始 Runtime 是否真实可加载 |
+
+Artifact 结构：
+
+```text
+optimized-game-visual-seo/
+└── {slug}/
+    ├── page-desktop.png
+    ├── page-mobile.png
+    └── game-runtime.png
+```
+
+Visual QA 会在相关 PR、`master` 变更和手动触发时执行，重点监听：
+
+```text
+src/data/game-profiles.ts
+src/views/GamePageView.tsx
+src/components/GamePlayer.tsx
+src/app/**/game/**
+src/messages/**
+public/games/**
+scripts/list-optimized-games.mjs
+.github/workflows/visual-seo.yml
+```
+
+CI 截图是**自动视觉回归**，不能替代真人试玩。`testedMobile=true` 表示已经有人在移动端视口或实际移动设备中进入并操作过游戏；浏览器自动截图本身不能把它从 `false` 改成 `true`。
+
+### 7.7 `optimized` Definition of Done
+
+一个游戏只有全部满足以下条件，才允许计入“SEO 已完成页面”：
+
+- [ ] 读取并核对真实游戏源码。
+- [ ] Primary keyword 明确，Secondary keywords 围绕同一搜索意图。
+- [ ] 真实 objective / controls / scoring / rules / end condition 等结构化进入 `game-profiles.ts`。
+- [ ] EN/ZH Title、Description、H1、Intro 独立维护。
+- [ ] About / How to Play / Rules / Scoring / Mechanics / Tips / FAQ 按实际玩法生成。
+- [ ] 同玩法/同意图内链完成。
+- [ ] canonical / hreflang / VideoGame / Breadcrumb / FAQ 等技术 SEO 正常。
+- [ ] 人工试玩页面和游戏，关键事实与实际表现一致。
+- [ ] 有移动端声明时完成移动端人工 QA，并正确设置 `testedMobile`。
+- [ ] `npm run build` 通过。
+- [ ] Visual SEO QA 通过，桌面/移动/Runtime 三张真实截图 Artifact 已生成。
+- [ ] `docs/README.md` 同步更新状态和关键事实。
 
 ---
 
-## 8. SEO 生产系统：从游戏源码生成独特页面
+## 8. SEO 生产系统：从游戏源码到 `optimized`
 
 ### 8.1 Step 1：读取真实游戏
 
-对每个游戏先检查 `public/games/{slug}/index.html`，提取：
+检查 `public/games/{slug}/index.html`，提取：
 
 - objective
 - controls
@@ -474,14 +547,14 @@ Hex Merge – Free Number Merge Puzzle Online
 - reward / penalty
 - special mechanics
 - win condition
-- fail condition
+- fail/end condition
 - speed/difficulty progression
 - saved progress / best score
 - mobile/touch support
 
 ### 8.2 Step 2：结构化事实
 
-P2 使用 `src/data/game-profiles.ts` 保存已核对游戏的结构化产品与 SEO 数据，核心字段：
+P2 使用 `src/data/game-profiles.ts` 保存已核对游戏的结构化产品与 SEO 数据：
 
 ```ts
 primaryKeyword
@@ -497,17 +570,19 @@ gameplayTopics[]
 publishedAt
 updatedAt
 seoStatus
+testedMobile
+containsViolence
 content.en / content.zh
 ```
 
-未进入 P2 的游戏继续使用 `games.json + zh-seo.json` fallback；一个游戏被审核后，再逐步迁移进入 `game-profiles.ts`。
+未进入 P2 的游戏继续使用 `games.json + zh-seo.json` fallback；被审核后再迁移进入 `game-profiles.ts`。
 
 ### 8.3 Step 3：搜索意图映射
 
 输入优先级：
 
 1. GSC 已出现 Query。
-2. 游戏名 + 常见产品问题：game / online / free / how to play / score / controls / mobile / tips。
+2. 游戏名 + 产品问题：game / online / free / how to play / score / controls / mobile / tips。
 3. 玩法机制词：tap / merge / defense / reaction / number / memory 等。
 4. 外部关键词工具补充搜索量与变体。
 
@@ -545,21 +620,45 @@ FAQ
 More same-mechanic games
 ```
 
-没有 profile 的游戏继续使用旧 fallback，避免未审核内容被错误标记成优化完成。
+### 8.5 Step 5：人工 QA
 
-### 8.5 Step 5：QA 与状态
+人工至少确认：
+
+- 页面能打开。
+- 游戏能开始、操作和重开。
+- SEO 文案写到的规则与实际游戏一致。
+- 控制方式真实可用。
+- 页面没有明显遮挡、溢出、断版。
+- 如果页面声称支持移动端，则在移动端视口或实际移动设备中真正操作游戏后才设置 `testedMobile=true`。
+
+### 8.6 Step 6：自动 Visual SEO QA
+
+`scripts/list-optimized-games.mjs` 使用 TypeScript AST 自动读取 `GAME_PROFILES`，找出所有 `seoStatus: "optimized"` 游戏，不再在 workflow 里手工维护 slug 列表。
+
+然后 `Visual SEO QA` 对全部 optimized 页面执行：
+
+```text
+build
+→ 检查 SEO export 页面存在
+→ 检查原始 game runtime 存在
+→ desktop screenshot
+→ mobile screenshot
+→ runtime screenshot
+→ test PNG 非空
+→ 上传 Artifact
+```
+
+只要其中任何一个游戏页面或 Runtime 不存在、截图失败、图片为空，workflow 即失败。
+
+### 8.7 Step 7：状态管理
 
 | Status | 定义 |
 |---|---|
 | `generated` | 只有基础模板/历史生成内容，技术上可索引但未逐页审核 |
-| `reviewed` | 已核对源码、玩法事实、关键声明和数据，内容可信 |
-| `optimized` | 已完成关键词映射、独特内容、metadata、规则/计分/FAQ、同机制内链和代码/内容 QA，并进入数据监测 |
+| `reviewed` | 已核对源码、玩法事实、关键声明和数据，内容可信，但尚未完成完整搜索意图/视觉/上线 QA |
+| `optimized` | 已完成关键词、独特内容、技术 SEO、同机制内链、人工试玩、移动端适用 QA、Build 和 Visual SEO QA，并进入数据监测 |
 
-截图/视觉证据属于优先增强项，但必须是真实素材；**没有真实截图不会阻止一个已完成产品事实与页面 QA 的页面进入 `optimized`，但后续应继续补齐。**
-
-任何页面只有达到 `optimized` 标准，才计入“SEO 已完成页面”。
-
-### 8.6 Step 6：上线后验证
+### 8.8 Step 8：上线后验证
 
 观察窗口以 GSC 和 GA4 为准，重点看：
 
@@ -575,11 +674,11 @@ More same-mechanic games
 - `related_game_click`
 - `game_error`
 
-SEO 页面不是发布即完成；GSC 出现新 Query 后，应回填 Title、正文模块和 FAQ。
+SEO 页面不是发布即结束；GSC 出现新 Query 后，应回填 Title、正文模块和 FAQ。
 
 ---
 
-## 9. Quick Tap：第一个 P2 标准页
+## 9. Quick Tap：第一个完整 P2 标准页
 
 ### 9.1 状态
 
@@ -588,13 +687,14 @@ SEO 页面不是发布即完成；GSC 出现新 Query 后，应回填 Title、�
 - Primary keyword：`quick tap game`
 - Secondary：`tap speed game` / `quick tapping game` / `reaction tap game` / `20 second tap game`
 - 玩法主题：`tap` / `reaction` / `score-challenge`
-- 首次进入仓库：**2026-07-21**（根据 `public/games/quick-tap/index.html` 的首个 Git commit）
+- 首次进入仓库：**2026-07-21**
 - P2 更新时间：**2026-08-07**
-- 移动端：源码支持 pointer/touch 交互；`testedMobile` 仍为 `false`，表示尚未记录真实设备人工 QA。
+- `testedMobile`：**`true`**；已在浏览器移动端视口人工试玩，操作与布局表现正常。
+- Visual SEO QA：**已通过**；桌面、390×844 移动端、Game Runtime 三类截图成功生成。
 
 ### 9.2 真实源码规则
 
-这些事实来自 `public/games/quick-tap/index.html`，不是 SEO 编写：
+这些事实来自 `public/games/quick-tap/index.html`：
 
 - 每局 **20 秒**。
 - 普通目标命中 **+1 分**。
@@ -602,9 +702,9 @@ SEO 页面不是发布即完成；GSC 出现新 Query 后，应回填 Title、�
 - 每次命中后目标随机移动。
 - 点击空白区域不加分，也不扣分。
 - Best Score 使用浏览器 `localStorage` 保存。
-- 使用 `pointerdown`，游戏区域为响应式尺寸，支持鼠标/触控。
+- 使用 `pointerdown`，支持鼠标和触控交互。
 
-### 9.3 当前 Metadata
+### 9.3 Metadata
 
 ```text
 EN Title: Quick Tap Game – 20-Second Tap Challenge
@@ -614,9 +714,9 @@ ZH Title: Quick Tap 快速点击游戏 – 20秒反应挑战
 ZH H1: Quick Tap – 20秒快速点击游戏
 ```
 
-Description 同样使用独立中英文内容，并直接写入 20 秒、普通目标 1 分、金色目标 15% / 3 分等真实机制。
+Description 使用独立中英文内容，并直接写入 20 秒、普通目标 1 分、金色目标 15% / 3 分等真实机制。
 
-### 9.4 当前页面模块
+### 9.4 页面模块
 
 ```text
 Breadcrumb
@@ -633,7 +733,7 @@ Game Info（含 20 seconds / Mouse / Touch）
 More Tap Games
 ```
 
-FAQ 已从全站模板替换为：
+FAQ：
 
 - How long is a Quick Tap game?
 - How does Quick Tap scoring work?
@@ -643,7 +743,7 @@ FAQ 已从全站模板替换为：
 
 ### 9.5 同玩法内链
 
-Quick Tap 不再只推荐 `casual` 分类游戏；P2 页面优先进入 `tap` 主题关系，当前可连接：
+Quick Tap 优先进入 `tap` 主题关系，可连接：
 
 - Tap Tower
 - Tap Tycoon
@@ -651,11 +751,23 @@ Quick Tap 不再只推荐 `casual` 分类游戏；P2 页面优先进入 `tap` �
 - Gravity Flip
 - Color Switch
 
-该机制由 `GAMEPLAY_TOPIC_MEMBERS` 管理，后续游戏进入 P2 时继续完善主题关系。
+该机制由 `GAMEPLAY_TOPIC_MEMBERS` 管理。
 
-### 9.6 结论
+### 9.6 Visual QA 实战价值
 
-Quick Tap 是 ZeroPlay 第一份真正可复用的 P2 模板：**页面共享结构方法，但每个游戏的正文、数字、规则、FAQ 和关键词必须来自自身真实产品。**
+Quick Tap 是第一个运行 Visual SEO QA 的页面。首轮真实截图曾发现导航中的 `categories.idle` 未翻译，随后补充 `Idle / 放置` 翻译并重新通过截图流程。
+
+这说明截图 CI 不只是“留一张图”，而是用于发现：
+
+- 翻译 key 泄漏。
+- 首屏断版。
+- 移动端溢出/遮挡。
+- 游戏 Runtime 加载失败。
+- 页面模板变更造成的视觉回归。
+
+### 9.7 结论
+
+Quick Tap 现在是 ZeroPlay 的 P2 基准：**共享的是 SEO/QA 生产流程，不共享虚构文案。后续每个游戏都必须按同一 Definition of Done 才能进入 `optimized`。**
 
 ---
 
@@ -678,7 +790,7 @@ Related same-mechanic links
 1. 同玩法机制。
 2. 同搜索意图。
 3. 同传统分类。
-4. 最后才是泛“热门游戏”。
+4. 最后才是泛热门游戏。
 
 玩法 Hub 应链接核心游戏；核心游戏正文反向链接 Hub，形成清晰主题集群。
 
@@ -699,13 +811,14 @@ Related same-mechanic links
 - 静态/法律页面也维护自己的 canonical。
 - 首页和搜索使用轻量数据，不把全部游戏 SEO JSON 打进客户端 bundle。
 - CI 必须通过生产构建后再视为可合并。
+- P2 页面进入 `optimized` 前还必须通过 Visual SEO QA。
 
 ### 11.1 当前已知技术债
 
 - Next.js 15.5.2 有安全升级警告，应升级到已修复版本。
-- `@cloudflare/next-on-pages` 已进入弃用路线；当前站点已经是 `output: export`，正式 Pages Git 部署应使用 `npm run build` → `out/`，后续删除旧 `pages:build/pages:deploy` 依赖与脚本。
-- 旧的 99 个 `generated` 游戏当前默认使用首次入库日期 `2026-07-21` 作为 published/updated 基线；进入 P2 后必须像 Quick Tap 一样维护独立真实更新时间。
-- 中文游戏页已通过 `getGamePageSeo()` 使用本地化 metadata；进入 P2 的游戏必须进一步维护专属中英文 Title/Description/H1。
+- `@cloudflare/next-on-pages` 已进入弃用路线；当前站点已使用 `output: export`，正式 Pages Git 部署使用 `npm run build` → `out/`，后续删除旧 `pages:build/pages:deploy` 依赖与脚本。
+- 旧的 99 个 `generated` 游戏当前使用统一日期基线；进入 P2 后必须维护独立真实 `publishedAt / updatedAt`。
+- 中文游戏页已有本地化 metadata fallback；进入 P2 的游戏必须进一步维护专属中英文 Title/Description/H1。
 
 ---
 
@@ -755,7 +868,7 @@ Related same-mechanic links
 - 首次打开可直接理解核心操作。
 - 10–30 秒内产生第一次明确反馈。
 - 失败/完成后可快速重开。
-- Mobile-first；触屏支持必须实际测试后才标记。
+- Mobile-first；移动支持必须经过人工操作验证后才标记。
 - 不依赖登录即可玩。
 - 有清晰目标、规则、反馈；避免只做视觉 Demo。
 
@@ -803,13 +916,13 @@ SEO 决策不能只看 impressions。优先级应综合：
 
 ### 15.1 Cloudflare Pages 正式部署
 
-当前 Next.js 配置使用：
+当前 Next.js 配置：
 
 ```ts
 output: "export"
 ```
 
-因此正式 Git 部署链路为：
+正式链路：
 
 ```text
 GitHub master
@@ -819,7 +932,7 @@ GitHub master
 → 自动发布
 ```
 
-Cloudflare Pages 配置：
+Cloudflare Pages：
 
 ```text
 Production branch: master
@@ -831,7 +944,15 @@ NODE_VERSION: 22
 NEXT_PUBLIC_SITE_URL: https://zeroplaygames.com
 ```
 
-`prebuild` 会自动运行 `scripts/generate-game-index.js`，生成轻量搜索索引。
+仓库 `.npmrc` 使用：
+
+```text
+legacy-peer-deps=true
+```
+
+使 Cloudflare 自动 `npm ci` 与 GitHub CI 的依赖解析行为一致。
+
+`prebuild` 自动运行 `scripts/generate-game-index.js`。
 
 旧的：
 
@@ -841,14 +962,25 @@ npm run pages:deploy
 @cloudflare/next-on-pages
 ```
 
-不再作为当前正式部署路径，后续技术清理时删除。
+不再作为正式部署路径。
 
 ### 15.2 合并要求
 
-- 代码变更必须生产构建通过。
-- SEO 页面修改需要核对 metadata / canonical / schema 与源码事实一致。
-- 新游戏必须确认 `games.json` 与 `public/games/{slug}` 一致，避免孤立资源。
-- 任何“安全、儿童适用、无广告、移动端支持”等声明必须有事实依据。
+普通代码：
+
+- `npm run build` 必须通过。
+
+P2 游戏页面：
+
+- metadata / canonical / schema 必须与源码事实一致。
+- 人工试玩完成。
+- 移动支持声明经过人工 QA。
+- `testedMobile` 与实际验证状态一致。
+- Visual SEO QA 必须通过。
+- Artifact 必须成功包含每个 `optimized` 游戏三类截图。
+- 文档同步更新。
+
+新增游戏还必须确认 `games.json` 与 `public/games/{slug}` 一致，避免孤立资源。
 
 ---
 
@@ -857,38 +989,41 @@ npm run pages:deploy
 ### 16.1 目录职责
 
 ```text
-public/games/{slug}/        独立 HTML5 游戏源码与缩略图
-src/app/                    Next.js 路由、metadata、robots、sitemap
-src/views/                  首页/分类页/游戏页视图
-src/components/             Header、GamePlayer、GameGrid、GameCard 等 UI
-src/data/games.json         100 个游戏的基础库存与英文历史内容
-src/data/zh-seo.json        中文历史 SEO fallback
-src/data/game-profiles.ts   P2 已核对游戏的真实机制、关键词、双语页面内容与主题关系
-src/data/category-seo.ts    分类页内容与页面钩子
-src/lib/games.ts            游戏读取、清洗、P2 profile、SEO metadata 与关联逻辑
-src/lib/metadata.ts         canonical / hreflang / 全站 metadata 工具
-src/lib/analytics.ts        GA4 事件封装
-src/messages/               中英文 UI 文案
-scripts/                    搜索索引、SEO/游戏数据辅助脚本
-docs/README.md              本项目唯一总文档
-.github/workflows/ci.yml     生产构建 CI
+public/games/{slug}/              独立 HTML5 游戏源码与缩略图
+src/app/                          Next.js 路由、metadata、robots、sitemap
+src/views/                        首页/分类页/游戏页视图
+src/components/                   Header、GamePlayer、GameGrid、GameCard 等 UI
+src/data/games.json               100 个游戏的基础库存与英文历史内容
+src/data/zh-seo.json              中文历史 SEO fallback
+src/data/game-profiles.ts         P2 真实机制、关键词、双语内容、QA 状态、主题关系
+src/data/category-seo.ts          分类页内容与页面钩子
+src/lib/games.ts                  游戏读取、清洗、P2 profile、metadata 与关联逻辑
+src/lib/metadata.ts               canonical / hreflang / 全站 metadata 工具
+src/lib/analytics.ts              GA4 事件封装
+src/messages/                     中英文 UI 文案
+scripts/generate-game-index.js    生成轻量搜索索引
+scripts/list-optimized-games.mjs  自动发现所有 optimized 游戏供 Visual SEO QA 使用
+docs/README.md                    本项目唯一总文档
+.github/workflows/ci.yml           生产构建 CI
+.github/workflows/visual-seo.yml   P2 自动截图与视觉回归 CI
 ```
 
-### 16.2 核心页面组件
+### 16.2 核心组件
 
 - `GamePlayer`：iframe 加载游戏、重开/全屏、游戏生命周期事件。
-- `GamePageView`：游戏页产品与 SEO 内容主体；对 `optimized` profile 自动渲染 P2 页面标准。
+- `GamePageView`：对 `optimized` profile 自动渲染 P2 页面标准。
 - `CategoryPageView`：传统分类页；未来玩法 Hub 可以复用部分结构，但内容意图必须独立。
-- `HomePageView`：首页精选/热门/最新入口；P1 已避免一次性把全部 100 个完整 SEO 数据送到客户端。
-- `GameCard / GameGrid`：使用轻量卡片数据。
+- `HomePageView`：首页精选/热门/最新入口。
+- `GameCard / GameGrid`：轻量卡片数据。
 
 ### 16.3 数据一致性规则
 
-- `games.json` 中正式游戏必须存在对应的 `public/games/{slug}/index.html`。
-- `public/games/` 中不保留未进入正式库存的孤立游戏。
-- 搜索索引由 `prebuild` 根据正式数据生成，不手工维护。
-- 游戏真实规则以实际源码/试玩为最终事实来源；SEO 文案与文档不能反向“定义”不存在的玩法。
-- `game-profiles.ts` 中的 publishedAt / updatedAt / scoring / controls 等字段必须能追溯到 Git 历史、源码或人工 QA。
+- `games.json` 中正式游戏必须存在对应 `public/games/{slug}/index.html`。
+- `public/games/` 不保留未进入正式库存的孤立游戏。
+- 搜索索引由 `prebuild` 生成，不手工维护。
+- 游戏真实规则以源码/试玩为最终事实来源。
+- `game-profiles.ts` 中的日期、计分、Controls 等字段必须能追溯到 Git 历史、源码或人工 QA。
+- `seoStatus=optimized` 会自动进入 Visual SEO QA 目标集合，不需要再手工修改 CI slug 列表。
 
 ---
 
@@ -896,33 +1031,30 @@ docs/README.md              本项目唯一总文档
 
 ### 17.1 UI 原则
 
-- 移动端优先，游戏应尽快进入可玩状态。
-- 页面视觉服务于“立即玩”，SEO 内容位于产品之后/周围，不做文章站式首屏。
-- H1 和一句话玩法说明应在首屏明确表达产品，不让用户先理解门户导航再找游戏。
-- 真实截图、规则表、计分表优先于装饰性长文。
+- 移动端优先，游戏尽快进入可玩状态。
+- 页面视觉服务于“立即玩”，不做文章站式首屏。
+- H1 和一句话玩法说明在首屏明确表达产品。
+- 规则表、计分表、真实游戏视觉证据优先于装饰性长文。
+- 自动截图用于 QA；如果某个搜索意图确实需要教程截图，再将真实截图作为用户可见内容加入页面。
 
 ### 17.2 广告
 
 - 项目保留 AdSense 接入能力。
 - 未配置真实 Publisher ID 时不加载占位广告脚本。
-- 广告不得阻挡首个核心操作、伪装成游戏按钮或制造“必须看广告才能开始”的虚假声明。
-- 页面文案只写“网站可能展示广告”等可验证表述，不写 `No Ads / No Forced Ads` 等未经确认的全站承诺。
+- 广告不得阻挡首个核心操作或伪装成游戏按钮。
+- 不写 `No Ads / No Forced Ads` 等未经确认的全站承诺。
 
 ### 17.3 法律页
 
-维护：`About / Privacy / Terms / DMCA` 及中文对应页。法律/关于页面同样遵循独立 canonical/hreflang。
+维护：`About / Privacy / Terms / DMCA` 及中文对应页；同样遵循独立 canonical/hreflang。
 
 ### 17.4 环境变量
-
-主要变量：
 
 ```text
 NODE_VERSION=22
 NEXT_PUBLIC_SITE_URL=https://zeroplaygames.com
 NEXT_PUBLIC_ADSENSE_CLIENT=<真实 AdSense ID，未获批时留空/不配置>
 ```
-
-GA4 当前由项目配置接入；若 Measurement ID 或数据策略变化，应同步更新本文件。
 
 ---
 
@@ -932,22 +1064,23 @@ GA4 当前由项目配置接入；若 Measurement ID 或数据策略变化，应
 
 - P0：索引、robots、canonical/hreflang、sitemap、结构化数据真实性等技术 SEO 基线。
 - P1：首页/搜索轻量化、行为事件、孤立资源清理、CI 构建验证等。
-- P2 标准样板：**Quick Tap**，完成真实机制数据模型、双语 metadata、Rules、Scoring、Mechanics、专属 FAQ、同玩法内链。
+- P2 标准样板：**Quick Tap**。
+- P2 自动化标准：`Visual SEO QA` + `list-optimized-games.mjs`，自动对所有 optimized 游戏抓取三类真实截图并留 Artifact。
 
 ### 当前主任务：P2
 
-1. 以 Quick Tap 为标准，继续 `tap-tower`。
+1. 以 Quick Tap 的完整 Definition of Done 继续 `tap-tower`。
 2. 再处理 `tap-tycoon`，完成第一批 Tap 游戏核心页。
 3. 处理 Hex Merge / Merge Defense，建立 Merge 主题基础。
 4. 处理 Plant Defense，建立 Defense 主题基础。
 5. 再处理 Gem Crush / Sand Fall / Number Puzzle。
-6. 核心游戏足够后，再正式建立 `/tap-games`、`/merge-games`、`/defense-games` Hub。
+6. 核心游戏足够后，正式建立 `/tap-games`、`/merge-games`、`/defense-games` Hub。
 7. 上线后观察 GSC + GA4，再决定下一批，而不是一次性重写 100 个。
 
 ### 暂不优先
 
-- 为了“游戏数量”从 100 扩到 500。
-- 批量生成几百个只有换关键词的专题页。
+- 为了游戏数量从 100 扩到 500。
+- 批量生成只有换关键词的专题页。
 - 在没有真实评分/播放数据前恢复 rating / plays schema。
 - 在没有 GSC 证据前把每个长尾词拆成独立 URL。
 
@@ -958,12 +1091,15 @@ GA4 当前由项目配置接入；若 Measurement ID 或数据策略变化，应
 从现在开始：
 
 1. `docs/` **只保留这一份 `README.md`**。
-2. 新增/删除游戏时，同步更新：总数、分类数量、游戏目录。
+2. 新增/删除游戏时，同步更新总数、分类数量、游戏目录。
 3. 新增玩法 Hub 时，同步更新站点主题树和内部链接规划。
-4. 某游戏从 `generated → reviewed → optimized` 时，同步更新游戏目录和 P2 队列。
-5. SEO 技术规则、部署方式、分析事件发生变化时同步更新。
-6. GSC 每形成一个有意义的新阶段基线，将关键数据更新到第 12 节；不要每天写流水账。
-7. 已废弃的规划直接从本文删除，不保留多份互相冲突的旧方案。Git 历史就是历史记录。
+4. 游戏从 `generated → reviewed → optimized` 时，同步更新游戏目录和 P2 队列。
+5. `optimized` 标准变化时，必须同时更新第 7 节 Definition of Done、Visual SEO QA 和相应代码流程，避免文档与 CI 脱节。
+6. 移动端人工 QA 完成后再更新 `testedMobile`；自动移动截图不能单独证明实际可操作。
+7. Visual SEO QA 发现的页面问题应在合并前修复；Artifact 是 QA 证据，不是永久产品资产。
+8. SEO 技术规则、部署方式、分析事件变化时同步更新。
+9. GSC 每形成有意义的新阶段基线，将关键数据更新到第 12 节，不写每日流水账。
+10. 已废弃规划直接从本文删除；Git 历史就是历史记录。
 
 ### 文档的最终用途
 
@@ -973,6 +1109,7 @@ GA4 当前由项目配置接入；若 Measurement ID 或数据策略变化，应
 - 现在有哪些游戏。
 - 游戏如何组织。
 - SEO 为什么这样做。
-- 一个游戏页达到“SEO 完成”的标准是什么。
+- 一个游戏页怎样从源码进入 `optimized`。
+- 哪些 QA 是人工、哪些 QA 是 CI 自动完成。
 - 下一步应该优先做什么。
 - 哪些数据和声明不能编造。
