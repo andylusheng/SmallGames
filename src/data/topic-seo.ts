@@ -1,0 +1,135 @@
+import type { SupportedLocale } from "@/data/game-profiles";
+
+export interface TopicPlayStyle {
+  gameSlug: string;
+  title: string;
+  description: string;
+}
+
+export interface LocalizedTopicSeoContent {
+  label: string;
+  metaTitle: string;
+  metaDescription: string;
+  h1: string;
+  intro: string;
+  about: string[];
+  playStylesTitle: string;
+  playStyles: TopicPlayStyle[];
+  howItWorksTitle: string;
+  howItWorks: string[];
+  faq: { q: string; a: string }[];
+}
+
+export interface TopicSeoConfig {
+  key: string;
+  path: string;
+  primaryKeyword: string;
+  secondaryKeywords: string[];
+  updatedAt: string;
+  content: Record<SupportedLocale, LocalizedTopicSeoContent>;
+}
+
+export const TOPIC_SEO: Record<string, TopicSeoConfig> = {
+  tap: {
+    key: "tap",
+    path: "/tap-games",
+    primaryKeyword: "tap games",
+    secondaryKeywords: [
+      "tap games online",
+      "one tap games",
+      "click games online",
+      "tapping games",
+      "tap reaction games",
+    ],
+    updatedAt: "2026-08-07",
+    content: {
+      en: {
+        label: "Tap Games",
+        metaTitle: "Tap Games – Free One-Tap & Click Games Online",
+        metaDescription: "Play 6 free tap games online, from 20-second reaction tests and tower stacking to clicker upgrades, balloon popping, gravity flips and color matching.",
+        h1: "Free Tap Games – One-Tap & Click Games Online",
+        intro: "Play six browser games built around a simple tap or click, then see how the same input becomes reaction speed, timing, stacking, upgrading, accuracy, gravity control or color matching.",
+        about: [
+          "Tap games use a very small input set—usually one tap, click or Space key—but the action can drive very different game systems. In Quick Tap the input is pure reaction speed; in Tap Tower it freezes a moving block; in Gravity Flip it reverses a physics rule; and in Tap Tycoon the same input becomes an economy that can be upgraded.",
+          "This hub groups games by their real interaction mechanic rather than by a broad store category such as Arcade or Casual. That makes it easier to choose the kind of tap challenge you want: a short timed score run, an endless precision game, a clicker progression loop, or a color-and-obstacle timing challenge.",
+        ],
+        playStylesTitle: "Choose a Tap Game by Play Style",
+        playStyles: [
+          { gameSlug: "quick-tap", title: "Reaction speed", description: "Quick Tap gives you 20 seconds to reacquire random targets, with 1-point normal targets and 3-point gold targets." },
+          { gameSlug: "tap-tower", title: "Stacking timing", description: "Tap Tower turns one press into a block drop: preserve overlap, chase 2-point perfect drops and adapt as movement speed rises." },
+          { gameSlug: "tap-tycoon", title: "Clicker progression", description: "Tap Tycoon starts at $1 per tap and lets you reinvest earnings into eight active and passive income upgrades." },
+          { gameSlug: "balloon-pop", title: "Timed accuracy", description: "Balloon Pop is a 30-second pop challenge where each balloon is worth 1 point and 10 escaped balloons end the round early." },
+          { gameSlug: "gravity-flip", title: "Gravity timing", description: "Gravity Flip reverses vertical gravity on every input; pass random obstacle gaps for points while later obstacles move faster." },
+          { gameSlug: "color-switch", title: "Color matching", description: "Color Switch combines tap-controlled height with rotating obstacles that can only be touched through the segment matching the ball color." },
+        ],
+        howItWorksTitle: "How Tap Games Create Different Challenges",
+        howItWorks: [
+          "Reaction games test how quickly you can find and hit a changing target.",
+          "Timing games make the same tap valuable only at a precise moment, such as dropping a moving block or reversing gravity before a gap.",
+          "Clicker games convert repeated taps into a resource, then add upgrades that change the value of future taps or generate passive income.",
+          "Accuracy games attach a consequence to what you tap or fail to tap, such as balloons escaping off screen.",
+          "Rule-switching games change what a safe tap means over time—for example, Color Switch randomizes the ball color after every cleared obstacle.",
+        ],
+        faq: [
+          { q: "What are tap games?", a: "Tap games are games where a tap, click or other single-button action is the main control. The same input can be used for reaction, stacking, jumping, gravity changes, clicker income or other mechanics." },
+          { q: "Which tap game is best for a short reaction challenge?", a: "Quick Tap is the shortest dedicated reaction challenge in this set: each round lasts 20 seconds and the target relocates after every successful hit." },
+          { q: "Are all tap games timed?", a: "No. Quick Tap and Balloon Pop use fixed timers, while Tap Tower, Gravity Flip and Color Switch continue until you fail. Tap Tycoon has no fixed game-over state." },
+          { q: "Which tap game has upgrades?", a: "Tap Tycoon has eight upgrade types that improve per-tap income or passive income. Upgrade costs increase as levels are purchased." },
+          { q: "Do these tap games require a download?", a: "No. The games in this hub run as browser games on ZeroPlay Games. Control support and mobile validation are tracked per individual title." },
+        ],
+      },
+      zh: {
+        label: "点击类游戏",
+        metaTitle: "点击类游戏 – 免费一键与点按小游戏",
+        metaDescription: "免费在线玩6款点击类游戏：20秒反应、叠塔时机、点击经营、戳气球、重力反转和颜色匹配。无需下载，打开浏览器即可开始。",
+        h1: "免费点击类游戏 – 一键点按与反应小游戏",
+        intro: "6款游戏都围绕点击或单键操作展开，但同一个输入会分别变成反应速度、叠塔时机、经营升级、点击准确度、重力控制和颜色匹配。",
+        about: [
+          "点击类游戏的输入很简单，通常只需要点击、触摸或空格键，但真正的玩法并不相同。Quick Tap 测试快速重新锁定目标；Tap Tower 用一次点击决定方块落点；Gravity Flip 用点击直接改变重力规则；Tap Tycoon 则把连续点击转化成可以升级的经营收益。",
+          "这个 Hub 不是按 Arcade、Casual 这类传统商店分类来组织，而是按真实交互机制把游戏放到一起。这样用户可以直接选择自己想玩的点击方式：短局冲分、无限精准挑战、Clicker 成长，或者颜色和障碍时机。",
+        ],
+        playStylesTitle: "按玩法选择点击游戏",
+        playStyles: [
+          { gameSlug: "quick-tap", title: "反应速度", description: "Quick Tap 每局20秒，目标每次命中后随机换位；普通目标1分，金色目标3分。" },
+          { gameSlug: "tap-tower", title: "叠塔时机", description: "Tap Tower 每次点击落下移动方块：保留重叠宽度，争取2分完美落点，并适应越来越快的移动速度。" },
+          { gameSlug: "tap-tycoon", title: "点击经营", description: "Tap Tycoon 从每次点击$1开始，把收入投入8种主动或被动收益升级。" },
+          { gameSlug: "balloon-pop", title: "限时准确度", description: "Balloon Pop 是30秒戳气球挑战，每个气球1分；漏掉10个会提前结束。" },
+          { gameSlug: "gravity-flip", title: "重力时机", description: "Gravity Flip 每次输入都会反转上下重力，通过随机障碍缺口得分，而且后续障碍越来越快。" },
+          { gameSlug: "color-switch", title: "颜色匹配", description: "Color Switch 用点击控制高度，但只能穿过与小球当前颜色一致的旋转障碍色段。" },
+        ],
+        howItWorksTitle: "点击类游戏如何形成不同玩法",
+        howItWorks: [
+          "反应类玩法测试你重新找到并命中变化目标的速度。",
+          "时机类玩法要求在正确瞬间点击，例如落下移动方块，或在进入障碍前反转重力。",
+          "Clicker 玩法把连续点击变成资源，再通过升级提高以后每次点击的价值或产生被动收入。",
+          "准确度玩法会让点中和漏掉产生不同结果，例如气球飞出画面会增加 Miss。",
+          "规则变化玩法会让下一次安全操作发生改变，例如 Color Switch 每通过一个障碍都会随机切换球色。",
+        ],
+        faq: [
+          { q: "什么是点击类游戏？", a: "点击类游戏以点击、触摸或单键作为主要操作，但同一个输入可以对应反应、叠塔、跳跃、重力切换、Clicker 收益等完全不同的机制。" },
+          { q: "哪款点击游戏适合短时间测反应？", a: "Quick Tap 是这一组里最直接的短局反应挑战：每局20秒，每次命中后目标都会随机移动。" },
+          { q: "点击类游戏都有倒计时吗？", a: "没有。Quick Tap 和 Balloon Pop 有固定计时；Tap Tower、Gravity Flip、Color Switch 会持续到失误；Tap Tycoon 没有固定 Game Over。" },
+          { q: "哪款点击游戏有升级系统？", a: "Tap Tycoon 有8种升级，可以提高单次点击收益或每秒被动收入，并且同一升级会随着等级提高而越来越贵。" },
+          { q: "这些点击游戏需要下载吗？", a: "不需要。这个 Hub 里的游戏都是 ZeroPlay Games 浏览器游戏；具体操作支持和移动端人工验证状态按每个游戏单独记录。" },
+        ],
+      },
+    },
+  },
+};
+
+export function getTopicSeoConfig(topic: string): TopicSeoConfig | undefined {
+  return TOPIC_SEO[topic];
+}
+
+export function getLocalizedTopicSeo(topic: string, locale: string): LocalizedTopicSeoContent | undefined {
+  const config = getTopicSeoConfig(topic);
+  if (!config) return undefined;
+  const supportedLocale: SupportedLocale = locale === "zh" ? "zh" : "en";
+  return config.content[supportedLocale];
+}
+
+export function getTopicHubHref(topic: string, locale: string): string | undefined {
+  const config = getTopicSeoConfig(topic);
+  if (!config) return undefined;
+  return locale === "en" ? config.path : `/zh${config.path}`;
+}
