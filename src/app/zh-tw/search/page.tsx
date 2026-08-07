@@ -16,7 +16,7 @@ function SearchContent() {
 
   useEffect(() => {
     let active = true;
-    fetch("/games-index.json")
+    fetch("/games-index-zh-tw.json")
       .then((response) => {
         if (!response.ok) throw new Error(`Search index failed: ${response.status}`);
         return response.json() as Promise<GameCardData[]>;
