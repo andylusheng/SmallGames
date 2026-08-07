@@ -3,6 +3,7 @@
 import { useLocale, useTranslations } from "@/lib/i18n";
 import { Link } from "@/components/Link";
 import NextLink from "next/link";
+import { usePathname } from "next/navigation";
 import { Gamepad2, Menu, X } from "lucide-react";
 import { useState } from "react";
 import SearchBar from "./SearchBar";
@@ -11,11 +12,12 @@ import CategoryNav from "./CategoryNav";
 export default function Header() {
   const t = useTranslations();
   const locale = useLocale();
+  const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const languageLink = locale === "en"
-    ? { href: "/zh-tw", label: "繁體中文" }
+    ? { href: `/zh-tw${pathname === "/" ? "" : pathname}`, label: "繁體中文" }
     : locale === "zh-tw"
-      ? { href: "/", label: "English" }
+      ? { href: pathname.replace(/^\/zh-tw(?=\/|$)/, "") || "/", label: "English" }
       : null;
 
   return (
