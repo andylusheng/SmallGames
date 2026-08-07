@@ -4,8 +4,9 @@ import React, { createContext, useContext } from "react";
 import en from "@/messages/en.json";
 import zh from "@/messages/zh.json";
 import zhTw from "@/messages/zh-tw.json";
+import es from "@/messages/es.json";
 
-const messages: Record<string, any> = { en, zh, "zh-tw": zhTw };
+const messages: Record<string, any> = { en, zh, "zh-tw": zhTw, es };
 
 type MessagesContextType = {
   locale: string;
@@ -42,9 +43,7 @@ export function useTranslations(namespace?: string) {
     const fullKey = namespace ? `${namespace}.${key}` : key;
     const keys = fullKey.split(".");
     let value: any = msgs;
-    for (const k of keys) {
-      value = value?.[k];
-    }
+    for (const k of keys) value = value?.[k];
     if (typeof value !== "string") return fullKey;
     if (params) {
       return value.replace(/\{(\w+)\}/g, (_, name) => String(params[name] ?? `{${name}}`));
