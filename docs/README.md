@@ -1157,7 +1157,7 @@ Hex Merge       reviewed
 Merge Defense   reviewed
 Pet Merge       reviewed
 2048            reviewed
-Merge Hub        implemented
+Merge Hub       implemented
 ```
 
 源码、P2 内容、Hub、双向内链、sitemap、Build、Visual QA 已完成。剩余：4 个游戏人工移动端试玩后晋级。
@@ -1202,3 +1202,114 @@ Defense Games
 8. 废弃规则直接删除；Git 历史就是历史记录。
 
 任何新的 ChatGPT / Codex / 开发者接手项目时，先阅读本文件，即可知道：站点定位、100个游戏、当前 Topic、真实 SEO 标准、哪些页面完成、哪些页面还差 QA，以及下一步应该做什么。
+
+---
+
+## 21. Mobile-first UX Standard
+
+2026-08-07 根据 iPhone 真机截图建立。目标不是“页面在手机上不报错”，而是 **用户打开页面后尽快看到游戏，并能在一个合理的移动 viewport 内完成核心操作**。
+
+### 21.1 移动端首屏优先级
+
+```text
+可玩游戏 / 游戏入口
+>
+必要的 H1 + 一句话说明
+>
+导航 / 搜索
+>
+SEO 扩展内容
+>
+广告
+```
+
+具体规则：
+
+- 首页移动端 Header 只保留 Logo + Menu；Search 放入展开菜单，不常驻占高。
+- 首页 Hero 保留唯一 H1，但介绍文案移动端最多展示两行；完整内容仍在 DOM 中供桌面和搜索引擎理解。
+- Featured Games 在移动端使用两列紧凑卡片，首屏必须能实际看到游戏卡片。
+- 传统 Category 页移动端顺序固定为：Breadcrumb → H1/短说明 → Game Grid → Hook / 扩展 SEO 文案 / 广告。
+- Topic Hub 同样遵循“先解释最少必要信息，再尽快进入游戏列表”。
+- 不允许开发占位内容（例如 `Ad Space`）进入正式站并占据移动首屏。
+
+### 21.2 Mobile Menu 标准
+
+- 菜单关闭时不常驻分类横条。
+- 打开后先显示 Search，再显示分类。
+- 分类使用可完整阅读的两列网格或纵向列表；禁止横向滚动导致分类名称被截断。
+- 点击分类后菜单自动关闭。
+- EN / ZH pathname 都必须正确显示 active state。
+
+### 21.3 Game Player 与 Runtime 标准
+
+网站外层 GamePlayer：
+
+- 移动端优先使用剩余 viewport，而不是固定桌面比例。
+- Header、Breadcrumb、播放器控制条不得无意义地抢占大块高度。
+- 用户点击 Play 后，应尽量在当前屏看到完整核心游戏区域；必要时提供 Fullscreen。
+
+游戏 Runtime：
+
+- `iframe` 自身适配不代表 Runtime 已适配；每个 Runtime 必须检查内部 canvas / DOM 是否横向或纵向溢出。
+- 桌面横排 HUD 在手机上应改成紧凑纵向/顶部 HUD，而不是把画布挤出屏幕。
+- 手机用户不能只看到键盘操作说明；如果游戏声明支持移动端，必须提供真实 touch/pointer/swipe 控制。
+- 画布尺寸必须根据 iframe 的 `innerWidth / innerHeight` 计算，禁止用过大的固定最小尺寸把页面撑出 viewport。
+
+Tetris 已作为 generated 游戏的移动 Runtime 基准案例：移动端棋盘、Score/Lines/Level 和 5 个触屏按钮可以在 390×620 viewport 内完整显示。
+
+### 21.4 广告标准补充
+
+`AdBanner` 只有存在合法 `NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-数字` 时才渲染。
+
+```text
+未配置 Publisher ID
+→ return null
+→ 不加载 adsbygoogle
+→ 不显示 Ad Space
+→ 不保留空白高度
+```
+
+即使未来启用真实广告，移动端 Category / Game 首个核心内容前也不能因为广告把游戏整体推到首屏以下。
+
+### 21.5 Mobile Shell Visual QA
+
+Visual SEO QA 除 P2 游戏和 Topic Hub 外，新增全站壳层基准：
+
+```text
+shell/home/
+  page-desktop.png
+  page-mobile.png       390×844
+
+shell/action-category/
+  page-desktop.png
+  page-mobile.png       390×844
+
+shell/tetris-page/
+  page-desktop.png
+  page-mobile.png       390×844
+
+shell/tetris-runtime/
+  runtime-mobile.png    390×620
+```
+
+这些基准覆盖三类此前未被 P2 CI 覆盖的页面：
+
+```text
+首页
+传统分类页
+generated 游戏页 + Runtime
+```
+
+当 `Header / CategoryNav / HomePageView / CategoryPageView / GamePlayer / GameCard / GameGrid / AdBanner / public games` 改动时，Visual QA 必须重新运行。
+
+### 21.6 验收原则
+
+CI 截图用于发现：
+
+- 游戏是否在移动首屏过晚出现。
+- 导航是否截断、横向溢出。
+- Category 页是否被 SEO 文案/广告挡住游戏。
+- Player/Runtime 是否明显超出 viewport。
+- generated 页面是否因为没有进入 P2 而逃过基础移动 UX 回归。
+
+但自动截图仍不能代替真人试玩。需要实际 touch/swipe 的游戏，最终 `testedMobile=true` 仍以人工完成核心玩法循环为准。

@@ -14,15 +14,20 @@ export default function AdBanner({
   className = "",
 }: AdBannerProps) {
   const adRef = useRef<HTMLModElement>(null);
+  const client = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
+  const enabled = Boolean(client && /^ca-pub-\d+$/.test(client));
 
   useEffect(() => {
+    if (!enabled) return;
     try {
       // @ts-ignore
       (window.adsbygoogle = window.adsbygoogle || []).push({});
-    } catch (e) {
-      // AdSense not loaded yet
+    } catch {
+      // AdSense may not be ready yet.
     }
-  }, []);
+  }, [enabled]);
+
+  if (!enabled) return null;
 
   const formatMap = {
     horizontal: "auto",
@@ -36,15 +41,11 @@ export default function AdBanner({
         ref={adRef}
         className="adsbygoogle block"
         style={{ display: "block", minHeight: "90px" }}
-        data-ad-client={process.env.NEXT_PUBLIC_ADSENSE_CLIENT || "ca-pub-XXXXXXXXXXXXXXXX"}
+        data-ad-client={client}
         data-ad-slot={slot}
         data-ad-format={formatMap[format]}
         data-full-width-responsive="true"
       />
-      {/* Placeholder for development */}
-      <div className="flex items-center justify-center rounded-lg border border-dashed border-white/10 bg-surface/50 py-6 text-xs text-gray-600">
-        Ad Space
-      </div>
     </div>
   );
 }

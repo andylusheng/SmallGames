@@ -39,32 +39,48 @@ export default async function CategoryPageView({ locale, slug }: CategoryPageVie
   const isEn = locale === "en";
   const prefix = isEn ? "" : `/${locale}`;
 
-  if (!categories.includes(slug)) {
-    notFound();
-  }
+  if (!categories.includes(slug)) notFound();
 
   const games = getGamesByCategory(slug);
   const categoryName = t(`categories.${slug}`);
   const seo = getCategorySeo(slug, locale);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6">
-      <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-2 text-sm text-gray-400">
+    <div className="mx-auto max-w-7xl px-4 py-4 md:py-6">
+      <nav aria-label="Breadcrumb" className="mb-3 flex items-center gap-2 text-sm text-gray-400 md:mb-4">
         <NextLink href={`${prefix}/`} className="hover:text-primary">{t("nav.home")}</NextLink>
         <span>/</span><span className="text-white">{categoryName}</span>
       </nav>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white lg:text-3xl">{isEn ? `Free ${categoryName} Games` : `${categoryName}游戏`}</h1>
-        <p className="mt-2 max-w-3xl text-sm leading-relaxed text-gray-400">
-          {isEn
-            ? `Play ${games.length} free ${categoryName} games online instantly — no download, no sign-up. You can browse on desktop or mobile; control support varies by title.`
-            : `在线畅玩${games.length}款免费${categoryName}游戏 — 无需下载，无需注册。你可以使用电脑或手机浏览，具体操作支持因游戏而异。`}
-        </p>
+
+      <div className="flex flex-col">
+        <header className="order-1 mb-4 md:mb-6">
+          <h1 className="text-2xl font-bold leading-tight text-white lg:text-3xl">{isEn ? `Free ${categoryName} Games` : `${categoryName}游戏`}</h1>
+          <p className="mt-2 max-w-3xl line-clamp-2 text-sm leading-relaxed text-gray-400 md:line-clamp-none">
+            {isEn
+              ? `Play ${games.length} free ${categoryName} games online instantly — no download, no sign-up. You can browse on desktop or mobile; control support varies by title.`
+              : `在线畅玩${games.length}款免费${categoryName}游戏 — 无需下载，无需注册。你可以使用电脑或手机浏览，具体操作支持因游戏而异。`}
+          </p>
+        </header>
+
+        <div className="order-2 mb-6 md:order-4">
+          <GameGrid games={games} trackingSource="category" />
+        </div>
+
+        {seo && (
+          <div className="order-3 mb-4 rounded-xl border border-primary/20 bg-primary/5 p-4 md:order-2 md:mb-6">
+            <p className="flex items-start gap-2 text-sm leading-relaxed text-gray-200">
+              <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              {seo.hook}
+            </p>
+          </div>
+        )}
+
+        <div className="order-4 md:order-3">
+          <AdBanner className="mb-6" />
+        </div>
       </div>
-      {seo && <div className="mb-6 rounded-xl border border-primary/20 bg-primary/5 p-4"><p className="flex items-start gap-2 text-sm leading-relaxed text-gray-200"><Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" />{seo.hook}</p></div>}
-      <AdBanner className="mb-6" />
-      <GameGrid games={games} trackingSource="category" />
-      {seo && <div className="mt-10 max-w-4xl">
+
+      {seo && <div className="mt-8 max-w-4xl md:mt-10">
         <section><h2 className="text-xl font-semibold text-white">{isEn ? `About Free ${categoryName} Games` : `关于免费${categoryName}游戏`}</h2><div className="mt-3 space-y-3 text-sm leading-relaxed text-gray-300">{seo.intro.map((para, i) => <p key={i}>{para}</p>)}</div></section>
         <section className="mt-8"><h2 className="text-xl font-semibold text-white">{isEn ? `Why You'll Love ${categoryName} Games` : `为什么你会爱上${categoryName}游戏`}</h2><div className="mt-4 grid gap-3 sm:grid-cols-2">{seo.benefits.map((b, i) => { const Icon = iconMap[b.icon] || Sparkles; return <div key={i} className="flex items-start gap-3 rounded-xl border border-white/10 bg-surface p-4"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/15"><Icon className="h-5 w-5 text-primary" /></div><div><h3 className="text-sm font-semibold text-white">{b.title}</h3><p className="mt-1 text-xs leading-relaxed text-gray-400">{b.desc}</p></div></div>; })}</div></section>
         <section className="mt-8"><h2 className="text-xl font-semibold text-white">{isEn ? `Why Play ${categoryName} Games Here?` : `为什么在这里玩${categoryName}游戏？`}</h2><ul className="mt-3 space-y-2">{seo.why.map((item, i) => <li key={i} className="flex items-start gap-2 text-sm text-gray-300"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-400" />{item}</li>)}</ul></section>
