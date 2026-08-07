@@ -1,6 +1,17 @@
 import { notFound } from "next/navigation";
 import NextLink from "next/link";
-import { getAllSlugs, getGameBySlug, getRelatedGames, getGamesByCategory, getGameSeo, type Game } from "@/lib/games";
+import {
+  getAllSlugs,
+  getGameBySlug,
+  getRelatedGames,
+  getGamesByCategory,
+  getGamesByGameplayTopic,
+  getGameSeo,
+  getGameProfile,
+  getLocalizedGameProfile,
+  getGamePageSeo,
+  type Game,
+} from "@/lib/games";
 import { getGameHook } from "@/data/category-seo";
 import { getServerTranslations } from "@/lib/server-i18n";
 import { SITE_URL } from "@/lib/metadata";
@@ -24,11 +35,12 @@ export function gameStaticParams() {
 
 export function buildGameJsonLd(game: Game, locale: string) {
   const prefix = locale === "en" ? "" : `/${locale}`;
+  const pageSeo = getGamePageSeo(game, locale);
   return {
     "@context": "https://schema.org",
     "@type": "VideoGame",
     name: game.title,
-    description: game.description,
+    description: pageSeo.metaDescription,
     url: `${SITE_URL}${prefix}/game/${game.slug}`,
     image: `${SITE_URL}${game.thumbnail}`,
     genre: game.category,
@@ -70,8 +82,10 @@ export function buildBreadcrumbJsonLd(game: Game, locale: string, t: (key: strin
 }
 
 function getGameFaqs(game: Game, locale: string): { q: string; a: string }[] {
-  const isEn = locale === "en";
+  const optimized = getLocalizedGameProfile(game, locale);
+  if (optimized?.faq?.length) return optimized.faq;
 
+  const isEn = locale === "en";
   if (isEn) {
     return [
       { q: `How do I play ${game.title}?`, a: game.instructions },
@@ -89,21 +103,63 @@ function getGameFaqs(game: Game, locale: string): { q: string; a: string }[] {
   ];
 }
 
+const topicLabels: Record<string, { en: string; zh: string }> = {
+  tap: { en: "Tap Games", zh: "点击类游戏" },
+  reaction: { en: "Reaction Games", zh: "反应类游戏" },
+  "score-challenge": { en: "Score Challenge Games", zh: "高分挑战游戏" },
+};
+
 export default async function GamePageView({ locale, slug }: GamePageViewProps) {
   const game = getGameBySlug(slug);
   if (!game) notFound();
 
   const t = getServerTranslations(locale);
+  const isEn = locale === "en";
+  const profile = getGameProfile(game);
+  const optimizedContent = getLocalizedGameProfile(game, locale);
+  const pageSeo = getGamePageSeo(game, locale);
+  const primaryTopic = profile?.mechanics.gameplayTopics[0];
+  const topicGames = primaryTopic ? getGamesByGameplayTopic(primaryTopic, game.slug, 6) : [];
   const relatedGames = getRelatedGames(game, 8);
   const categoryGames = getGamesByCategory(game.category).filter((g) => g.id !== game.id).slice(0, 4);
-  const isEn = locale === "en";
 
   const seo = getGameSeo(game, locale);
   const longDescription = seo.longDescription || game.description;
   const features = seo.features;
-  const tips = seo.tips;
+  const tips = optimizedContent?.tips ?? seo.tips;
   const difficulty = seo.difficulty || (isEn ? "Easy" : "简单");
   const faqs = getGameFaqs(game, locale);
+  const aboutParagraphs = optimizedContent?.about ?? longDescription.split("\n").filter(Boolean);
+  const howToPlaySteps = optimizedContent?.howToPlay ?? game.instructions.split(/(?<=\.)\s+(?=[A-Z])/);
+  const localize = (value: { en: string; zh: string }) => (isEn ? value.en : value.zh);
+
+  const infoRows: string[][] = [
+    [isEn ? "Game Name" : "游戏名称", game.title],
+    [isEn ? "Category" : "游戏分类", t(`categories.${game.category}`)],
+    [isEn ? "Difficulty" : "难度", difficulty],
+    [isEn ? "Platform" : "平台", isEn ? "Web Browser" : "网页浏览器"],
+    [isEn ? "Price" : "价格", isEn ? "Free" : "免费"],
+    [isEn ? "Players" : "玩家", isEn ? "1 Player" : "单人"],
+  ];
+
+  if (profile?.mechanics.durationSeconds) {
+    infoRows.push([
+      isEn ? "Round Length" : "单局时长",
+      isEn ? `${profile.mechanics.durationSeconds} seconds` : `${profile.mechanics.durationSeconds}秒`,
+    ]);
+  }
+  if (profile?.mechanics.controls.length) {
+    const controlLabels: Record<string, { en: string; zh: string }> = {
+      mouse: { en: "Mouse", zh: "鼠标" },
+      touch: { en: "Touch", zh: "触屏" },
+      keyboard: { en: "Keyboard", zh: "键盘" },
+    };
+    infoRows.push([
+      isEn ? "Controls" : "操作方式",
+      profile.mechanics.controls.map((control) => controlLabels[control]?.[isEn ? "en" : "zh"] ?? control).join(" / "),
+    ]);
+  }
+  infoRows.push([isEn ? "Last Updated" : "最近更新", game.updatedAt]);
 
   return (
     <>
@@ -122,19 +178,23 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
           <span className="text-white">{game.title}</span>
         </nav>
 
+        {optimizedContent && (
+          <header className="mb-6 max-w-4xl">
+            <h1 className="text-3xl font-bold tracking-tight text-white lg:text-4xl">{pageSeo.h1}</h1>
+            <p className="mt-3 text-base leading-relaxed text-gray-300 lg:text-lg">{pageSeo.intro}</p>
+          </header>
+        )}
+
         <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
           <div>
             <GamePlayer gameUrl={game.gameUrl} title={game.title} slug={game.slug} />
 
             <div className="mt-6">
-              <h1 className="text-2xl font-bold text-white lg:text-3xl">
-                {game.title}
-                <span className="ml-3 align-middle text-sm font-normal text-gray-400">
-                  {isEn ? "Free Online Game" : "免费在线游戏"}
-                </span>
-              </h1>
+              {!optimizedContent && (
+                <h1 className="text-2xl font-bold text-white lg:text-3xl">{pageSeo.h1}</h1>
+              )}
 
-              <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-gray-400">
+              <div className={`${optimizedContent ? "" : "mt-3"} flex flex-wrap items-center gap-4 text-sm text-gray-400`}>
                 <span className="flex items-center gap-1">
                   <Tag className="h-4 w-4" />
                   <NextLink href={lp(locale, `/${game.category}`)} className="text-primary hover:underline">
@@ -164,34 +224,26 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
                 ))}
               </div>
 
-              <div className="mt-6 rounded-xl border border-primary/20 bg-primary/5 p-4">
-                <p className="flex items-start gap-2 text-sm leading-relaxed text-gray-200">
-                  <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  {getGameHook(game.category, game.title, locale)}
-                </p>
-              </div>
+              {!optimizedContent && (
+                <div className="mt-6 rounded-xl border border-primary/20 bg-primary/5 p-4">
+                  <p className="flex items-start gap-2 text-sm leading-relaxed text-gray-200">
+                    <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                    {getGameHook(game.category, game.title, locale)}
+                  </p>
+                </div>
+              )}
 
               <section className="mt-8">
                 <h2 className="text-xl font-semibold text-white">{isEn ? `About ${game.title}` : `关于${game.title}`}</h2>
                 <div className="mt-3 space-y-3 text-sm leading-relaxed text-gray-300">
-                  {longDescription.split("\n").map((para: string, i: number) => <p key={i}>{para}</p>)}
-                  <p className="rounded-lg bg-surface/50 p-3">
-                    {isEn ? `If you enjoy ${game.title}, you might also like ` : `如果你喜欢${game.title}，你可能也会喜欢`}
-                    {relatedGames.slice(0, 3).map((rg, i) => (
-                      <span key={rg.id}>
-                        <NextLink href={lp(locale, `/game/${rg.slug}`)} className="font-medium text-primary hover:underline">{rg.title}</NextLink>
-                        {i < 2 ? (isEn ? ", " : "、") : ""}
-                      </span>
-                    ))}
-                    {isEn ? " — all free to play instantly in your browser." : "——全部免费，浏览器即开即玩。"}
-                  </p>
+                  {aboutParagraphs.map((para, i) => <p key={i}>{para}</p>)}
                 </div>
               </section>
 
               <section className="mt-8">
                 <h2 className="text-xl font-semibold text-white">{isEn ? `How to Play ${game.title}` : `${game.title}怎么玩`}</h2>
                 <div className="mt-3 space-y-2 text-sm leading-relaxed text-gray-300">
-                  {game.instructions.split(/(?<=\.)\s+(?=[A-Z])/).map((step: string, i: number) => (
+                  {howToPlaySteps.map((step, i) => (
                     <p key={i} className="flex gap-2">
                       <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">{i + 1}</span>
                       <span>{step}</span>
@@ -200,11 +252,83 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
                 </div>
               </section>
 
-              {features && features.length > 0 && (
+              {optimizedContent?.rules?.length ? (
+                <section className="mt-8">
+                  <h2 className="text-xl font-semibold text-white">{isEn ? `${game.title} Rules` : `${game.title}游戏规则`}</h2>
+                  <ul className="mt-3 space-y-2">
+                    {optimizedContent.rules.map((rule, i) => (
+                      <li key={i} className="flex gap-2 text-sm leading-relaxed text-gray-300">
+                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                        <span>{rule}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
+
+              {profile?.mechanics.scoring.length ? (
+                <section className="mt-8">
+                  <h2 className="text-xl font-semibold text-white">{isEn ? `${game.title} Scoring` : `${game.title}计分规则`}</h2>
+                  <div className="mt-3 overflow-hidden rounded-xl border border-white/10">
+                    <table className="w-full text-sm">
+                      <thead className="bg-surface">
+                        <tr>
+                          <th className="px-4 py-3 text-left font-semibold text-gray-200">{isEn ? "Action" : "操作"}</th>
+                          <th className="px-4 py-3 text-left font-semibold text-gray-200">{isEn ? "Points" : "分数"}</th>
+                          <th className="hidden px-4 py-3 text-left font-semibold text-gray-200 sm:table-cell">{isEn ? "How it works" : "说明"}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {profile.mechanics.scoring.map((rule) => (
+                          <tr key={rule.id} className="border-t border-white/5">
+                            <td className="px-4 py-3 text-white">{localize(rule.label)}</td>
+                            <td className="px-4 py-3 font-semibold text-primary">+{rule.points}</td>
+                            <td className="hidden px-4 py-3 text-gray-400 sm:table-cell">{rule.note ? localize(rule.note) : "—"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+              ) : null}
+
+              {profile && (
+                <section className="mt-8">
+                  <h2 className="text-xl font-semibold text-white">{isEn ? `${game.title} Game Mechanics` : `${game.title}玩法机制`}</h2>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-xl border border-white/10 bg-surface/50 p-4">
+                      <h3 className="text-sm font-semibold text-white">{isEn ? "Objective" : "游戏目标"}</h3>
+                      <p className="mt-2 text-sm leading-relaxed text-gray-300">{localize(profile.mechanics.objective)}</p>
+                    </div>
+                    {profile.mechanics.endCondition && (
+                      <div className="rounded-xl border border-white/10 bg-surface/50 p-4">
+                        <h3 className="text-sm font-semibold text-white">{isEn ? "Round End" : "结束条件"}</h3>
+                        <p className="mt-2 text-sm leading-relaxed text-gray-300">{localize(profile.mechanics.endCondition)}</p>
+                      </div>
+                    )}
+                  </div>
+                  <ul className="mt-3 space-y-2">
+                    {profile.mechanics.specialMechanics.map((mechanic, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm leading-relaxed text-gray-300">
+                        <Zap className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                        {localize(mechanic)}
+                      </li>
+                    ))}
+                    {profile.mechanics.progress && (
+                      <li className="flex items-start gap-2 text-sm leading-relaxed text-gray-300">
+                        <Star className="mt-0.5 h-4 w-4 shrink-0 text-yellow-400" />
+                        {localize(profile.mechanics.progress)}
+                      </li>
+                    )}
+                  </ul>
+                </section>
+              )}
+
+              {!optimizedContent && features && features.length > 0 && (
                 <section className="mt-8">
                   <h2 className="text-xl font-semibold text-white">{isEn ? `${game.title} Features` : `${game.title}游戏特色`}</h2>
                   <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                    {features.map((f: string, i: number) => {
+                    {features.map((f, i) => {
                       const FeatureIcon = [Zap, Star, ShieldCheck, Heart][i % 4];
                       return (
                         <div key={i} className="flex items-start gap-3 rounded-xl border border-white/10 bg-surface/50 p-4 transition-colors hover:border-primary/30">
@@ -221,7 +345,7 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
                 <section className="mt-8">
                   <h2 className="text-xl font-semibold text-white">{isEn ? "Tips & Strategies" : "技巧与攻略"}</h2>
                   <ul className="mt-3 space-y-2">
-                    {tips.map((tip: string, i: number) => <li key={i} className="flex items-start gap-2 text-sm text-gray-300"><Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-yellow-400" />{tip}</li>)}
+                    {tips.map((tip, i) => <li key={i} className="flex items-start gap-2 text-sm text-gray-300"><Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-yellow-400" />{tip}</li>)}
                   </ul>
                 </section>
               )}
@@ -247,15 +371,7 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
                 <h2 className="flex items-center gap-2 text-xl font-semibold text-white"><Info className="h-5 w-5 text-primary" />{isEn ? "Game Info" : "游戏信息"}</h2>
                 <div className="mt-3 overflow-hidden rounded-lg border border-white/10">
                   <table className="w-full text-sm"><tbody>
-                    {[
-                      [isEn ? "Game Name" : "游戏名称", game.title],
-                      [isEn ? "Category" : "游戏分类", t(`categories.${game.category}`)],
-                      [isEn ? "Difficulty" : "难度", difficulty],
-                      [isEn ? "Platform" : "平台", isEn ? "Web Browser" : "网页浏览器"],
-                      [isEn ? "Price" : "价格", isEn ? "Free" : "免费"],
-                      [isEn ? "Players" : "玩家", isEn ? "1 Player" : "单人"],
-                      [isEn ? "Last Updated" : "最近更新", game.updatedAt],
-                    ].map(([label, value]) => <tr key={label} className="border-b border-white/5 last:border-0"><td className="bg-surface px-4 py-2.5 font-medium text-gray-300">{label}</td><td className="px-4 py-2.5 text-white">{value}</td></tr>)}
+                    {infoRows.map(([label, value]) => <tr key={label} className="border-b border-white/5 last:border-0"><td className="bg-surface px-4 py-2.5 font-medium text-gray-300">{label}</td><td className="px-4 py-2.5 text-white">{value}</td></tr>)}
                   </tbody></table>
                 </div>
               </section>
@@ -267,9 +383,19 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
                 </div>
               </section>
 
-              {categoryGames.length > 0 && (
+              {primaryTopic && topicGames.length > 0 ? (
+                <section className="mt-8">
+                  <h2 className="text-xl font-semibold text-white">
+                    {isEn ? `More ${topicLabels[primaryTopic]?.en ?? primaryTopic} Like ${game.title}` : `更多${topicLabels[primaryTopic]?.zh ?? primaryTopic}`}
+                  </h2>
+                  <p className="mt-2 text-sm text-gray-400">
+                    {isEn ? `Continue with games built around the same ${primaryTopic} mechanic.` : `继续体验围绕${topicLabels[primaryTopic]?.zh ?? primaryTopic}机制设计的游戏。`}
+                  </p>
+                  <div className="mt-3"><GameGrid games={topicGames} trackingSource="related" /></div>
+                </section>
+              ) : categoryGames.length > 0 ? (
                 <section className="mt-8"><h2 className="text-xl font-semibold text-white">{isEn ? `More ${t(`categories.${game.category}`)} Games` : `更多${t(`categories.${game.category}`)}游戏`}</h2><div className="mt-3"><GameGrid games={categoryGames} trackingSource="related" /></div></section>
-              )}
+              ) : null}
             </div>
             <AdBanner className="mt-6" />
           </div>
