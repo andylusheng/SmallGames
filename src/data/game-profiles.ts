@@ -66,7 +66,7 @@ export const GAME_PROFILES: Record<string, GameSeoProfile> = {
     publishedAt: "2026-07-21",
     updatedAt: "2026-08-07",
     seoStatus: "optimized",
-    testedMobile: false,
+    testedMobile: true,
     containsViolence: false,
     mechanics: {
       objective: {
