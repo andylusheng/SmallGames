@@ -1,12 +1,13 @@
 import localGamesData from "@/data/games.json";
 import zhSeoData from "@/data/zh-seo.json";
 
+export type SeoStatus = "generated" | "reviewed" | "optimized";
+
 export interface GameSeo {
   longDescription?: string;
   features?: string[];
   tips?: string[];
   difficulty?: string;
-  faq?: { q: string; a: string }[];
 }
 
 export interface Game {
@@ -20,20 +21,79 @@ export interface Game {
   tags: string[];
   featured: boolean;
   popular: boolean;
-  dateAdded: string;
-  plays: number;
-  rating: number;
+  publishedAt: string;
+  updatedAt: string;
+  seoStatus: SeoStatus;
+  testedMobile: boolean;
+  containsViolence: boolean | null;
   instructions: string;
   longDescription?: string;
   features?: string[];
   tips?: string[];
   difficulty?: string;
-  faq?: { q: string; a: string }[];
   source?: "local";
 }
 
-// 全部自研游戏
-const games: Game[] = (localGamesData as Game[]).map((g) => ({ ...g, source: "local" as const }));
+type RawGame = Omit<Game, "publishedAt" | "updatedAt" | "seoStatus" | "testedMobile" | "containsViolence" | "source"> & {
+  dateAdded?: string;
+  plays?: number;
+  rating?: number;
+  faq?: { q: string; a: string }[];
+};
+
+type RawGameSeo = GameSeo & { faq?: { q: string; a: string }[] };
+
+const PUBLISHED_AT = "2026-07-21";
+const UPDATED_AT = "2026-08-07";
+
+function sanitizeSeoContent(seo: RawGameSeo): GameSeo {
+  const longDescription = seo.longDescription
+    ?.split("\n")
+    .filter(
+      (paragraph) =>
+        !paragraph.includes("runs entirely in your browser using HTML5 technology") &&
+        !paragraph.includes("works on any device") &&
+        !paragraph.includes("完全在浏览器中运行") &&
+        !paragraph.includes("支持电脑、平板和手机")
+    )
+    .join("\n");
+
+  const blockedFeaturePhrases = [
+    "no in-app purchases",
+    "high score saved automatically",
+    "desktop, tablet, and mobile browsers",
+    "无内购",
+    "最高分自动保存",
+    "支持桌面、平板和手机",
+  ];
+
+  const features = seo.features?.filter(
+    (feature) =>
+      !blockedFeaturePhrases.some((phrase) =>
+        feature.toLowerCase().includes(phrase.toLowerCase())
+      )
+  );
+
+  return {
+    longDescription,
+    features,
+    tips: seo.tips,
+    difficulty: seo.difficulty,
+  };
+}
+
+const games: Game[] = (localGamesData as RawGame[]).map((rawGame) => {
+  const { dateAdded: _dateAdded, plays: _plays, rating: _rating, faq: _faq, ...game } = rawGame;
+  return {
+    ...game,
+    publishedAt: PUBLISHED_AT,
+    updatedAt: UPDATED_AT,
+    seoStatus: "generated",
+    testedMobile: false,
+    containsViolence: null,
+    source: "local",
+  };
+});
 
 export function getAllGames(): Game[] {
   return games;
@@ -43,21 +103,20 @@ export function getGameBySlug(slug: string): Game | undefined {
   return games.find((game) => game.slug === slug);
 }
 
-export function getFeaturedGames(): Game[] {
-  return games.filter((game) => game.featured);
+export function getFeaturedGames(limit?: number): Game[] {
+  const result = games.filter((game) => game.featured);
+  return typeof limit === "number" ? result.slice(0, limit) : result;
 }
 
 export function getPopularGames(limit = 8): Game[] {
-  return [...games]
-    .sort((a, b) => b.plays - a.plays)
-    .slice(0, limit);
+  const curated = games.filter((game) => game.popular);
+  const fallback = games.filter((game) => !game.popular);
+  return [...curated, ...fallback].slice(0, limit);
 }
 
 export function getNewGames(limit = 8): Game[] {
   return [...games]
-    .sort(
-      (a, b) => new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime()
-    )
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
     .slice(0, limit);
 }
 
@@ -69,44 +128,32 @@ export function getGamesByCategory(category: string): Game[] {
 export function getRelatedGames(game: Game, limit = 4): Game[] {
   return games
     .filter(
-      (g) =>
-        g.id !== game.id &&
-        (g.category === game.category ||
-          g.tags.some((tag) => game.tags.includes(tag)))
+      (candidate) =>
+        candidate.id !== game.id &&
+        (candidate.category === game.category ||
+          candidate.tags.some((tag) => game.tags.includes(tag)))
     )
     .slice(0, limit);
-}
-
-export function searchGames(query: string): Game[] {
-  const q = query.toLowerCase();
-  return games.filter(
-    (game) =>
-      game.title.toLowerCase().includes(q) ||
-      game.description.toLowerCase().includes(q) ||
-      game.tags.some((tag) => tag.toLowerCase().includes(q))
-  );
 }
 
 export function getAllSlugs(): string[] {
   return games.map((game) => game.slug);
 }
 
-/** Get locale-aware SEO content: zh pages use zh-seo.json, en uses games.json fields */
 export function getGameSeo(game: Game, locale: string): GameSeo {
   if (locale === "zh") {
-    const zh = (zhSeoData as Record<string, GameSeo>)[game.slug];
-    if (zh) return zh;
+    const localized = (zhSeoData as Record<string, RawGameSeo>)[game.slug];
+    if (localized) return sanitizeSeoContent(localized);
   }
-  return {
+
+  return sanitizeSeoContent({
     longDescription: game.longDescription,
     features: game.features,
     tips: game.tips,
     difficulty: game.difficulty,
-    faq: game.faq,
-  };
+  });
 }
 
 export function getCategories(): string[] {
-  const cats = new Set(games.map((game) => game.category));
-  return Array.from(cats);
+  return Array.from(new Set(games.map((game) => game.category)));
 }

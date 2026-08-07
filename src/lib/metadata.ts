@@ -27,6 +27,7 @@ export function buildLocaleMetadata(locale: string): Metadata {
   const isEn = locale === "en";
   const prefix = isEn ? "" : "/zh";
   return {
+    metadataBase: new URL(SITE_URL),
     title: {
       default: isEn
         ? `${SITE_NAME} - Play Free Online Games, No Download`
@@ -34,8 +35,8 @@ export function buildLocaleMetadata(locale: string): Metadata {
       template: `%s | ${SITE_NAME}`,
     },
     description: isEn
-      ? "Play thousands of free online games instantly. No downloads, no sign-ups. Action, puzzle, arcade, racing games and more - just click and play!"
-      : "即刻畅玩数千款免费在线小游戏。无需下载，无需注册。动作、益智、街机、赛车游戏应有尽有，点击即玩！",
+      ? "Play 100+ free online games instantly. No downloads, no sign-ups. Action, puzzle, arcade, racing games and more - just click and play!"
+      : "即刻畅玩100多款免费在线小游戏。无需下载，无需注册。动作、益智、街机、赛车游戏应有尽有，点击即玩！",
     keywords: ["free online games", "play games online", "no download games", "browser games", "HTML5 games", "free games"],
     openGraph: {
       type: "website",

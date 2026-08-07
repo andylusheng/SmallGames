@@ -1,58 +1,31 @@
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "About Us",
-};
-
 export default function AboutPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
-      <h1 className="text-3xl font-bold text-white">About ZeroPlay Games</h1>
+      <h1 className="text-3xl font-bold text-white">关于 ZeroPlay Games</h1>
 
       <div className="mt-8 space-y-6 text-sm leading-relaxed text-gray-300">
         <section>
-          <h2 className="mb-2 text-lg font-semibold text-white">
-            Our Mission
-          </h2>
+          <h2 className="mb-2 text-lg font-semibold text-white">我们的目标</h2>
           <p>
-            ZeroPlay Games is dedicated to providing the best free online gaming
-            experience. We believe games should be accessible to everyone — no
-            downloads, no installations, no sign-ups required. Just click and
-            play!
+            ZeroPlay Games 提供无需账号、无需安装即可开始的轻量浏览器游戏。我们的目标是让原创小游戏更容易被发现和游玩。
           </p>
         </section>
 
         <section>
-          <h2 className="mb-2 text-lg font-semibold text-white">
-            What We Offer
-          </h2>
+          <h2 className="mb-2 text-lg font-semibold text-white">现有内容</h2>
           <p>
-            Our platform hosts hundreds of HTML5 games across multiple
-            categories including action, puzzle, arcade, racing, sports, and
-            more. All games run directly in your browser on any device —
-            desktop, tablet, or mobile.
+            目前游戏目录包含 100+ 款 HTML5 游戏，覆盖动作、益智、街机、赛车、体育、策略和休闲等分类。不同游戏的设备与操作支持可能不同，我们会逐款测试并持续完善。
           </p>
         </section>
 
         <section>
-          <h2 className="mb-2 text-lg font-semibold text-white">
-            For Game Developers
-          </h2>
+          <h2 className="mb-2 text-lg font-semibold text-white">联系我们</h2>
           <p>
-            Are you a game developer looking to reach a wider audience? We
-            welcome submissions from indie developers and studios. Your games
-            can reach millions of players worldwide through our platform.
-          </p>
-        </section>
-
-        <section>
-          <h2 className="mb-2 text-lg font-semibold text-white">Contact Us</h2>
-          <p>
-            General inquiries: info@zeroplaygames.com
+            一般咨询：info@zeroplaygames.com
             <br />
-            Game submissions: developers@zeroplaygames.com
+            游戏投稿：developers@zeroplaygames.com
             <br />
-            Advertising: ads@zeroplaygames.com
+            广告合作：ads@zeroplaygames.com
           </p>
         </section>
       </div>

@@ -2,34 +2,59 @@
 
 import { useTranslations } from "@/lib/i18n";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useMemo } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import GameGrid from "@/components/GameGrid";
 import SearchBar from "@/components/SearchBar";
-import { searchGames } from "@/lib/games";
+import type { GameCardData } from "@/types/game-card";
 
 function SearchContent() {
   const t = useTranslations("search");
   const searchParams = useSearchParams();
   const query = searchParams.get("q") || "";
-  const results = useMemo(() => searchGames(query), [query]);
+  const [games, setGames] = useState<GameCardData[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    fetch("/games-index.json")
+      .then((response) => {
+        if (!response.ok) throw new Error(`Search index failed: ${response.status}`);
+        return response.json() as Promise<GameCardData[]>;
+      })
+      .then((data) => {
+        if (active) setGames(data);
+      })
+      .catch(() => {
+        if (active) setGames([]);
+      });
+    return () => { active = false; };
+  }, []);
+
+  const results = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+    if (!normalized) return [];
+    return games.filter(
+      (game) =>
+        game.title.toLowerCase().includes(normalized) ||
+        game.description.toLowerCase().includes(normalized) ||
+        game.tags.some((tag) => tag.toLowerCase().includes(normalized))
+    );
+  }, [games, query]);
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6">
       <div>
-        <h1 className="text-2xl font-bold mb-4">{t("placeholder")}</h1>
+        <h1 className="mb-4 text-2xl font-bold">{t("placeholder")}</h1>
         <SearchBar />
       </div>
-
       {query && (
-        <p className="text-gray-400 text-sm">
+        <p className="text-sm text-gray-400">
           {results.length} {t("results")} &quot;{query}&quot;
         </p>
       )}
-
       {query ? (
-        <GameGrid games={results} />
+        <GameGrid games={results} trackingSource="search" />
       ) : (
-        <p className="text-gray-500 text-center py-12">{t("placeholder")}</p>
+        <p className="py-12 text-center text-gray-500">{t("placeholder")}</p>
       )}
     </div>
   );
@@ -37,7 +62,7 @@ function SearchContent() {
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={<div className="text-center py-12 text-gray-500">Loading...</div>}>
+    <Suspense fallback={<div className="py-12 text-center text-gray-500">Loading...</div>}>
       <SearchContent />
     </Suspense>
   );
