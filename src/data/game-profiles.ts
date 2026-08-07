@@ -1,4 +1,5 @@
 import { TAP_GAME_PROFILES } from "@/data/game-profiles/tap";
+import { MERGE_GAME_PROFILES } from "@/data/game-profiles/merge";
 
 export type SupportedLocale = "en" | "zh";
 
@@ -10,7 +11,8 @@ export interface LocalizedText {
 export interface GameScoringRule {
   id: string;
   label: LocalizedText;
-  points: number;
+  points?: number;
+  value?: LocalizedText;
   note?: LocalizedText;
 }
 
@@ -54,11 +56,13 @@ export interface GameSeoProfile {
 
 export const GAMEPLAY_TOPIC_MEMBERS: Record<string, string[]> = {
   tap: ["quick-tap", "tap-tower", "tap-tycoon", "balloon-pop", "gravity-flip", "color-switch"],
+  merge: ["hex-merge", "merge-defense", "pet-merge", "2048"],
   reaction: ["quick-tap", "reaction-test", "whack-a-mole", "fruit-catch", "avoid-blocks", "tile-hop", "table-tennis"],
 };
 
 export const GAME_PROFILES: Record<string, GameSeoProfile> = {
   ...TAP_GAME_PROFILES,
+  ...MERGE_GAME_PROFILES,
 };
 
 export function getGameProfileConfig(slug: string): GameSeoProfile | undefined {
