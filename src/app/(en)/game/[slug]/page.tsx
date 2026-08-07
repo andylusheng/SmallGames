@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getGameBySlug } from "@/lib/games";
+import { getGameBySlug, getGamePageSeo } from "@/lib/games";
 import { buildAlternates, SITE_URL } from "@/lib/metadata";
 import GamePageView, { gameStaticParams } from "@/views/GamePageView";
 
@@ -16,13 +16,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const game = getGameBySlug(slug);
   if (!game) return {};
 
+  const seo = getGamePageSeo(game, "en");
+
   return {
-    title: `Play ${game.title} Free Online - No Download`,
-    description: game.description,
+    title: seo.metaTitle,
+    description: seo.metaDescription,
     alternates: buildAlternates(`/game/${slug}`, "en"),
     openGraph: {
-      title: `Play ${game.title} Free Online`,
-      description: game.description,
+      title: seo.metaTitle,
+      description: seo.metaDescription,
       type: "website",
       url: `${SITE_URL}/game/${slug}`,
       images: [{ url: game.thumbnail }],

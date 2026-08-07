@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getGameBySlug } from "@/lib/games";
+import { getGameBySlug, getGamePageSeo } from "@/lib/games";
 import { buildAlternates, SITE_URL } from "@/lib/metadata";
 import GamePageView, { gameStaticParams } from "@/views/GamePageView";
 
@@ -16,13 +16,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const game = getGameBySlug(slug);
   if (!game) return {};
 
+  const seo = getGamePageSeo(game, "zh");
+
   return {
-    title: `${game.title} - 免费在线小游戏`,
-    description: game.description,
+    title: seo.metaTitle,
+    description: seo.metaDescription,
     alternates: buildAlternates(`/game/${slug}`, "zh"),
     openGraph: {
-      title: `${game.title} - 免费在线玩`,
-      description: game.description,
+      title: seo.metaTitle,
+      description: seo.metaDescription,
       type: "website",
       url: `${SITE_URL}/zh/game/${slug}`,
       images: [{ url: game.thumbnail }],

@@ -1,5 +1,12 @@
 import localGamesData from "@/data/games.json";
 import zhSeoData from "@/data/zh-seo.json";
+import {
+  GAMEPLAY_TOPIC_MEMBERS,
+  getGameProfileConfig,
+  type GameSeoProfile,
+  type LocalizedGameSeoContent,
+  type SupportedLocale,
+} from "@/data/game-profiles";
 
 export type SeoStatus = "generated" | "reviewed" | "optimized";
 
@@ -8,6 +15,13 @@ export interface GameSeo {
   features?: string[];
   tips?: string[];
   difficulty?: string;
+}
+
+export interface GamePageSeo {
+  metaTitle: string;
+  metaDescription: string;
+  h1: string;
+  intro: string;
 }
 
 export interface Game {
@@ -43,8 +57,8 @@ type RawGame = Omit<Game, "publishedAt" | "updatedAt" | "seoStatus" | "testedMob
 
 type RawGameSeo = GameSeo & { faq?: { q: string; a: string }[] };
 
-const PUBLISHED_AT = "2026-07-21";
-const UPDATED_AT = "2026-08-07";
+const DEFAULT_PUBLISHED_AT = "2026-07-21";
+const DEFAULT_UPDATED_AT = "2026-07-21";
 
 function sanitizeSeoContent(seo: RawGameSeo): GameSeo {
   const longDescription = seo.longDescription
@@ -84,13 +98,15 @@ function sanitizeSeoContent(seo: RawGameSeo): GameSeo {
 
 const games: Game[] = (localGamesData as RawGame[]).map((rawGame) => {
   const { dateAdded: _dateAdded, plays: _plays, rating: _rating, faq: _faq, ...game } = rawGame;
+  const profile = getGameProfileConfig(rawGame.slug);
+
   return {
     ...game,
-    publishedAt: PUBLISHED_AT,
-    updatedAt: UPDATED_AT,
-    seoStatus: "generated",
-    testedMobile: false,
-    containsViolence: null,
+    publishedAt: profile?.publishedAt ?? DEFAULT_PUBLISHED_AT,
+    updatedAt: profile?.updatedAt ?? DEFAULT_UPDATED_AT,
+    seoStatus: profile?.seoStatus ?? "generated",
+    testedMobile: profile?.testedMobile ?? false,
+    containsViolence: profile?.containsViolence ?? null,
     source: "local",
   };
 });
@@ -136,6 +152,15 @@ export function getRelatedGames(game: Game, limit = 4): Game[] {
     .slice(0, limit);
 }
 
+export function getGamesByGameplayTopic(topic: string, excludeSlug?: string, limit = 6): Game[] {
+  const members = GAMEPLAY_TOPIC_MEMBERS[topic] ?? [];
+  return members
+    .filter((slug) => slug !== excludeSlug)
+    .map((slug) => getGameBySlug(slug))
+    .filter((game): game is Game => Boolean(game))
+    .slice(0, limit);
+}
+
 export function getAllSlugs(): string[] {
   return games.map((game) => game.slug);
 }
@@ -152,6 +177,52 @@ export function getGameSeo(game: Game, locale: string): GameSeo {
     tips: game.tips,
     difficulty: game.difficulty,
   });
+}
+
+export function getGameProfile(gameOrSlug: Game | string): GameSeoProfile | undefined {
+  const slug = typeof gameOrSlug === "string" ? gameOrSlug : gameOrSlug.slug;
+  return getGameProfileConfig(slug);
+}
+
+export function getLocalizedGameProfile(
+  gameOrSlug: Game | string,
+  locale: string
+): LocalizedGameSeoContent | undefined {
+  const profile = getGameProfile(gameOrSlug);
+  if (!profile) return undefined;
+  const supportedLocale: SupportedLocale = locale === "zh" ? "zh" : "en";
+  return profile.content[supportedLocale];
+}
+
+function compactMetaDescription(value: string, maxLength = 160): string {
+  const text = value.replace(/\s+/g, " ").trim();
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, maxLength - 1).trimEnd()}…`;
+}
+
+export function getGamePageSeo(game: Game, locale: string): GamePageSeo {
+  const optimized = getLocalizedGameProfile(game, locale);
+  if (optimized) {
+    return {
+      metaTitle: optimized.metaTitle,
+      metaDescription: optimized.metaDescription,
+      h1: optimized.h1,
+      intro: optimized.intro,
+    };
+  }
+
+  const isEn = locale === "en";
+  const localizedSeo = getGameSeo(game, locale);
+  const localizedDescription = localizedSeo.longDescription?.split("\n").find(Boolean) || game.description;
+
+  return {
+    metaTitle: isEn
+      ? `Play ${game.title} Free Online - No Download`
+      : `${game.title} - 免费在线小游戏`,
+    metaDescription: compactMetaDescription(localizedDescription),
+    h1: isEn ? `${game.title} - Free Online Game` : `${game.title} - 免费在线游戏`,
+    intro: compactMetaDescription(localizedDescription, 220),
+  };
 }
 
 export function getCategories(): string[] {

@@ -68,7 +68,7 @@ Free Play Games / Free Online Games
 | Analytics | GA4 + 游戏行为事件 |
 | Build validation | GitHub Actions：`npm ci --legacy-peer-deps` + `npm run build` |
 | Current SEO phase | P0/P1 已完成；P2 内容优化进行中 |
-| Game SEO status | 当前 100/100 为 `generated`，0/100 为 `optimized` |
+| Game SEO status | 当前 **99/100 `generated`，1/100 `optimized`（Quick Tap）** |
 
 ### 2.1 路由
 
@@ -83,7 +83,9 @@ Free Play Games / Free Online Games
 
 ### 2.2 当前数据模型
 
-核心游戏数据位于 `src/data/games.json`，中文 SEO 扩展位于 `src/data/zh-seo.json`，读取层为 `src/lib/games.ts`。当前运行时标准字段包括：
+基础游戏库存位于 `src/data/games.json`，历史中文 SEO 扩展位于 `src/data/zh-seo.json`；**P2 结构化产品事实与逐游戏 SEO 配置统一进入 `src/data/game-profiles.ts`**，读取层为 `src/lib/games.ts`。
+
+运行时基础字段包括：
 
 ```ts
 title / slug / description / category / thumbnail / gameUrl / tags
@@ -95,7 +97,24 @@ containsViolence
 longDescription / features / tips / difficulty
 ```
 
-P2 起应逐步把“真实产品机制”也结构化进数据，而不是只存 AI 生成文案，见第 8 节。
+进入 P2 的游戏额外维护：
+
+```ts
+primaryKeyword
+secondaryKeywords[]
+objective
+controls[]
+durationSeconds
+scoring[]
+specialMechanics[]
+endCondition
+progress
+gameplayTopics[]
+localized metaTitle / metaDescription / h1 / intro
+localized about / howToPlay / rules / tips / faq
+```
+
+原则：**真实玩法字段优先于历史生成文案。** 页面内容由结构化产品事实驱动，而不是按分类批量扩写。
 
 ---
 
@@ -183,7 +202,7 @@ P2 起应逐步把“真实产品机制”也结构化进数据，而不是只�
 | Reaction Speed Test | `reaction-test` | Test your reaction time! Wait for the screen to turn green, then click as fast as possible. | `generated` |
 | Color Match | `color-match` | Match colors before time runs out in this quick brain and reflex challenge. | `generated` |
 | Rock Paper Scissors | `rock-paper-scissors` | Play the classic rock-paper-scissors game against the computer and try to win a streak. | `generated` |
-| Quick Tap | `quick-tap` | Hit moving targets as fast as possible before the timer runs out. Gold targets are worth bonus points. | `generated` |
+| Quick Tap | `quick-tap` | Hit moving targets for 20 seconds; normal targets score 1 point and 15% gold targets score 3 points. | **`optimized`** |
 | Dice Duel | `dice-duel` | Roll the dice against an opponent and see who can win the round with the stronger result. | `generated` |
 | Bubble Wrap | `bubble-wrap` | Pop virtual bubbles one by one for a simple, relaxing and satisfying break. | `generated` |
 | Fidget Spinner | `fidget-spinner` | Spin a virtual fidget spinner and keep it moving as long as you can. | `generated` |
@@ -400,14 +419,14 @@ H1 不要求机械加入所有关键词，但必须让用户和搜索引擎立�
 10. **Tips & Strategies**：技巧必须能从规则推导或经实际试玩验证。
 11. **FAQ**：优先来自 GSC / 真实产品问题，而不是全站统一四问。
 12. **Related Games**：优先同机制，其次同分类，形成主题内链。
-13. **Screenshots / Visual Evidence**：P2 页面应逐步增加真实游戏截图，而不是纯装饰图。
+13. **Screenshots / Visual Evidence**：属于推荐增强项，优先使用真实游戏截图；没有真实素材时不允许用虚构截图代替。
 
 ### 7.3 Metadata 标准
 
 **Title** 不再全部机械使用 `Play {name} Free Online - No Download`。根据主意图定制，例如：
 
 ```text
-Quick Tap Game – 20-Second Tap Speed Challenge
+Quick Tap Game – 20-Second Tap Challenge
 Tap Tower Game – Stack the Tower Online
 Hex Merge – Free Number Merge Puzzle Online
 ```
@@ -462,27 +481,26 @@ Hex Merge – Free Number Merge Puzzle Online
 
 ### 8.2 Step 2：结构化事实
 
-P2 推荐把以下字段逐步加入正式游戏数据：
+P2 使用 `src/data/game-profiles.ts` 保存已核对游戏的结构化产品与 SEO 数据，核心字段：
 
 ```ts
 primaryKeyword
 secondaryKeywords[]
 objective
 controls[]
-duration
-levels
-scoring
-winCondition
-failCondition
+durationSeconds
+scoring[]
 specialMechanics[]
-difficultyProgression
-progressStorage
-mobileSupport
-screenshots[]
+endCondition
+progress
+gameplayTopics[]
 publishedAt
 updatedAt
 seoStatus
+content.en / content.zh
 ```
+
+未进入 P2 的游戏继续使用 `games.json + zh-seo.json` fallback；一个游戏被审核后，再逐步迁移进入 `game-profiles.ts`。
 
 ### 8.3 Step 3：搜索意图映射
 
@@ -511,13 +529,33 @@ Supporting intents: 若干同主题问题
 
 AI 的职责是组织和表达，不是创造不存在的产品事实。
 
+`GamePageView` 对有 P2 profile 的游戏自动渲染：
+
+```text
+H1 + unique intro
+Game Player
+About
+How to Play
+Rules
+Scoring
+Game Mechanics
+Tips & Strategies
+Game Info
+FAQ
+More same-mechanic games
+```
+
+没有 profile 的游戏继续使用旧 fallback，避免未审核内容被错误标记成优化完成。
+
 ### 8.5 Step 5：QA 与状态
 
 | Status | 定义 |
 |---|---|
 | `generated` | 只有基础模板/历史生成内容，技术上可索引但未逐页审核 |
-| `reviewed` | 已核对源码、玩法事实、移动端和声明，内容可信 |
-| `optimized` | 已完成关键词映射、独特内容、内部链接、截图/证据、metadata 与 QA，并进入数据监测 |
+| `reviewed` | 已核对源码、玩法事实、关键声明和数据，内容可信 |
+| `optimized` | 已完成关键词映射、独特内容、metadata、规则/计分/FAQ、同机制内链和代码/内容 QA，并进入数据监测 |
+
+截图/视觉证据属于优先增强项，但必须是真实素材；**没有真实截图不会阻止一个已完成产品事实与页面 QA 的页面进入 `optimized`，但后续应继续补齐。**
 
 任何页面只有达到 `optimized` 标准，才计入“SEO 已完成页面”。
 
@@ -541,37 +579,83 @@ SEO 页面不是发布即完成；GSC 出现新 Query 后，应回填 Title、�
 
 ---
 
-## 9. Quick Tap：标准示例
+## 9. Quick Tap：第一个 P2 标准页
 
-真实源码规则（不是 SEO 编写）：
+### 9.1 状态
+
+- URL：`/game/quick-tap`；中文 `/zh/game/quick-tap`
+- `seoStatus`：**`optimized`**
+- Primary keyword：`quick tap game`
+- Secondary：`tap speed game` / `quick tapping game` / `reaction tap game` / `20 second tap game`
+- 玩法主题：`tap` / `reaction` / `score-challenge`
+- 首次进入仓库：**2026-07-21**（根据 `public/games/quick-tap/index.html` 的首个 Git commit）
+- P2 更新时间：**2026-08-07**
+- 移动端：源码支持 pointer/touch 交互；`testedMobile` 仍为 `false`，表示尚未记录真实设备人工 QA。
+
+### 9.2 真实源码规则
+
+这些事实来自 `public/games/quick-tap/index.html`，不是 SEO 编写：
 
 - 每局 **20 秒**。
 - 普通目标命中 **+1 分**。
 - 金色目标出现概率 **15%**，命中 **+3 分**。
 - 每次命中后目标随机移动。
+- 点击空白区域不加分，也不扣分。
 - Best Score 使用浏览器 `localStorage` 保存。
-- 使用 pointer 事件，可点击/触控。
+- 使用 `pointerdown`，游戏区域为响应式尺寸，支持鼠标/触控。
 
-对应 SEO 页面应自然产生：
+### 9.3 当前 Metadata
 
 ```text
-Primary: quick tap game
-Secondary: tap speed game / quick tapping game / 20 second tap game / tap reaction game
+EN Title: Quick Tap Game – 20-Second Tap Challenge
+EN H1: Quick Tap – 20-Second Tap Speed Game
 
-Title: Quick Tap Game – 20-Second Tap Speed Challenge
-H1: Quick Tap – 20-Second Tap Speed Game
-
-Sections:
-- How to Play Quick Tap
-- Quick Tap Rules
-- Quick Tap Scoring
-- Normal vs Gold Targets
-- How Your Best Score Is Saved
-- Quick Tap Tips
-- FAQ based on actual gameplay/search queries
+ZH Title: Quick Tap 快速点击游戏 – 20秒反应挑战
+ZH H1: Quick Tap – 20秒快速点击游戏
 ```
 
-这就是 ZeroPlay 后续 100 个游戏的标准：**每个页面共享结构方法，但不共享虚构/通用正文。**
+Description 同样使用独立中英文内容，并直接写入 20 秒、普通目标 1 分、金色目标 15% / 3 分等真实机制。
+
+### 9.4 当前页面模块
+
+```text
+Breadcrumb
+H1 + unique intro
+Game Player
+About Quick Tap
+How to Play Quick Tap
+Quick Tap Rules
+Quick Tap Scoring
+Quick Tap Game Mechanics
+Tips & Strategies
+Game Info（含 20 seconds / Mouse / Touch）
+5 个 Quick Tap 专属 FAQ
+More Tap Games
+```
+
+FAQ 已从全站模板替换为：
+
+- How long is a Quick Tap game?
+- How does Quick Tap scoring work?
+- What is the gold target in Quick Tap?
+- Does Quick Tap save my best score?
+- Can I play Quick Tap on a phone?
+
+### 9.5 同玩法内链
+
+Quick Tap 不再只推荐 `casual` 分类游戏；P2 页面优先进入 `tap` 主题关系，当前可连接：
+
+- Tap Tower
+- Tap Tycoon
+- Balloon Pop
+- Gravity Flip
+- Color Switch
+
+该机制由 `GAMEPLAY_TOPIC_MEMBERS` 管理，后续游戏进入 P2 时继续完善主题关系。
+
+### 9.6 结论
+
+Quick Tap 是 ZeroPlay 第一份真正可复用的 P2 模板：**页面共享结构方法，但每个游戏的正文、数字、规则、FAQ 和关键词必须来自自身真实产品。**
 
 ---
 
@@ -619,9 +703,9 @@ Related same-mechanic links
 ### 11.1 当前已知技术债
 
 - Next.js 15.5.2 有安全升级警告，应升级到已修复版本。
-- `@cloudflare/next-on-pages` 已进入弃用路线，后续迁移 OpenNext for Cloudflare。
-- 当前 `publishedAt / updatedAt` 仍由数据层统一归一化；P2 应迁移为每个游戏真实独立日期。
-- 中文游戏页 metadata 应随 P2 使用真正中文 short description，而不是复用英文 description。
+- `@cloudflare/next-on-pages` 已进入弃用路线；当前站点已经是 `output: export`，正式 Pages Git 部署应使用 `npm run build` → `out/`，后续删除旧 `pages:build/pages:deploy` 依赖与脚本。
+- 旧的 99 个 `generated` 游戏当前默认使用首次入库日期 `2026-07-21` 作为 published/updated 基线；进入 P2 后必须像 Quick Tap 一样维护独立真实更新时间。
+- 中文游戏页已通过 `getGamePageSeo()` 使用本地化 metadata；进入 P2 的游戏必须进一步维护专属中英文 Title/Description/H1。
 
 ---
 
@@ -646,10 +730,10 @@ Related same-mechanic links
 
 ### 12.2 第一批 P2 游戏
 
-按当前 GSC 信号优先：
+当前进度：
 
-1. `quick-tap`
-2. `tap-tower`
+1. ✅ `quick-tap` — `optimized`
+2. ⏭ `tap-tower`
 3. `tap-tycoon`
 4. `hex-merge`
 5. `merge-defense`
@@ -717,21 +801,52 @@ SEO 决策不能只看 impressions。优先级应综合：
 
 ## 15. 部署与工程约束
 
-### 15.1 常用命令
+### 15.1 Cloudflare Pages 正式部署
 
-```bash
-npm ci --legacy-peer-deps
-npm run build
-npm run pages:build
-npm run pages:deploy
+当前 Next.js 配置使用：
+
+```ts
+output: "export"
 ```
 
-`prebuild` 会运行 `scripts/generate-game-index.js`，生成轻量搜索索引。
+因此正式 Git 部署链路为：
+
+```text
+GitHub master
+→ Cloudflare Pages
+→ npm run build
+→ out/
+→ 自动发布
+```
+
+Cloudflare Pages 配置：
+
+```text
+Production branch: master
+Framework preset: Next.js (Static HTML Export)；没有该预设时可选 None
+Build command: npm run build
+Build output directory: out
+Root directory: 留空
+NODE_VERSION: 22
+NEXT_PUBLIC_SITE_URL: https://zeroplaygames.com
+```
+
+`prebuild` 会自动运行 `scripts/generate-game-index.js`，生成轻量搜索索引。
+
+旧的：
+
+```text
+npm run pages:build
+npm run pages:deploy
+@cloudflare/next-on-pages
+```
+
+不再作为当前正式部署路径，后续技术清理时删除。
 
 ### 15.2 合并要求
 
 - 代码变更必须生产构建通过。
-- SEO 页面修改需要核对最终 HTML / metadata / canonical / schema。
+- SEO 页面修改需要核对 metadata / canonical / schema 与源码事实一致。
 - 新游戏必须确认 `games.json` 与 `public/games/{slug}` 一致，避免孤立资源。
 - 任何“安全、儿童适用、无广告、移动端支持”等声明必须有事实依据。
 
@@ -746,10 +861,11 @@ public/games/{slug}/        独立 HTML5 游戏源码与缩略图
 src/app/                    Next.js 路由、metadata、robots、sitemap
 src/views/                  首页/分类页/游戏页视图
 src/components/             Header、GamePlayer、GameGrid、GameCard 等 UI
-src/data/games.json         100 个游戏的主数据与英文基础内容
-src/data/zh-seo.json        中文 SEO 扩展内容
+src/data/games.json         100 个游戏的基础库存与英文历史内容
+src/data/zh-seo.json        中文历史 SEO fallback
+src/data/game-profiles.ts   P2 已核对游戏的真实机制、关键词、双语页面内容与主题关系
 src/data/category-seo.ts    分类页内容与页面钩子
-src/lib/games.ts            游戏读取、清洗、SEO 状态与关联逻辑
+src/lib/games.ts            游戏读取、清洗、P2 profile、SEO metadata 与关联逻辑
 src/lib/metadata.ts         canonical / hreflang / 全站 metadata 工具
 src/lib/analytics.ts        GA4 事件封装
 src/messages/               中英文 UI 文案
@@ -761,7 +877,7 @@ docs/README.md              本项目唯一总文档
 ### 16.2 核心页面组件
 
 - `GamePlayer`：iframe 加载游戏、重开/全屏、游戏生命周期事件。
-- `GamePageView`：游戏页产品与 SEO 内容主体；P2 的主要改造位置。
+- `GamePageView`：游戏页产品与 SEO 内容主体；对 `optimized` profile 自动渲染 P2 页面标准。
 - `CategoryPageView`：传统分类页；未来玩法 Hub 可以复用部分结构，但内容意图必须独立。
 - `HomePageView`：首页精选/热门/最新入口；P1 已避免一次性把全部 100 个完整 SEO 数据送到客户端。
 - `GameCard / GameGrid`：使用轻量卡片数据。
@@ -772,6 +888,7 @@ docs/README.md              本项目唯一总文档
 - `public/games/` 中不保留未进入正式库存的孤立游戏。
 - 搜索索引由 `prebuild` 根据正式数据生成，不手工维护。
 - 游戏真实规则以实际源码/试玩为最终事实来源；SEO 文案与文档不能反向“定义”不存在的玩法。
+- `game-profiles.ts` 中的 publishedAt / updatedAt / scoring / controls 等字段必须能追溯到 Git 历史、源码或人工 QA。
 
 ---
 
@@ -800,6 +917,7 @@ docs/README.md              本项目唯一总文档
 主要变量：
 
 ```text
+NODE_VERSION=22
 NEXT_PUBLIC_SITE_URL=https://zeroplaygames.com
 NEXT_PUBLIC_ADSENSE_CLIENT=<真实 AdSense ID，未获批时留空/不配置>
 ```
@@ -814,15 +932,17 @@ GA4 当前由项目配置接入；若 Measurement ID 或数据策略变化，应
 
 - P0：索引、robots、canonical/hreflang、sitemap、结构化数据真实性等技术 SEO 基线。
 - P1：首页/搜索轻量化、行为事件、孤立资源清理、CI 构建验证等。
+- P2 标准样板：**Quick Tap**，完成真实机制数据模型、双语 metadata、Rules、Scoring、Mechanics、专属 FAQ、同玩法内链。
 
 ### 当前主任务：P2
 
-1. 先优化已有 GSC 信号的 9 个游戏。
-2. 从真实源码提取机制事实，建立新的游戏 SEO 数据字段。
-3. 重写每页 Title/H1/Description、How to Play、Rules、Scoring、Tips、FAQ。
-4. 建 Tap / Merge / Defense 第一批玩法 Hub。
-5. 加真实游戏截图和同机制内链。
-6. 观察 GSC + GA4，再决定下一批，而不是一次性重写 100 个。
+1. 以 Quick Tap 为标准，继续 `tap-tower`。
+2. 再处理 `tap-tycoon`，完成第一批 Tap 游戏核心页。
+3. 处理 Hex Merge / Merge Defense，建立 Merge 主题基础。
+4. 处理 Plant Defense，建立 Defense 主题基础。
+5. 再处理 Gem Crush / Sand Fall / Number Puzzle。
+6. 核心游戏足够后，再正式建立 `/tap-games`、`/merge-games`、`/defense-games` Hub。
+7. 上线后观察 GSC + GA4，再决定下一批，而不是一次性重写 100 个。
 
 ### 暂不优先
 
