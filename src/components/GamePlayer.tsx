@@ -21,14 +21,8 @@ export default function GamePlayer({ gameUrl, title, slug }: GamePlayerProps) {
   useEffect(() => {
     if (!hasStarted || isLoading) return;
 
-    const timer30 = window.setTimeout(
-      () => trackEvent("game_30s", { game_slug: slug }),
-      30_000
-    );
-    const timer60 = window.setTimeout(
-      () => trackEvent("game_60s", { game_slug: slug }),
-      60_000
-    );
+    const timer30 = window.setTimeout(() => trackEvent("game_30s", { game_slug: slug }), 30_000);
+    const timer60 = window.setTimeout(() => trackEvent("game_60s", { game_slug: slug }), 60_000);
 
     return () => {
       window.clearTimeout(timer30);
@@ -55,11 +49,8 @@ export default function GamePlayer({ gameUrl, title, slug }: GamePlayerProps) {
     trackEvent("fullscreen_click", { game_slug: slug });
     if (!containerRef.current) return;
 
-    if (document.fullscreenElement) {
-      void document.exitFullscreen();
-    } else {
-      void containerRef.current.requestFullscreen();
-    }
+    if (document.fullscreenElement) void document.exitFullscreen();
+    else void containerRef.current.requestFullscreen();
   };
 
   const handleReload = () => {
@@ -71,11 +62,8 @@ export default function GamePlayer({ gameUrl, title, slug }: GamePlayerProps) {
   };
 
   return (
-    <div
-      ref={containerRef}
-      className="relative w-full overflow-hidden rounded-xl border border-white/10 bg-black"
-    >
-      <div className="relative h-[clamp(420px,65vh,680px)] w-full">
+    <div ref={containerRef} className="relative w-full overflow-hidden rounded-xl border border-white/10 bg-black">
+      <div className="relative h-[calc(100svh-7rem)] min-h-[520px] max-h-[720px] w-full md:h-[clamp(420px,65vh,680px)] md:min-h-0">
         {!hasStarted && (
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-gradient-to-br from-primary/30 to-dark">
             <button
@@ -114,30 +102,20 @@ export default function GamePlayer({ gameUrl, title, slug }: GamePlayerProps) {
       </div>
 
       {hasStarted && (
-        <div className="flex items-center justify-between border-t border-white/10 bg-surface px-4 py-2">
-          <span className="text-sm font-medium text-white">{title}</span>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleReload}
-              className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-surface-light hover:text-white"
-              title="Reload"
-              aria-label={`Reload ${title}`}
-            >
+        <div className="flex items-center justify-between border-t border-white/10 bg-surface px-3 py-1.5 md:px-4 md:py-2">
+          <span className="truncate pr-3 text-sm font-medium text-white">{title}</span>
+          <div className="flex items-center gap-1 md:gap-2">
+            <button onClick={handleReload} className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-surface-light hover:text-white" title="Reload" aria-label={`Reload ${title}`}>
               <RotateCcw className="h-4 w-4" />
             </button>
-            <button
-              onClick={handleFullscreen}
-              className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-surface-light hover:text-white"
-              title={t("game.fullscreen")}
-              aria-label={`${t("game.fullscreen")}: ${title}`}
-            >
+            <button onClick={handleFullscreen} className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-surface-light hover:text-white" title={t("game.fullscreen")} aria-label={`${t("game.fullscreen")}: ${title}`}>
               <Maximize className="h-4 w-4" />
             </button>
           </div>
         </div>
       )}
 
-      <div className="hidden max-[480px]:flex items-center justify-center gap-2 bg-secondary/10 px-4 py-2 text-xs text-secondary">
+      <div className="hidden max-[480px]:flex items-center justify-center gap-2 bg-secondary/10 px-4 py-1.5 text-xs text-secondary">
         📱 {t("game.tips")}
       </div>
     </div>
