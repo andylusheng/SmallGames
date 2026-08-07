@@ -2,17 +2,31 @@ name: Visual SEO QA
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [master]
+    paths:
+      - "src/data/game-profiles.ts"
+      - "src/views/GamePageView.tsx"
+      - "src/components/GamePlayer.tsx"
+      - "src/app/**/game/**"
+      - "src/messages/**"
+      - "public/games/**"
+      - "scripts/list-optimized-games.mjs"
+      - ".github/workflows/visual-seo.yml"
   push:
     branches: [master]
     paths:
       - "src/data/game-profiles.ts"
       - "src/views/GamePageView.tsx"
+      - "src/components/GamePlayer.tsx"
+      - "src/app/**/game/**"
       - "src/messages/**"
       - "public/games/**"
+      - "scripts/list-optimized-games.mjs"
       - ".github/workflows/visual-seo.yml"
 
 jobs:
-  quick-tap-screenshots:
+  optimized-game-screenshots:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,13 +39,23 @@ jobs:
       - run: npm ci --legacy-peer-deps
       - run: npm run build
 
+      - name: Discover optimized games
+        id: targets
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/list-optimized-games.mjs
+          TARGETS_JSON="$(node scripts/list-optimized-games.mjs --json)"
+          echo "json=$TARGETS_JSON" >> "$GITHUB_OUTPUT"
+          echo "Optimized games: $TARGETS_JSON" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Set up Chrome
         id: chrome
         uses: browser-actions/setup-chrome@v1
         with:
           chrome-version: stable
 
-      - name: Capture Quick Tap desktop and mobile screenshots
+      - name: Capture optimized game visual evidence
         shell: bash
         run: |
           set -euo pipefail
@@ -47,67 +71,80 @@ jobs:
             sleep 1
           done
 
-          if [[ -f out/game/quick-tap.html ]]; then
-            PAGE_URL="http://127.0.0.1:4173/game/quick-tap.html"
-          elif [[ -f out/game/quick-tap/index.html ]]; then
-            PAGE_URL="http://127.0.0.1:4173/game/quick-tap/"
-          else
-            echo "Quick Tap exported page was not found under out/game/"
-            find out/game -maxdepth 2 -type f | head -50 || true
-            exit 1
-          fi
+          curl -fsS http://127.0.0.1:4173/ >/dev/null
 
-          GAME_URL="http://127.0.0.1:4173/games/quick-tap/index.html"
           CHROME="${{ steps.chrome.outputs.chrome-path }}"
-          OUTPUT_DIR="$GITHUB_WORKSPACE/artifacts/quick-tap"
-          mkdir -p "$OUTPUT_DIR"
+          mapfile -t SLUGS < <(node scripts/list-optimized-games.mjs)
 
-          curl -fsS "$PAGE_URL" >/dev/null
-          curl -fsS "$GAME_URL" >/dev/null
+          echo "## Captured pages" >> "$GITHUB_STEP_SUMMARY"
 
-          "$CHROME" \
-            --headless=new \
-            --no-sandbox \
-            --disable-gpu \
-            --hide-scrollbars \
-            --force-device-scale-factor=1 \
-            --window-size=1440,1200 \
-            --virtual-time-budget=6000 \
-            --screenshot="$OUTPUT_DIR/page-desktop.png" \
-            "$PAGE_URL"
+          for SLUG in "${SLUGS[@]}"; do
+            if [[ -f "out/game/${SLUG}.html" ]]; then
+              PAGE_URL="http://127.0.0.1:4173/game/${SLUG}.html"
+            elif [[ -f "out/game/${SLUG}/index.html" ]]; then
+              PAGE_URL="http://127.0.0.1:4173/game/${SLUG}/"
+            else
+              echo "Exported SEO page not found for ${SLUG}" >&2
+              exit 1
+            fi
 
-          "$CHROME" \
-            --headless=new \
-            --no-sandbox \
-            --disable-gpu \
-            --hide-scrollbars \
-            --force-device-scale-factor=1 \
-            --window-size=390,844 \
-            --virtual-time-budget=6000 \
-            --screenshot="$OUTPUT_DIR/page-mobile.png" \
-            "$PAGE_URL"
+            if [[ ! -f "out/games/${SLUG}/index.html" ]]; then
+              echo "Exported game runtime not found for ${SLUG}" >&2
+              exit 1
+            fi
 
-          "$CHROME" \
-            --headless=new \
-            --no-sandbox \
-            --disable-gpu \
-            --hide-scrollbars \
-            --force-device-scale-factor=1 \
-            --window-size=900,700 \
-            --virtual-time-budget=5000 \
-            --screenshot="$OUTPUT_DIR/game-runtime.png" \
-            "$GAME_URL"
+            GAME_URL="http://127.0.0.1:4173/games/${SLUG}/index.html"
+            OUTPUT_DIR="$GITHUB_WORKSPACE/artifacts/visual-seo/${SLUG}"
+            mkdir -p "$OUTPUT_DIR"
 
-          test -s "$OUTPUT_DIR/page-desktop.png"
-          test -s "$OUTPUT_DIR/page-mobile.png"
-          test -s "$OUTPUT_DIR/game-runtime.png"
+            curl -fsS "$PAGE_URL" >/dev/null
+            curl -fsS "$GAME_URL" >/dev/null
 
-          file "$OUTPUT_DIR"/*.png
+            "$CHROME" \
+              --headless=new \
+              --no-sandbox \
+              --disable-gpu \
+              --hide-scrollbars \
+              --force-device-scale-factor=1 \
+              --window-size=1440,1200 \
+              --virtual-time-budget=6000 \
+              --screenshot="$OUTPUT_DIR/page-desktop.png" \
+              "$PAGE_URL"
 
-      - name: Upload visual QA screenshots
+            "$CHROME" \
+              --headless=new \
+              --no-sandbox \
+              --disable-gpu \
+              --hide-scrollbars \
+              --force-device-scale-factor=1 \
+              --window-size=390,844 \
+              --virtual-time-budget=6000 \
+              --screenshot="$OUTPUT_DIR/page-mobile.png" \
+              "$PAGE_URL"
+
+            "$CHROME" \
+              --headless=new \
+              --no-sandbox \
+              --disable-gpu \
+              --hide-scrollbars \
+              --force-device-scale-factor=1 \
+              --window-size=900,700 \
+              --virtual-time-budget=5000 \
+              --screenshot="$OUTPUT_DIR/game-runtime.png" \
+              "$GAME_URL"
+
+            test -s "$OUTPUT_DIR/page-desktop.png"
+            test -s "$OUTPUT_DIR/page-mobile.png"
+            test -s "$OUTPUT_DIR/game-runtime.png"
+            file "$OUTPUT_DIR"/*.png
+
+            echo "- ${SLUG}: desktop page, 390x844 mobile page, game runtime" >> "$GITHUB_STEP_SUMMARY"
+          done
+
+      - name: Upload visual QA evidence
         uses: actions/upload-artifact@v4
         with:
-          name: quick-tap-visual-seo
-          path: artifacts/quick-tap/*.png
+          name: optimized-game-visual-seo
+          path: artifacts/visual-seo/**/*.png
           if-no-files-found: error
           retention-days: 30
