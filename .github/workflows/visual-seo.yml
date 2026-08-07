@@ -12,7 +12,14 @@ on:
       - "src/lib/games.ts"
       - "src/views/GamePageView.tsx"
       - "src/views/TopicPageView.tsx"
+      - "src/views/HomePageView.tsx"
+      - "src/views/CategoryPageView.tsx"
       - "src/components/GamePlayer.tsx"
+      - "src/components/Header.tsx"
+      - "src/components/CategoryNav.tsx"
+      - "src/components/AdBanner.tsx"
+      - "src/components/GameGrid.tsx"
+      - "src/components/GameCard.tsx"
       - "src/app/**"
       - "src/messages/**"
       - "public/games/**"
@@ -30,7 +37,14 @@ on:
       - "src/lib/games.ts"
       - "src/views/GamePageView.tsx"
       - "src/views/TopicPageView.tsx"
+      - "src/views/HomePageView.tsx"
+      - "src/views/CategoryPageView.tsx"
       - "src/components/GamePlayer.tsx"
+      - "src/components/Header.tsx"
+      - "src/components/CategoryNav.tsx"
+      - "src/components/AdBanner.tsx"
+      - "src/components/GameGrid.tsx"
+      - "src/components/GameCard.tsx"
       - "src/app/**"
       - "src/messages/**"
       - "public/games/**"
@@ -105,17 +119,37 @@ jobs:
             test -s "$output_dir/page-mobile.png"
           }
 
+          resolve_page_url() {
+            local path="$1"
+            if [[ -f "out${path}.html" ]]; then
+              printf 'http://127.0.0.1:4173%s.html\n' "$path"
+            elif [[ -f "out${path}/index.html" ]]; then
+              printf 'http://127.0.0.1:4173%s/\n' "$path"
+            else
+              echo "Exported page not found for ${path}" >&2
+              exit 1
+            fi
+          }
+
+          echo "## Captured mobile UX shell baselines" >> "$GITHUB_STEP_SUMMARY"
+          capture_page "http://127.0.0.1:4173/" "$GITHUB_WORKSPACE/artifacts/visual-seo/shell/home"
+          capture_page "$(resolve_page_url /action)" "$GITHUB_WORKSPACE/artifacts/visual-seo/shell/action-category"
+          capture_page "$(resolve_page_url /game/tetris)" "$GITHUB_WORKSPACE/artifacts/visual-seo/shell/tetris-page"
+
+          TETRIS_URL="http://127.0.0.1:4173/games/tetris/index.html"
+          TETRIS_OUTPUT="$GITHUB_WORKSPACE/artifacts/visual-seo/shell/tetris-runtime"
+          mkdir -p "$TETRIS_OUTPUT"
+          curl -fsS "$TETRIS_URL" >/dev/null
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --hide-scrollbars \
+            --force-device-scale-factor=1 --window-size=390,620 --virtual-time-budget=5000 \
+            --screenshot="$TETRIS_OUTPUT/runtime-mobile.png" "$TETRIS_URL"
+          test -s "$TETRIS_OUTPUT/runtime-mobile.png"
+          echo "- home, action category, Tetris page, Tetris mobile runtime" >> "$GITHUB_STEP_SUMMARY"
+
           echo "## Captured P2 game pages" >> "$GITHUB_STEP_SUMMARY"
           mapfile -t SLUGS < <(node scripts/list-p2-qa-games.mjs)
           for SLUG in "${SLUGS[@]}"; do
-            if [[ -f "out/game/${SLUG}.html" ]]; then
-              PAGE_URL="http://127.0.0.1:4173/game/${SLUG}.html"
-            elif [[ -f "out/game/${SLUG}/index.html" ]]; then
-              PAGE_URL="http://127.0.0.1:4173/game/${SLUG}/"
-            else
-              echo "Exported SEO page not found for ${SLUG}" >&2
-              exit 1
-            fi
+            PAGE_URL="$(resolve_page_url /game/${SLUG})"
 
             if [[ ! -f "out/games/${SLUG}/index.html" ]]; then
               echo "Exported game runtime not found for ${SLUG}" >&2
@@ -138,15 +172,7 @@ jobs:
           echo "## Captured topic hubs" >> "$GITHUB_STEP_SUMMARY"
           while IFS=$'\t' read -r TOPIC_KEY TOPIC_PATH; do
             [[ -n "$TOPIC_KEY" ]] || continue
-            if [[ -f "out${TOPIC_PATH}.html" ]]; then
-              TOPIC_URL="http://127.0.0.1:4173${TOPIC_PATH}.html"
-            elif [[ -f "out${TOPIC_PATH}/index.html" ]]; then
-              TOPIC_URL="http://127.0.0.1:4173${TOPIC_PATH}/"
-            else
-              echo "Exported topic hub not found for ${TOPIC_KEY} at ${TOPIC_PATH}" >&2
-              exit 1
-            fi
-
+            TOPIC_URL="$(resolve_page_url "$TOPIC_PATH")"
             TOPIC_OUTPUT="$GITHUB_WORKSPACE/artifacts/visual-seo/topics/${TOPIC_KEY}"
             capture_page "$TOPIC_URL" "$TOPIC_OUTPUT"
             file "$TOPIC_OUTPUT"/*.png
