@@ -4,7 +4,9 @@ const ts = require("typescript");
 
 const gamesPath = path.join(__dirname, "../src/data/games.json");
 const profilesDir = path.join(__dirname, "../src/data/game-profiles");
+const zhTwConvertPath = path.join(__dirname, "../src/data/zh-tw/convert.ts");
 const output = path.join(__dirname, "../public/games-index.json");
+const zhTwOutput = path.join(__dirname, "../public/games-index-zh-tw.json");
 const defaultPublishedAt = "2026-07-21";
 const defaultUpdatedAt = "2026-07-21";
 
@@ -40,6 +42,11 @@ function collectProfileFiles(dir) {
   });
 }
 
+function mergeOverride(overrides, slug, patch) {
+  if (!slug) return;
+  overrides.set(slug, { ...(overrides.get(slug) || {}), ...patch });
+}
+
 function loadProfileOverrides() {
   const overrides = new Map();
 
@@ -54,12 +61,31 @@ function loadProfileOverrides() {
         const updatedAt = stringProperty(node, "updatedAt");
         const content = objectProperty(node, "content");
         const en = content ? objectProperty(content, "en") : undefined;
-        const description = en ? stringProperty(en, "metaDescription") : undefined;
+        const zh = content ? objectProperty(content, "zh") : undefined;
+        const enDescription = en ? stringProperty(en, "metaDescription") : undefined;
+        const zhDescription = zh ? stringProperty(zh, "metaDescription") : undefined;
 
-        if (slug && (description || publishedAt || updatedAt)) {
-          overrides.set(slug, { description, publishedAt, updatedAt });
+        if (slug && (enDescription || zhDescription || publishedAt || updatedAt)) {
+          mergeOverride(overrides, slug, { enDescription, zhDescription, publishedAt, updatedAt });
         }
       }
+
+      if (
+        ts.isCallExpression(node) &&
+        ts.isIdentifier(node.expression) &&
+        node.expression.text === "catalogProfile" &&
+        node.arguments.length > 0 &&
+        ts.isObjectLiteralExpression(node.arguments[0])
+      ) {
+        const seed = node.arguments[0];
+        const slug = stringProperty(seed, "slug");
+        const zhTitle = stringProperty(seed, "zhTitle");
+        const metaDescription = objectProperty(seed, "metaDescription");
+        const enDescription = metaDescription ? stringProperty(metaDescription, "en") : undefined;
+        const zhDescription = metaDescription ? stringProperty(metaDescription, "zh") : undefined;
+        mergeOverride(overrides, slug, { enDescription, zhDescription, zhTitle });
+      }
+
       ts.forEachChild(node, visit);
     }
 
@@ -69,8 +95,50 @@ function loadProfileOverrides() {
   return overrides;
 }
 
+function loadZhTwConverter() {
+  const sourceText = fs.readFileSync(zhTwConvertPath, "utf8");
+  const source = ts.createSourceFile(zhTwConvertPath, sourceText, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  let simplified = "";
+  let traditional = "";
+  const overrides = [];
+
+  function visit(node) {
+    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name)) {
+      if (node.name.text === "SIMPLIFIED" && node.initializer && ts.isStringLiteral(node.initializer)) {
+        simplified = node.initializer.text;
+      }
+      if (node.name.text === "TRADITIONAL" && node.initializer && ts.isStringLiteral(node.initializer)) {
+        traditional = node.initializer.text;
+      }
+      if (node.name.text === "PHRASE_OVERRIDES" && node.initializer && ts.isArrayLiteralExpression(node.initializer)) {
+        for (const entry of node.initializer.elements) {
+          if (
+            ts.isArrayLiteralExpression(entry) &&
+            entry.elements.length === 2 &&
+            ts.isStringLiteral(entry.elements[0]) &&
+            ts.isStringLiteral(entry.elements[1])
+          ) {
+            overrides.push([entry.elements[0].text, entry.elements[1].text]);
+          }
+        }
+      }
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(source);
+
+  const traditionalChars = Array.from(traditional);
+  const charMap = new Map(Array.from(simplified).map((char, index) => [char, traditionalChars[index]]));
+  return (input) => {
+    let result = input || "";
+    for (const [from, to] of overrides) result = result.split(from).join(to);
+    return Array.from(result).map((char) => charMap.get(char) ?? char).join("");
+  };
+}
+
 const games = JSON.parse(fs.readFileSync(gamesPath, "utf8"));
 const profileOverrides = loadProfileOverrides();
+const toZhTw = loadZhTwConverter();
 
 const index = games.map(({ id, title, slug, description, category, thumbnail, tags, featured, popular }) => {
   const profile = profileOverrides.get(slug);
@@ -78,7 +146,24 @@ const index = games.map(({ id, title, slug, description, category, thumbnail, ta
     id,
     title,
     slug,
-    description: profile?.description ?? description,
+    description: profile?.enDescription ?? description,
+    category,
+    thumbnail,
+    tags,
+    featured,
+    popular,
+    publishedAt: profile?.publishedAt ?? defaultPublishedAt,
+    updatedAt: profile?.updatedAt ?? defaultUpdatedAt,
+  };
+});
+
+const zhTwIndex = games.map(({ id, title, slug, description, category, thumbnail, tags, featured, popular }) => {
+  const profile = profileOverrides.get(slug);
+  return {
+    id,
+    title: profile?.zhTitle ? toZhTw(profile.zhTitle) : title,
+    slug,
+    description: toZhTw(profile?.zhDescription ?? description),
     category,
     thumbnail,
     tags,
@@ -90,4 +175,6 @@ const index = games.map(({ id, title, slug, description, category, thumbnail, ta
 });
 
 fs.writeFileSync(output, JSON.stringify(index));
-console.log(`Generated ${index.length} search index entries with ${profileOverrides.size} P2 overrides.`);
+fs.writeFileSync(zhTwOutput, JSON.stringify(zhTwIndex));
+console.log(`Generated ${index.length} English search entries with ${profileOverrides.size} profile overrides.`);
+console.log(`Generated ${zhTwIndex.length} Traditional Chinese search entries.`);
