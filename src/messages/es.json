@@ -1,0 +1,61 @@
+{
+  "site": {
+    "name": "ZeroPlay Games",
+    "tagline": "Juegos online gratis - sin descargar"
+  },
+  "nav": {
+    "home": "Inicio",
+    "categories": "Categorías",
+    "search": "Buscar juegos...",
+    "newGames": "Juegos nuevos",
+    "popular": "Populares"
+  },
+  "categories": {
+    "all": "Todos los juegos",
+    "action": "Acción",
+    "puzzle": "Puzles",
+    "arcade": "Arcade",
+    "racing": "Carreras",
+    "sports": "Deportes",
+    "shooting": "Disparos",
+    "strategy": "Estrategia",
+    "casual": "Casuales",
+    "idle": "Idle",
+    "adventure": "Aventura"
+  },
+  "home": {
+    "h1": "Juegos online gratis - sin descargar ni registrarse",
+    "intro": "Bienvenido a ZeroPlay Games. Juega a 100 juegos HTML5 gratis de puzles, arcade, acción, carreras, deportes, estrategia y más directamente en tu navegador. No necesitas descargar ni instalar nada. Puedes jugar desde ordenador o móvil; los controles dependen de cada juego.",
+    "featured": "Juegos destacados",
+    "newGames": "Juegos nuevos",
+    "popularGames": "Juegos populares",
+    "allGames": "Todos los juegos",
+    "playNow": "Jugar ahora",
+    "loadMore": "Ver más"
+  },
+  "game": {
+    "play": "Jugar",
+    "fullscreen": "Pantalla completa",
+    "share": "Compartir",
+    "relatedGames": "Juegos relacionados",
+    "loading": "Cargando juego...",
+    "clickToPlay": "Haz clic para jugar",
+    "about": "Acerca del juego",
+    "instructions": "Cómo jugar",
+    "tips": "Gira el dispositivo si necesitas una mejor vista"
+  },
+  "footer": {
+    "about": "Acerca de",
+    "privacy": "Política de privacidad",
+    "terms": "Términos de servicio",
+    "dmca": "DMCA",
+    "contact": "Contacto",
+    "copyright": "Todos los derechos reservados.",
+    "description": "Juega a 100 juegos online gratis directamente en tu navegador. Sin descargas ni registro: abre un juego y empieza a jugar."
+  },
+  "search": {
+    "placeholder": "Buscar juegos...",
+    "noResults": "No se encontraron juegos",
+    "results": "juegos"
+  }
+}
