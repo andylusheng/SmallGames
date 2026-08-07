@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     template: "%s | ZeroPlay Games",
   },
   description:
-    "Play thousands of free online games on your browser. No downloads, no sign-ups. Just click and play!",
+    "Play 100+ free online games in your browser. No downloads, no sign-ups. Just click and play!",
 };
 
 export default function RootLayout({

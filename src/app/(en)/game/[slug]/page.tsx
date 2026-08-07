@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getGameBySlug } from "@/lib/games";
-import { buildAlternates } from "@/lib/metadata";
+import { buildAlternates, SITE_URL } from "@/lib/metadata";
 import GamePageView, { gameStaticParams } from "@/views/GamePageView";
 
 interface Props {
@@ -24,6 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: `Play ${game.title} Free Online`,
       description: game.description,
       type: "website",
+      url: `${SITE_URL}/game/${slug}`,
       images: [{ url: game.thumbnail }],
     },
   };

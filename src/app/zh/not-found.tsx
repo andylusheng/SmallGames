@@ -15,7 +15,7 @@ export default function NotFoundZh() {
         </h1>
         <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-gray-400">
           你访问的游戏或页面可能已被移动或从未存在。
-          不过别担心，这里有数百款免费游戏等着你！
+          不过别担心，这里有100多款免费游戏等着你！
         </p>
       </div>
 
@@ -69,9 +69,6 @@ export default function NotFoundZh() {
                 <h3 className="truncate text-sm font-semibold text-white group-hover:text-primary">
                   {game.title}
                 </h3>
-                <p className="mt-1 text-xs text-gray-500">
-                  {(game.plays / 1000).toFixed(0)}K 次游玩
-                </p>
               </div>
             </NextLink>
           ))}

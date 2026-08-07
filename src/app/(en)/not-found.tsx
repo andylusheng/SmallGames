@@ -15,7 +15,7 @@ export default function NotFound() {
         </h1>
         <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-gray-400">
           The game or page you&apos;re looking for might have been moved or never existed.
-          But hey, there are hundreds of free games waiting for you!
+          But hey, there are more than 100 free games waiting for you!
         </p>
       </div>
 
@@ -69,9 +69,6 @@ export default function NotFound() {
                 <h3 className="truncate text-sm font-semibold text-white group-hover:text-primary">
                   {game.title}
                 </h3>
-                <p className="mt-1 text-xs text-gray-500">
-                  {(game.plays / 1000).toFixed(0)}K plays
-                </p>
               </div>
             </NextLink>
           ))}

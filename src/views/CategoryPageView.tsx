@@ -84,7 +84,7 @@ export default async function CategoryPageView({ locale, slug }: CategoryPageVie
       <AdBanner className="mb-6" />
 
       {/* Games Grid */}
-      <GameGrid games={games} />
+      <GameGrid games={games} trackingSource="category" />
 
       {/* Rich SEO content */}
       {seo && (

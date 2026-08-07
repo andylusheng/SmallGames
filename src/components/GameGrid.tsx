@@ -1,11 +1,42 @@
-import type { Game } from "@/lib/games";
 import GameCard from "./GameCard";
+import type { GameCardData } from "@/types/game-card";
 
 interface GameGridProps {
-  games: Game[];
+  games: GameCardData[];
+  trackingSource?: "related" | "home" | "category" | "search";
 }
 
-export default function GameGrid({ games }: GameGridProps) {
+function toCardData(game: GameCardData): GameCardData {
+  const {
+    id,
+    title,
+    slug,
+    description,
+    category,
+    thumbnail,
+    tags,
+    featured,
+    popular,
+    publishedAt,
+    updatedAt,
+  } = game;
+
+  return {
+    id,
+    title,
+    slug,
+    description,
+    category,
+    thumbnail,
+    tags,
+    featured,
+    popular,
+    publishedAt,
+    updatedAt,
+  };
+}
+
+export default function GameGrid({ games, trackingSource }: GameGridProps) {
   if (games.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-gray-400">
@@ -18,7 +49,11 @@ export default function GameGrid({ games }: GameGridProps) {
   return (
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
       {games.map((game) => (
-        <GameCard key={game.id} game={game} />
+        <GameCard
+          key={game.id}
+          game={toCardData(game)}
+          trackingSource={trackingSource}
+        />
       ))}
     </div>
   );

@@ -3,7 +3,7 @@
 import { useTranslations } from "@/lib/i18n";
 import { Link } from "@/components/Link";
 import { usePathname } from "next/navigation";
-import { getCategories } from "@/lib/games";
+const GAME_CATEGORIES = ["action", "puzzle", "arcade", "racing", "sports", "shooting", "strategy", "casual", "idle"];
 
 const categoryIcons: Record<string, string> = {
   all: "🎮",
@@ -21,7 +21,7 @@ const categoryIcons: Record<string, string> = {
 export default function CategoryNav() {
   const t = useTranslations();
   const pathname = usePathname();
-  const categories = getCategories();
+  const categories = GAME_CATEGORIES;
 
   return (
     <nav className="mx-auto max-w-7xl px-4">
