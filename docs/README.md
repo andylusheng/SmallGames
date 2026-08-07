@@ -1,6 +1,6 @@
 # ZeroPlay Games 项目总文档
 
-> **Single Source of Truth（SSOT）**：本文件记录 ZeroPlay Games 的站点定位、100 游戏库存状态、Gameplay Topic 架构、单游戏 SEO 标准、CI/Visual QA、移动端验证、部署和当前观察计划。
+> **Single Source of Truth（SSOT）**：本文件记录 ZeroPlay Games 的站点定位、100 游戏 SEO 状态、Gameplay Topic 架构、单游戏 SEO 标准、CI/Visual QA、移动端验证、部署和观察计划。
 >
 > 最近更新：2026-08-07 ｜ 站点：https://zeroplaygames.com ｜ 仓库：`andylusheng/SmallGames`
 
@@ -16,24 +16,24 @@
 - **正式 Gameplay Topic**：9
 - **技术 SEO P0/P1**：完成
 - **Topic Hub P2**：9/9 完成
-- **Topic 单游戏内容 SEO**：38/38 `optimized`
-- **未进入正式 Topic 的游戏**：62 个，继续保持 `generated`
-- **当前策略**：停止继续扩 Topic，先观察 2 周真实 GSC/GA4 表现
+- **单游戏内容 SEO**：**100/100 `optimized`**
+- **generated 游戏**：**0**
+- **当前策略**：100 个单游戏页全部上线后，冻结大规模 SEO 重写 2 周，观察真实 GSC/GA4 变化
 
-观察窗口：
+第一轮观察窗口：
 
 ```text
 2026-08-07 → 2026-08-21
 ```
 
-这 14 天默认冻结大规模 SEO 重写和新 Topic 扩张，只处理：
+这 14 天默认不再进行大规模 Title/正文重写、不批量新增 Topic、不改变整体 URL 架构，只处理：
 
-1. 索引/抓取/Canonical/Hreflang 等明显技术错误。
+1. 索引/抓取/Canonical/Hreflang 等明确技术错误。
 2. Runtime 无法加载、页面断版等产品 Bug。
 3. 明确错误的玩法事实。
 4. 严重影响用户开始游戏的移动端问题。
 
-这样两周后的 GSC/GA4 变化才有可比较性。
+这样两周后的数据才有可比较性。
 
 ---
 
@@ -53,7 +53,7 @@ L0  Free Play Games / Free Online Games
 │   ├── Classic Games          /classic-games
 │   └── Idle & Clicker Games   /idle-games
 │
-├── L2  独立游戏 SEO 页
+├── L2  100 个独立游戏 SEO 页
 │   └── /game/{slug} ｜ /zh/game/{slug}
 │
 └── L3  同一游戏页承接长尾意图
@@ -70,15 +70,16 @@ L0  Free Play Games / Free Online Games
 
 原则：
 
-1. 一个游戏页承接一组同主题长尾词，不为同义词制造薄页面。
-2. Topic Hub 承接玩法级搜索意图，必须解释成员真实机制差异。
-3. 单游戏内容来自 Runtime 源码、产品事实、Git 历史、实际 QA 和 GSC Query；AI 只组织表达。
-4. 同一游戏只维护一份 `GameSeoProfile`，可以同时属于多个 Topic。
-5. `seoStatus` 与 `testedMobile` **完全分离**：
+1. **每个正式游戏都必须有独立 SEO Profile。** 是否属于正式 Topic 不再决定单页是否优化。
+2. 一个游戏页承接一组同主题长尾词，不为同义词制造薄页面。
+3. Topic Hub 承接玩法级搜索意图，作为聚合和内链层，不替代单游戏 SEO。
+4. 单游戏内容来自 Runtime 源码、产品事实、Git 历史、实际 QA 和 GSC Query；AI 只组织表达。
+5. 同一游戏只维护一份 `GameSeoProfile`，可以同时属于多个 Topic。
+6. `seoStatus` 与 `testedMobile` 完全分离：
    - `seoStatus` = 单游戏内容 SEO 是否完成。
    - `testedMobile` = 是否经过真人移动端核心玩法验证。
-6. `optimized` **不再等于**“真人移动端已试玩”。不要通过 SEO 状态推断设备 QA。
-7. SEO 内容不能挡住产品。用户应先看到游戏和开始入口，再看到扩展正文。
+7. `optimized` 不代表 `testedMobile=true`，不要从 SEO 状态推断设备 QA。
+8. SEO 内容不能挡住产品。用户应先看到游戏和开始入口，再看到扩展正文。
 
 ---
 
@@ -98,8 +99,8 @@ L0  Free Play Games / Free Online Games
 | Game SEO page | `/game/{slug}` / `/zh/game/{slug}` |
 | Topic Hub | `/{topic}-games` / `/zh/{topic}-games` |
 | Analytics | GA4 + 游戏行为事件 |
-| CI | Node 22 + production build |
-| Visual QA | P2 Game + Topic Hub + Mobile Shell 自动截图 |
+| CI | Node 22 + 100-game SEO Gate + production build |
+| Visual QA | 100 Game Pages + 9 Topic Hubs + Mobile Shell 自动截图 |
 
 部署链：
 
@@ -109,6 +110,10 @@ GitHub master
 Cloudflare Pages
     ↓
 npm run build
+    ↓
+seo:verify
+    ↓
+Next.js static export
     ↓
 out/
     ↓
@@ -149,27 +154,35 @@ NEXT_PUBLIC_SITE_URL=https://zeroplaygames.com
 - Search 页面不索引且不进 sitemap。
 - 不伪造 `lastModified`。
 - 不输出虚假 rating / plays / reviews / AggregateRating。
-- P2 英文、中文独立 Title / Meta Description / H1。
-- P2 描述优先覆盖旧 `games.json` 描述并进入站内卡片/Search Index。
+- 100 个游戏全部使用独立 EN/ZH Title / Meta Description / H1。
+- 已核验 Profile 描述优先覆盖旧 `games.json` 描述并进入站内卡片/Search Index。
 
 ---
 
-## 5. Browse Category
+## 5. 100 游戏库存
 
-| Category | 数量 |
-|---|---:|
-| action | 6 |
-| arcade | 23 |
-| casual | 13 |
-| idle | 6 |
-| puzzle | 22 |
-| racing | 6 |
-| shooting | 8 |
-| sports | 9 |
-| strategy | 7 |
-| **Total** | **100** |
+| Category | 数量 | 单页 SEO |
+|---|---:|---:|
+| action | 6 | 6 optimized |
+| arcade | 23 | 23 optimized |
+| casual | 13 | 13 optimized |
+| idle | 6 | 6 optimized |
+| puzzle | 22 | 22 optimized |
+| racing | 6 | 6 optimized |
+| shooting | 8 | 8 optimized |
+| sports | 9 | 9 optimized |
+| strategy | 7 | 7 optimized |
+| **Total** | **100** | **100 optimized** |
 
-Browse Category 负责用户浏览，不等同于 SEO Gameplay Topic。
+正式库存的一一对应关系由以下事实源共同保证：
+
+```text
+src/data/games.json                  100 个正式 slug
+public/games/{slug}/index.html       真实 Runtime
+src/data/game-profiles*              100 个源码级 SEO Profile
+```
+
+Production Build 会强制校验 `games.json` 与 Profile 数量、slug 一一对应；缺一个、多一个都会失败。
 
 ---
 
@@ -197,90 +210,60 @@ Topic 以真实主要机制划分，不只看名称和 tags。一个游戏可以
 - Reaction Speed Test 不属于 Memory。
 - Sudoku Lite 必须写明 **6×6 / digits 1–6 / 2×3 boxes**，不能当成传统 9×9。
 
+没有进入这 9 个 Hub 的游戏仍然拥有完整单游戏 SEO；Topic 只是搜索聚合层，不是 SEO 完成状态。
+
 ---
 
-## 7. 当前单游戏 SEO 状态
+## 7. 单游戏 SEO 状态
 
 状态定义：
 
 ```text
 generated
-= 只有基础游戏页/历史内容，尚未完成逐游戏源码级 P2 SEO
+= 只有基础页，尚未完成逐游戏源码级 SEO
 
 reviewed
-= 保留的中间状态；内容已人工/源码核验但尚未通过完整 Topic SEO Gate
+= 历史中间状态；源码级内容已建立但尚未通过完整 Completion Gate
 
 optimized
-= 单游戏内容 SEO 已通过 Completion Gate
+= 单游戏内容 SEO 已通过生产 Completion Gate
   不代表 testedMobile=true
 ```
 
-当前：
+当前生产目标状态：
 
 ```text
 100 total games
-38 optimized Topic games
-0 reviewed Topic games
-62 generated non-Topic games
+100 optimized
+0 reviewed
+0 generated
 9 formal Topic Hubs
 ```
 
-### 38 个 optimized Topic 游戏
+本轮新增的 62 个 Profile 不是按游戏名套通用文案。全部先读取对应 `public/games/{slug}/index.html`，再记录实际 Objective、Controls、Scoring、概率、时间、生命、失败条件、保存机制等事实。
 
-```text
-quick-tap
-tap-tower
-tap-tycoon
-balloon-pop
-gravity-flip
-color-switch
-hex-merge
-merge-defense
-pet-merge
-2048
-tower-defense
-plant-defense
-memory-cards
-memory-sequence
-reaction-test
-whack-a-mole
-fruit-catch
-avoid-blocks
-tile-hop
-table-tennis
-number-puzzle
-speed-math
-sudoku
-word-scramble
-word-search
-hangman
-tetris
-minesweeper
-tic-tac-toe
-pong
-space-invaders
-brick-breaker
-pac-man
-frogger
-cookie-clicker
-idle-miner
-idle-factory
-lemonade-stand
-```
+本轮特别保留的实现差异包括：
 
-### 62 个 generated 游戏
-
-仍保留在正式库存和 Browse Category 中，但当前观察期不批量改写。两周后只根据 GSC/GA4 和真实搜索机会决定下一批，而不是为了“100% optimized”强行制造 Topic。
+- Tangram 当前没有自动解题判定；`Next Puzzle` 是手动推进。
+- Sand Fall 是开放粒子沙盒，没有分数、胜负和 Game Over。
+- Pipe Connect 的实际成功条件是左上 BFS 网络到达右下格，不宣称所有随机棋盘保证可解。
+- Bubble Cannon 当前源码没有真正实现 Game Over，也不会像 Bubble Shooter 一样清除失去顶部连接的悬空组。
+- Bowling 当前使用简化倒瓶累计，不冒充正式 strike/spare 奖励计分。
+- Boat Race 当前没有对手船，是单人河道距离/避障玩法。
+- Asteroid Dodge 当前没有射击，是纯躲避玩法。
+- Subway Dash 当前只有三车道换道，没有跳跃/下蹲。
+- Chess Puzzle 是 8 个固定 `from/to` 答案，不冒充完整国际象棋引擎。
+- Gomoku 当前没有明确满盘平局处理，因此页面不虚构自动平局。
 
 ---
 
-## 8. 单游戏 P2 内容 SEO 标准
+## 8. 单游戏 Page Standard
 
-每个正式 Topic 成员必须有：
+100 个正式游戏都必须有：
 
 ```text
 Primary Keyword
-Secondary Keywords
+至少 2 个 Secondary Keywords
 EN/ZH Meta Title
 EN/ZH Meta Description
 EN/ZH H1
@@ -289,14 +272,14 @@ Objective
 Controls
 Game-specific Mechanics
 About
-How to Play
-Rules
+至少 3 步 How to Play
+至少 3 条 Rules
 Scoring / Cost / Reward（适用时）
 End / Win / Fail Condition（适用时）
-Tips
-Game-specific FAQ
-Topic backlink
-Same-topic internal links
+至少 2 条 Tips
+至少 3 个 Game-specific FAQ
+Related Games
+Topic backlink（属于正式 Topic 时）
 ```
 
 内容标准：
@@ -304,32 +287,53 @@ Same-topic internal links
 - Title 必须体现该游戏真实独特机制，不使用全站统一模板作为最终 Title。
 - Description = 游戏目标 + 核心玩法 + 1～2 个具体事实。
 - How to Play、Rules、FAQ 必须是这个游戏自己的事实。
-- 如果删掉游戏名后正文可以原封不动放到几十个游戏页，它不能作为 P2 核心内容。
+- 如果删掉游戏名后正文可以原封不动放到几十个游戏页，它不能作为核心事实内容。
 - 保存进度、移动支持、计分、时间、等级、波次、概率、成本等声明必须可追溯。
+- 没有某机制就明确不写；产品与常见同名玩法不同，以当前 Runtime 为准。
 - 禁止虚构用户数、评分、播放量、评论、医学/科学基准。
 
-### Topic SEO Completion Gate
+---
 
-生产 Build 会对所有正式 Topic 成员强制检查：
+## 9. 100-game SEO Completion Gate
 
-- Profile 必须存在。
-- Primary Keyword 必须存在。
-- Secondary Keywords 至少 2 个。
-- EN/ZH objective 必须存在。
-- controls 至少 1 个。
-- 至少 1 条 game-specific mechanic。
-- EN/ZH Title / Description / H1 / Intro 必须完整。
-- About 至少 1 段。
-- How to Play 至少 3 步。
-- Rules 至少 3 条。
-- Tips 至少 2 条。
-- FAQ 至少 3 条。
-- 同语言 Meta Title 不允许 Topic 游戏之间重复。
-- 同语言 H1 不允许 Topic 游戏之间重复。
+`npm run build` 前先执行：
 
-任何一个 Topic 游戏不满足，`npm run build` 直接失败。
+```text
+npm run seo:verify
+```
 
-通过 Gate 后，Topic 游戏统一输出：
+静态验证要求：
+
+- `games.json` 必须正好 100 个正式游戏。
+- 必须发现正好 100 个源码级 Profile。
+- Inventory 与 Profile slug 必须一一对应。
+- 不允许缺 Profile。
+- 不允许存在库存外 Profile。
+
+运行时内容 Gate 对每个游戏继续检查：
+
+- Primary Keyword 存在。
+- Secondary Keywords ≥ 2。
+- EN/ZH Objective 完整。
+- Controls ≥ 1。
+- 至少 1 条源码级 Mechanics。
+- EN/ZH Title / Description / H1 / Intro 完整。
+- About ≥ 1 段。
+- How to Play ≥ 3 步。
+- Rules ≥ 3 条。
+- Tips ≥ 2 条。
+- FAQ ≥ 3 条。
+- 同语言 Meta Title 不允许 100 个游戏之间重复。
+- 同语言 H1 不允许 100 个游戏之间重复。
+
+任何一个游戏失败：
+
+```text
+npm run build = FAIL
+Cloudflare 不应进入正常发布
+```
+
+全部通过后生产导出的 Profile 统一为：
 
 ```text
 seoStatus = optimized
@@ -337,7 +341,7 @@ seoStatus = optimized
 
 ---
 
-## 9. 移动端 QA 与 SEO 状态分离
+## 10. 移动端 QA 与 SEO 状态分离
 
 ```text
 seoStatus=optimized
@@ -347,7 +351,7 @@ testedMobile=true
 
 `testedMobile=true` 只能在真人完成至少一个移动端核心玩法循环后设置。
 
-CI Mobile Screenshot 只负责：
+CI Mobile Screenshot 负责：
 
 - 断版
 - 溢出
@@ -359,11 +363,11 @@ CI Mobile Screenshot 只负责：
 
 它不等于真人触控试玩。
 
-当前已知：
+当前明确人工验证：
 
 ```text
 Quick Tap: testedMobile=true
-其他 Topic 游戏：按各 Profile 实际 testedMobile 字段为准
+其他游戏：按各 Profile 实际 testedMobile 字段为准
 ```
 
 移动端产品优先级：
@@ -382,17 +386,17 @@ SEO 扩展内容
 
 ---
 
-## 10. Structured Data
+## 11. Structured Data
 
 - `VideoGame`：只输出可验证字段。
-- `BreadcrumbList`：P2 优先体现主 Topic。
+- `BreadcrumbList`：属于正式 Topic 时优先体现主 Topic，否则回到 Browse Category。
 - `FAQPage`：页面显示什么，Schema 才输出什么。
 - Topic Hub：`CollectionPage + ItemList + BreadcrumbList + FAQPage`。
 - 禁止虚构 `AggregateRating` / ratingCount / plays / reviews。
 
 ---
 
-## 11. CI / Visual SEO QA
+## 12. CI / Visual SEO QA
 
 ### Build CI
 
@@ -400,6 +404,14 @@ SEO 扩展内容
 Node 22
 npm ci --legacy-peer-deps
 npm run build
+```
+
+其中 `prebuild`：
+
+```text
+seo:verify
+→ generate-game-index
+→ Next build
 ```
 
 production build 不通过，不合并。
@@ -412,10 +424,16 @@ production build 不通过，不合并。
 reviewed / optimized 显式 Profile
 + reviewedProfile({...})
 + optimizedProfile({...})
-+ 全部正式 Topic Hubs
++ catalogProfile({...})
 ```
 
-每个 P2 游戏：
+并且必须精确发现：
+
+```text
+100 Game Pages
+```
+
+每个游戏：
 
 ```text
 games/{slug}/page-desktop.png
@@ -423,7 +441,7 @@ games/{slug}/page-mobile.png
 games/{slug}/game-runtime.png
 ```
 
-每个 Topic：
+9 个 Topic：
 
 ```text
 topics/{topic}/page-desktop.png
@@ -439,17 +457,17 @@ topics/{topic}/page-mobile.png
 /games/tetris/index.html
 ```
 
-当前全量目标：
+最终全量截图规模预期：
 
 ```text
-38 Topic game pages
-9 Topic Hubs
+100 × 3 = 300 game screenshots
+9 × 2   = 18 topic screenshots
 + Mobile Shell regression
 ```
 
 ---
 
-## 12. Analytics 与两周观察指标
+## 13. Analytics 与两周观察指标
 
 GA4 当前事件：
 
@@ -492,7 +510,7 @@ gem crush
 
 ```text
 1. 全站 impressions / clicks / CTR / avg position
-2. 38 optimized 游戏页的 impressions / clicks
+2. 100 optimized 游戏页的 impressions / clicks
 3. 9 Topic Hub 的 impressions / clicks
 4. 新出现 Query 数量
 5. Position 4–20 的机会 Query
@@ -513,45 +531,63 @@ gem crush
 
 ---
 
-## 13. 关键代码职责
+## 14. 关键代码职责
 
 ```text
 public/games/{slug}/
-    真实 HTML5 Runtime；玩法事实最终来源
+    100 个真实 HTML5 Runtime；玩法事实最终来源
 
 src/data/games.json
-    100 游戏基础库存；generated fallback
+    100 个正式游戏库存
 
 src/data/game-profiles.ts
-    P2 类型、Topic成员、Profile聚合、Topic SEO Completion Gate
+    Profile 类型、Topic成员、100-game Completion Gate、Profile聚合
 
 src/data/game-profiles/factory.ts
-    source-grounded optimized Profile 工厂；testedMobile 独立
+    早期 source-grounded Profile 工厂；testedMobile 独立
 
-src/data/game-profiles/*.ts
-    38 个 Topic 游戏的真实机制、关键词、EN/ZH P2 内容
+src/data/game-profiles/tap.ts
+src/data/game-profiles/merge.ts
+src/data/game-profiles/defense.ts
+src/data/game-profiles/memory.ts
+src/data/game-profiles/reaction.ts
+src/data/game-profiles/number.ts
+src/data/game-profiles/word.ts
+src/data/game-profiles/classic.ts
+src/data/game-profiles/idle.ts
+    早期 38 个 Topic 游戏的独立 Profile
+
+src/data/game-profiles/catalog-factory.ts
+    剩余正式库存的结构化事实 Profile 工厂；只消费显式源码事实
+
+src/data/game-profiles/catalog-action.ts
+src/data/game-profiles/catalog-arcade.ts
+src/data/game-profiles/catalog-casual-puzzle.ts
+src/data/game-profiles/catalog-racing-shooting.ts
+src/data/game-profiles/catalog-sports-strategy.ts
+    后续 62 个游戏的独立关键词、机制和 EN/ZH 内容
 
 src/data/topic-seo.ts
 src/data/topic-seo/*.ts
     9 个 Topic Hub
 
 src/lib/games.ts
-    游戏读取、P2覆盖、Topic关系、metadata
+    游戏读取、Profile覆盖、Topic关系、metadata
 
 src/views/GamePageView.tsx
-    P2 / generated fallback 单游戏视图
+    统一单游戏 SEO 视图
 
 src/views/TopicPageView.tsx
     Topic Hub 视图
 
-src/app/sitemap.ts
-    Static / Category / Topic / Game sitemap
+scripts/verify-all-game-seo.mjs
+    静态检查 100 inventory slug ↔ 100 Profile
 
 scripts/generate-game-index.js
-    Search Index；P2描述优先
+    Search Index；Profile描述优先
 
 scripts/list-p2-qa-games.mjs
-    Visual QA 自动发现 reviewed/optimized 和两种 Profile factory
+    Visual QA 自动发现全部 100 个游戏
 
 scripts/list-topic-hubs.mjs
     自动发现全部正式 Topic Hub
@@ -560,7 +596,7 @@ scripts/list-topic-hubs.mjs
     Production build
 
 .github/workflows/visual-seo.yml
-    Game + Topic + Mobile visual regression
+    100 Game + Topic + Mobile visual regression
 
 docs/README.md
     唯一 SSOT
@@ -568,29 +604,32 @@ docs/README.md
 
 ---
 
-## 14. 当前决策
+## 15. 当前决策
 
 ### 已完成
 
 ```text
 P0/P1 Technical SEO
 100 game inventory cleanup
+100 Runtime 源码复核
+100 source-grounded single-game SEO profiles
+100 / 100 game content SEO optimized
 9 Gameplay Topic Hubs
-38 source-grounded single-game P2 profiles
-38 Topic game content SEO optimized
 EN/ZH metadata + content
-Hub ↔ Game internal links
+Topic Hub ↔ member Game internal links
 sitemap
-Production Build gate
-Visual SEO QA
+100-game SEO Completion Gate
+Visual SEO QA pipeline
 ```
 
 ### 2026-08-07 → 2026-08-21
 
+在本批次部署并确认生产 CI 后：
+
 ```text
-不继续盲目扩 Topic
-不批量改 62 generated 页面
-不频繁重写 38 optimized 页面的 Title/正文
+冻结大规模 SEO 改写
+不为了数量继续新增 Topic
+不频繁修改 100 个页面的 Title/正文
 
 主要动作：
 观察 GSC
@@ -604,32 +643,30 @@ Visual SEO QA
 
 根据数据决定：
 
-1. 哪些 Topic 有真实增长。
-2. 哪些单游戏页需要第二轮 Title/FAQ/内容迭代。
-3. 62 个 generated 游戏中哪些已经出现搜索信号。
-4. 是否存在值得建立的新 Gameplay Topic Cluster。
-5. 哪些页面应该继续投入，哪些保持现状。
-
-不要为了“100 个全 optimized”而给没有搜索价值的游戏强行制造内容资产。
+1. 100 个游戏中哪些页面真正获得曝光与点击。
+2. 哪些 Topic 有真实增长。
+3. 哪些单游戏页需要第二轮 Title/FAQ/内容迭代。
+4. 哪些 Query 已形成新的玩法 Cluster，值得新增 Hub。
+5. 哪些游戏产品本身需要改善留存，而不是继续增加 SEO 文字。
 
 ---
 
-## 15. 技术债
+## 16. 技术债
 
 1. Next.js 15.5.2 存在安全升级提示，后续升级到已修复版本。
 2. `@cloudflare/next-on-pages` 已不是正式部署链路；当前是静态 export，后续删除旧依赖和 deploy scripts。
-3. 62 个 generated 游戏仍使用历史基础内容/默认日期；根据真实搜索信号逐批迁移。
+3. npm audit 仍有依赖安全告警，需要单独升级验证，不能和本轮 SEO 大改混在一起。
 4. `VideoGame.operatingSystem` 等 Schema 字段继续按真实平台能力保守维护。
 5. Topic 不以数量为 KPI；没有真实语义差异和搜索需求时不创建空 Hub。
 
 ---
 
-## 16. 文档维护规则
+## 17. 文档维护规则
 
 1. `docs/` 只维护本 `README.md`。
 2. 新增/删除游戏要同步总数和分类计数。
 3. 新 Topic 上线要同步成员和 URL。
-4. `generated / reviewed / optimized` 状态变化同步本文。
+4. 所有正式游戏必须保持 `seoStatus=optimized`；新增游戏在 Profile 和 Gate 完成前不能进入正式库存。
 5. `seoStatus` 和 `testedMobile` 永远分别记录。
 6. SEO / Mobile / CI / 部署标准变化直接改本文，不创建平行规划文档。
 7. GSC 出现有意义的新阶段基线再更新，不写每日流水账。
@@ -637,4 +674,4 @@ Visual SEO QA
 
 任何 ChatGPT / Codex / 开发者接手项目时，应先读本文件。当前最重要的项目状态只有一句话：
 
-> **9 个正式 Topic 和其中 38 个单游戏内容 SEO 已全部完成；接下来冻结大规模 SEO 变更两周，用 GSC + GA4 决定下一步。**
+> **100 个正式游戏的单游戏内容 SEO 已全部完成；9 个 Topic Hub 作为聚合层保留。生产验证完成后冻结大规模 SEO 变更到 2026-08-21，再用 GSC + GA4 做第一轮结果复盘。**
