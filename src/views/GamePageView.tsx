@@ -13,6 +13,7 @@ import {
   type Game,
 } from "@/lib/games";
 import { getGameHook } from "@/data/category-seo";
+import { getLocalizedTopicSeo, getTopicHubHref, getTopicSeoConfig } from "@/data/topic-seo";
 import { getServerTranslations } from "@/lib/server-i18n";
 import { SITE_URL } from "@/lib/metadata";
 import GamePlayer from "@/components/GamePlayer";
@@ -70,12 +71,20 @@ export function buildFaqJsonLd(game: Game, locale: string) {
 
 export function buildBreadcrumbJsonLd(game: Game, locale: string, t: (key: string) => string) {
   const prefix = locale === "en" ? "" : `/${locale}`;
+  const profile = getGameProfile(game);
+  const primaryTopic = profile?.mechanics.gameplayTopics[0];
+  const topicConfig = primaryTopic ? getTopicSeoConfig(primaryTopic) : undefined;
+  const topicContent = primaryTopic ? getLocalizedTopicSeo(primaryTopic, locale) : undefined;
+  const middle = topicConfig && topicContent
+    ? { name: topicContent.label, item: `${SITE_URL}${prefix}${topicConfig.path}` }
+    : { name: t(`categories.${game.category}`), item: `${SITE_URL}${prefix}/${game.category}` };
+
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: locale === "en" ? "Home" : "首页", item: `${SITE_URL}${prefix}` },
-      { "@type": "ListItem", position: 2, name: t(`categories.${game.category}`), item: `${SITE_URL}${prefix}/${game.category}` },
+      { "@type": "ListItem", position: 2, name: middle.name, item: middle.item },
       { "@type": "ListItem", position: 3, name: game.title, item: `${SITE_URL}${prefix}/game/${game.slug}` },
     ],
   };
@@ -120,6 +129,8 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
   const pageSeo = getGamePageSeo(game, locale);
   const primaryTopic = profile?.mechanics.gameplayTopics[0];
   const topicGames = primaryTopic ? getGamesByGameplayTopic(primaryTopic, game.slug, 6) : [];
+  const topicHubHref = primaryTopic ? getTopicHubHref(primaryTopic, locale) : undefined;
+  const topicContent = primaryTopic ? getLocalizedTopicSeo(primaryTopic, locale) : undefined;
   const relatedGames = getRelatedGames(game, 8);
   const categoryGames = getGamesByCategory(game.category).filter((g) => g.id !== game.id).slice(0, 4);
 
@@ -171,9 +182,13 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
         <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-2 text-sm text-gray-400">
           <NextLink href={lp(locale, "/")} className="hover:text-primary">{t("nav.home")}</NextLink>
           <span>/</span>
-          <NextLink href={lp(locale, `/${game.category}`)} className="hover:text-primary">
-            {t(`categories.${game.category}`)}
-          </NextLink>
+          {topicHubHref && topicContent ? (
+            <NextLink href={topicHubHref} className="hover:text-primary">{topicContent.label}</NextLink>
+          ) : (
+            <NextLink href={lp(locale, `/${game.category}`)} className="hover:text-primary">
+              {t(`categories.${game.category}`)}
+            </NextLink>
+          )}
           <span>/</span>
           <span className="text-white">{game.title}</span>
         </nav>
@@ -268,13 +283,21 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
 
               {profile?.mechanics.scoring.length ? (
                 <section className="mt-8">
-                  <h2 className="text-xl font-semibold text-white">{isEn ? `${game.title} Scoring` : `${game.title}计分规则`}</h2>
+                  <h2 className="text-xl font-semibold text-white">
+                    {profile.mechanics.scoringTitle
+                      ? localize(profile.mechanics.scoringTitle)
+                      : isEn ? `${game.title} Scoring` : `${game.title}计分规则`}
+                  </h2>
                   <div className="mt-3 overflow-hidden rounded-xl border border-white/10">
                     <table className="w-full text-sm">
                       <thead className="bg-surface">
                         <tr>
                           <th className="px-4 py-3 text-left font-semibold text-gray-200">{isEn ? "Action" : "操作"}</th>
-                          <th className="px-4 py-3 text-left font-semibold text-gray-200">{isEn ? "Points" : "分数"}</th>
+                          <th className="px-4 py-3 text-left font-semibold text-gray-200">
+                            {profile.mechanics.scoringValueLabel
+                              ? localize(profile.mechanics.scoringValueLabel)
+                              : isEn ? "Points" : "分数"}
+                          </th>
                           <th className="hidden px-4 py-3 text-left font-semibold text-gray-200 sm:table-cell">{isEn ? "How it works" : "说明"}</th>
                         </tr>
                       </thead>
@@ -385,11 +408,18 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
 
               {primaryTopic && topicGames.length > 0 ? (
                 <section className="mt-8">
-                  <h2 className="text-xl font-semibold text-white">
-                    {isEn ? `More ${topicLabels[primaryTopic]?.en ?? primaryTopic} Like ${game.title}` : `更多${topicLabels[primaryTopic]?.zh ?? primaryTopic}`}
-                  </h2>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <h2 className="text-xl font-semibold text-white">
+                      {isEn ? `More ${topicContent?.label ?? topicLabels[primaryTopic]?.en ?? primaryTopic} Like ${game.title}` : `更多${topicContent?.label ?? topicLabels[primaryTopic]?.zh ?? primaryTopic}`}
+                    </h2>
+                    {topicHubHref && topicContent && (
+                      <NextLink href={topicHubHref} className="text-sm font-medium text-primary hover:underline">
+                        {isEn ? `View all ${topicContent.label}` : `查看全部${topicContent.label}`}
+                      </NextLink>
+                    )}
+                  </div>
                   <p className="mt-2 text-sm text-gray-400">
-                    {isEn ? `Continue with games built around the same ${primaryTopic} mechanic.` : `继续体验围绕${topicLabels[primaryTopic]?.zh ?? primaryTopic}机制设计的游戏。`}
+                    {isEn ? `Continue with games built around the same ${primaryTopic} mechanic.` : `继续体验围绕${topicContent?.label ?? topicLabels[primaryTopic]?.zh ?? primaryTopic}机制设计的游戏。`}
                   </p>
                   <div className="mt-3"><GameGrid games={topicGames} trackingSource="related" /></div>
                 </section>
