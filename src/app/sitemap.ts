@@ -24,6 +24,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly" as const,
       priority: 0.8,
     },
+    {
+      url: `${BASE_URL}/zh-tw/game/${game.slug}`,
+      lastModified: game.updatedAt,
+      changeFrequency: "monthly" as const,
+      priority: 0.85,
+    },
   ]);
 
   const categoryEntries: MetadataRoute.Sitemap = categories.flatMap((category) => [
@@ -38,6 +44,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: SITE_UPDATED_AT,
       changeFrequency: "weekly" as const,
       priority: 0.6,
+    },
+    {
+      url: `${BASE_URL}/zh-tw/${category}`,
+      lastModified: SITE_UPDATED_AT,
+      changeFrequency: "weekly" as const,
+      priority: 0.65,
     },
   ]);
 
@@ -54,19 +66,30 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly" as const,
       priority: 0.75,
     },
+    {
+      url: `${BASE_URL}/zh-tw${topic.path}`,
+      lastModified: topic.updatedAt,
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    },
   ]);
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: BASE_URL, lastModified: SITE_UPDATED_AT, changeFrequency: "weekly", priority: 1 },
     { url: `${BASE_URL}/zh`, lastModified: SITE_UPDATED_AT, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${BASE_URL}/zh-tw`, lastModified: SITE_UPDATED_AT, changeFrequency: "weekly", priority: 0.95 },
     { url: `${BASE_URL}/privacy`, lastModified: SITE_UPDATED_AT, changeFrequency: "yearly", priority: 0.2 },
     { url: `${BASE_URL}/zh/privacy`, lastModified: SITE_UPDATED_AT, changeFrequency: "yearly", priority: 0.2 },
+    { url: `${BASE_URL}/zh-tw/privacy`, lastModified: SITE_UPDATED_AT, changeFrequency: "yearly", priority: 0.2 },
     { url: `${BASE_URL}/terms`, lastModified: SITE_UPDATED_AT, changeFrequency: "yearly", priority: 0.2 },
     { url: `${BASE_URL}/zh/terms`, lastModified: SITE_UPDATED_AT, changeFrequency: "yearly", priority: 0.2 },
+    { url: `${BASE_URL}/zh-tw/terms`, lastModified: SITE_UPDATED_AT, changeFrequency: "yearly", priority: 0.2 },
     { url: `${BASE_URL}/dmca`, lastModified: SITE_UPDATED_AT, changeFrequency: "yearly", priority: 0.2 },
     { url: `${BASE_URL}/zh/dmca`, lastModified: SITE_UPDATED_AT, changeFrequency: "yearly", priority: 0.2 },
+    { url: `${BASE_URL}/zh-tw/dmca`, lastModified: SITE_UPDATED_AT, changeFrequency: "yearly", priority: 0.2 },
     { url: `${BASE_URL}/about`, lastModified: SITE_UPDATED_AT, changeFrequency: "yearly", priority: 0.3 },
     { url: `${BASE_URL}/zh/about`, lastModified: SITE_UPDATED_AT, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${BASE_URL}/zh-tw/about`, lastModified: SITE_UPDATED_AT, changeFrequency: "yearly", priority: 0.3 },
   ];
 
   return [...staticPages, ...topicEntries, ...categoryEntries, ...gameEntries];
