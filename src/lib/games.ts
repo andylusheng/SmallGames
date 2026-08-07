@@ -102,6 +102,7 @@ const games: Game[] = (localGamesData as RawGame[]).map((rawGame) => {
 
   return {
     ...game,
+    description: profile?.content.en.metaDescription ?? game.description,
     publishedAt: profile?.publishedAt ?? DEFAULT_PUBLISHED_AT,
     updatedAt: profile?.updatedAt ?? DEFAULT_UPDATED_AT,
     seoStatus: profile?.seoStatus ?? "generated",

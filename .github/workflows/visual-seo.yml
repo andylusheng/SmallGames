@@ -6,27 +6,39 @@ on:
     branches: [master]
     paths:
       - "src/data/game-profiles.ts"
+      - "src/data/game-profiles/**"
+      - "src/data/topic-seo.ts"
+      - "src/lib/games.ts"
       - "src/views/GamePageView.tsx"
+      - "src/views/TopicPageView.tsx"
       - "src/components/GamePlayer.tsx"
-      - "src/app/**/game/**"
+      - "src/app/**"
       - "src/messages/**"
       - "public/games/**"
-      - "scripts/list-optimized-games.mjs"
+      - "scripts/generate-game-index.js"
+      - "scripts/list-p2-qa-games.mjs"
+      - "scripts/list-topic-hubs.mjs"
       - ".github/workflows/visual-seo.yml"
   push:
     branches: [master]
     paths:
       - "src/data/game-profiles.ts"
+      - "src/data/game-profiles/**"
+      - "src/data/topic-seo.ts"
+      - "src/lib/games.ts"
       - "src/views/GamePageView.tsx"
+      - "src/views/TopicPageView.tsx"
       - "src/components/GamePlayer.tsx"
-      - "src/app/**/game/**"
+      - "src/app/**"
       - "src/messages/**"
       - "public/games/**"
-      - "scripts/list-optimized-games.mjs"
+      - "scripts/generate-game-index.js"
+      - "scripts/list-p2-qa-games.mjs"
+      - "scripts/list-topic-hubs.mjs"
       - ".github/workflows/visual-seo.yml"
 
 jobs:
-  optimized-game-screenshots:
+  p2-visual-seo:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -39,15 +51,14 @@ jobs:
       - run: npm ci --legacy-peer-deps
       - run: npm run build
 
-      - name: Discover optimized games
-        id: targets
+      - name: Discover P2 QA targets
         shell: bash
         run: |
           set -euo pipefail
-          node scripts/list-optimized-games.mjs
-          TARGETS_JSON="$(node scripts/list-optimized-games.mjs --json)"
-          echo "json=$TARGETS_JSON" >> "$GITHUB_OUTPUT"
-          echo "Optimized games: $TARGETS_JSON" >> "$GITHUB_STEP_SUMMARY"
+          echo "## P2 QA games" >> "$GITHUB_STEP_SUMMARY"
+          node scripts/list-p2-qa-games.mjs | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "## Topic hubs" >> "$GITHUB_STEP_SUMMARY"
+          node scripts/list-topic-hubs.mjs | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Set up Chrome
         id: chrome
@@ -55,7 +66,7 @@ jobs:
         with:
           chrome-version: stable
 
-      - name: Capture optimized game visual evidence
+      - name: Capture P2 visual evidence
         shell: bash
         run: |
           set -euo pipefail
@@ -70,14 +81,30 @@ jobs:
             fi
             sleep 1
           done
-
           curl -fsS http://127.0.0.1:4173/ >/dev/null
 
           CHROME="${{ steps.chrome.outputs.chrome-path }}"
-          mapfile -t SLUGS < <(node scripts/list-optimized-games.mjs)
 
-          echo "## Captured pages" >> "$GITHUB_STEP_SUMMARY"
+          capture_page() {
+            local url="$1"
+            local output_dir="$2"
+            mkdir -p "$output_dir"
+            curl -fsS "$url" >/dev/null
 
+            "$CHROME" --headless=new --no-sandbox --disable-gpu --hide-scrollbars \
+              --force-device-scale-factor=1 --window-size=1440,1200 --virtual-time-budget=6000 \
+              --screenshot="$output_dir/page-desktop.png" "$url"
+
+            "$CHROME" --headless=new --no-sandbox --disable-gpu --hide-scrollbars \
+              --force-device-scale-factor=1 --window-size=390,844 --virtual-time-budget=6000 \
+              --screenshot="$output_dir/page-mobile.png" "$url"
+
+            test -s "$output_dir/page-desktop.png"
+            test -s "$output_dir/page-mobile.png"
+          }
+
+          echo "## Captured P2 game pages" >> "$GITHUB_STEP_SUMMARY"
+          mapfile -t SLUGS < <(node scripts/list-p2-qa-games.mjs)
           for SLUG in "${SLUGS[@]}"; do
             if [[ -f "out/game/${SLUG}.html" ]]; then
               PAGE_URL="http://127.0.0.1:4173/game/${SLUG}.html"
@@ -93,58 +120,41 @@ jobs:
               exit 1
             fi
 
+            OUTPUT_DIR="$GITHUB_WORKSPACE/artifacts/visual-seo/games/${SLUG}"
+            capture_page "$PAGE_URL" "$OUTPUT_DIR"
+
             GAME_URL="http://127.0.0.1:4173/games/${SLUG}/index.html"
-            OUTPUT_DIR="$GITHUB_WORKSPACE/artifacts/visual-seo/${SLUG}"
-            mkdir -p "$OUTPUT_DIR"
-
-            curl -fsS "$PAGE_URL" >/dev/null
             curl -fsS "$GAME_URL" >/dev/null
-
-            "$CHROME" \
-              --headless=new \
-              --no-sandbox \
-              --disable-gpu \
-              --hide-scrollbars \
-              --force-device-scale-factor=1 \
-              --window-size=1440,1200 \
-              --virtual-time-budget=6000 \
-              --screenshot="$OUTPUT_DIR/page-desktop.png" \
-              "$PAGE_URL"
-
-            "$CHROME" \
-              --headless=new \
-              --no-sandbox \
-              --disable-gpu \
-              --hide-scrollbars \
-              --force-device-scale-factor=1 \
-              --window-size=390,844 \
-              --virtual-time-budget=6000 \
-              --screenshot="$OUTPUT_DIR/page-mobile.png" \
-              "$PAGE_URL"
-
-            "$CHROME" \
-              --headless=new \
-              --no-sandbox \
-              --disable-gpu \
-              --hide-scrollbars \
-              --force-device-scale-factor=1 \
-              --window-size=900,700 \
-              --virtual-time-budget=5000 \
-              --screenshot="$OUTPUT_DIR/game-runtime.png" \
-              "$GAME_URL"
-
-            test -s "$OUTPUT_DIR/page-desktop.png"
-            test -s "$OUTPUT_DIR/page-mobile.png"
+            "$CHROME" --headless=new --no-sandbox --disable-gpu --hide-scrollbars \
+              --force-device-scale-factor=1 --window-size=900,700 --virtual-time-budget=5000 \
+              --screenshot="$OUTPUT_DIR/game-runtime.png" "$GAME_URL"
             test -s "$OUTPUT_DIR/game-runtime.png"
             file "$OUTPUT_DIR"/*.png
-
-            echo "- ${SLUG}: desktop page, 390x844 mobile page, game runtime" >> "$GITHUB_STEP_SUMMARY"
+            echo "- ${SLUG}: desktop, mobile, runtime" >> "$GITHUB_STEP_SUMMARY"
           done
+
+          echo "## Captured topic hubs" >> "$GITHUB_STEP_SUMMARY"
+          while IFS=$'\t' read -r TOPIC_KEY TOPIC_PATH; do
+            [[ -n "$TOPIC_KEY" ]] || continue
+            if [[ -f "out${TOPIC_PATH}.html" ]]; then
+              TOPIC_URL="http://127.0.0.1:4173${TOPIC_PATH}.html"
+            elif [[ -f "out${TOPIC_PATH}/index.html" ]]; then
+              TOPIC_URL="http://127.0.0.1:4173${TOPIC_PATH}/"
+            else
+              echo "Exported topic hub not found for ${TOPIC_KEY} at ${TOPIC_PATH}" >&2
+              exit 1
+            fi
+
+            TOPIC_OUTPUT="$GITHUB_WORKSPACE/artifacts/visual-seo/topics/${TOPIC_KEY}"
+            capture_page "$TOPIC_URL" "$TOPIC_OUTPUT"
+            file "$TOPIC_OUTPUT"/*.png
+            echo "- ${TOPIC_KEY}: desktop, mobile" >> "$GITHUB_STEP_SUMMARY"
+          done < <(node scripts/list-topic-hubs.mjs)
 
       - name: Upload visual QA evidence
         uses: actions/upload-artifact@v4
         with:
-          name: optimized-game-visual-seo
+          name: p2-visual-seo
           path: artifacts/visual-seo/**/*.png
           if-no-files-found: error
           retention-days: 30

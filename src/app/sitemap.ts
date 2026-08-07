@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getAllGames, getCategories } from "@/lib/games";
+import { TOPIC_SEO } from "@/data/topic-seo";
 
 export const dynamic = "force-static";
 
@@ -40,6 +41,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ]);
 
+  const topicEntries: MetadataRoute.Sitemap = Object.values(TOPIC_SEO).flatMap((topic) => [
+    {
+      url: `${BASE_URL}${topic.path}`,
+      lastModified: topic.updatedAt,
+      changeFrequency: "weekly" as const,
+      priority: 0.85,
+    },
+    {
+      url: `${BASE_URL}/zh${topic.path}`,
+      lastModified: topic.updatedAt,
+      changeFrequency: "weekly" as const,
+      priority: 0.75,
+    },
+  ]);
+
   const staticPages: MetadataRoute.Sitemap = [
     { url: BASE_URL, lastModified: SITE_UPDATED_AT, changeFrequency: "weekly", priority: 1 },
     { url: `${BASE_URL}/zh`, lastModified: SITE_UPDATED_AT, changeFrequency: "weekly", priority: 0.9 },
@@ -53,5 +69,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/zh/about`, lastModified: SITE_UPDATED_AT, changeFrequency: "yearly", priority: 0.3 },
   ];
 
-  return [...staticPages, ...categoryEntries, ...gameEntries];
+  return [...staticPages, ...topicEntries, ...categoryEntries, ...gameEntries];
 }
