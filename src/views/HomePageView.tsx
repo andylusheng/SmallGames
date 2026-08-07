@@ -74,7 +74,7 @@ export default function HomePageView({ locale }: HomePageViewProps) {
           <Flame className="h-5 w-5 text-orange-500" />
           <h2 className="text-xl font-bold text-white">{t("home.popularGames")}</h2>
         </div>
-        <GameGrid games={popular} trackingSource="home" />
+        <GameGrid games={popular} trackingSource="home" locale={locale} />
       </section>
 
       <AdBanner className="mb-8" />
@@ -84,7 +84,7 @@ export default function HomePageView({ locale }: HomePageViewProps) {
           <Clock className="h-5 w-5 text-green-500" />
           <h2 className="text-xl font-bold text-white">{t("home.newGames")}</h2>
         </div>
-        <GameGrid games={newGames} trackingSource="home" />
+        <GameGrid games={newGames} trackingSource="home" locale={locale} />
       </section>
 
       <section>
