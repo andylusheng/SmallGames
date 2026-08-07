@@ -4,6 +4,7 @@ import GameGrid from "@/components/GameGrid";
 import {
   getCategories,
   getFeaturedGames,
+  getLocalizedGameDescription,
   getNewGames,
   getPopularGames,
 } from "@/lib/games";
@@ -11,16 +12,17 @@ import { getServerTranslations } from "@/lib/server-i18n";
 import { Clock, Flame, Sparkles } from "lucide-react";
 
 interface HomePageViewProps {
-  locale: "en" | "zh";
+  locale: string;
 }
 
 export default function HomePageView({ locale }: HomePageViewProps) {
   const t = getServerTranslations(locale);
-  const prefix = locale === "en" ? "" : "/zh";
+  const prefix = locale === "en" ? "" : `/${locale}`;
   const featured = getFeaturedGames(6);
   const popular = getPopularGames(10);
   const newGames = getNewGames(10);
   const categories = getCategories();
+  const browseCategories = locale === "en" ? "Browse Game Categories" : locale === "zh-tw" ? "瀏覽遊戲分類" : "浏览游戏分类";
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-4 md:py-6">
@@ -51,13 +53,13 @@ export default function HomePageView({ locale }: HomePageViewProps) {
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
               <div className="relative z-10 min-w-0">
                 <span className="rounded-full bg-primary/20 px-2 py-0.5 text-[10px] font-medium text-primary md:text-xs">
-                  {game.category}
+                  {t(`categories.${game.category}`)}
                 </span>
                 <h3 className="mt-1.5 truncate text-sm font-bold text-white group-hover:text-primary md:mt-2 md:text-lg">
                   {game.title}
                 </h3>
                 <p className="mt-1 hidden line-clamp-2 text-sm text-gray-300 sm:block">
-                  {game.description}
+                  {getLocalizedGameDescription(game, locale)}
                 </p>
               </div>
             </NextLink>
@@ -86,9 +88,7 @@ export default function HomePageView({ locale }: HomePageViewProps) {
       </section>
 
       <section>
-        <h2 className="mb-4 text-xl font-bold text-white">
-          {locale === "en" ? "Browse Game Categories" : "浏览游戏分类"}
-        </h2>
+        <h2 className="mb-4 text-xl font-bold text-white">{browseCategories}</h2>
         <div className="flex flex-wrap gap-2">
           {categories.map((category) => (
             <NextLink
