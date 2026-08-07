@@ -73,7 +73,7 @@ export const GAMEPLAY_TOPIC_MEMBERS: Record<string, string[]> = {
   idle: ["cookie-clicker", "idle-miner", "idle-factory", "tap-tycoon", "lemonade-stand", "pet-merge"],
 };
 
-export const GAME_PROFILES: Record<string, GameSeoProfile> = {
+const RAW_GAME_PROFILES: Record<string, GameSeoProfile> = {
   ...TAP_GAME_PROFILES,
   ...MERGE_GAME_PROFILES,
   ...DEFENSE_GAME_PROFILES,
@@ -84,6 +84,117 @@ export const GAME_PROFILES: Record<string, GameSeoProfile> = {
   ...CLASSIC_GAME_PROFILES,
   ...IDLE_GAME_PROFILES,
 };
+
+export const TOPIC_GAME_SLUGS = Array.from(
+  new Set(Object.values(GAMEPLAY_TOPIC_MEMBERS).flat())
+);
+
+function hasText(value: string | undefined): boolean {
+  return Boolean(value?.trim());
+}
+
+function validateLocalizedSeo(
+  slug: string,
+  locale: SupportedLocale,
+  content: LocalizedGameSeoContent,
+  errors: string[]
+) {
+  const prefix = `${slug}/${locale}`;
+
+  if (!hasText(content.metaTitle)) errors.push(`${prefix}: missing metaTitle`);
+  if (!hasText(content.metaDescription)) errors.push(`${prefix}: missing metaDescription`);
+  if (!hasText(content.h1)) errors.push(`${prefix}: missing h1`);
+  if (!hasText(content.intro)) errors.push(`${prefix}: missing intro`);
+  if (content.about.length < 1) errors.push(`${prefix}: missing source-grounded about content`);
+  if (content.howToPlay.length < 3) errors.push(`${prefix}: needs at least 3 how-to-play steps`);
+  if (content.rules.length < 3) errors.push(`${prefix}: needs at least 3 game-specific rules`);
+  if (content.tips.length < 2) errors.push(`${prefix}: needs at least 2 game-specific tips`);
+  if (content.faq.length < 3) errors.push(`${prefix}: needs at least 3 game-specific FAQ items`);
+}
+
+/**
+ * Topic SEO completion gate.
+ *
+ * Every game exposed by a gameplay Topic must have a source-grounded profile
+ * with keyword mapping, unique localized metadata and enough game-specific
+ * content to avoid falling back to the generic generated page template.
+ *
+ * `testedMobile` is intentionally NOT part of this gate. It records manual
+ * device gameplay QA and is independent from content SEO completion.
+ */
+function finalizeTopicGameProfiles(
+  profiles: Record<string, GameSeoProfile>
+): Record<string, GameSeoProfile> {
+  const errors: string[] = [];
+  const metaTitles: Record<SupportedLocale, Map<string, string>> = {
+    en: new Map(),
+    zh: new Map(),
+  };
+  const h1s: Record<SupportedLocale, Map<string, string>> = {
+    en: new Map(),
+    zh: new Map(),
+  };
+
+  for (const slug of TOPIC_GAME_SLUGS) {
+    const profile = profiles[slug];
+    if (!profile) {
+      errors.push(`${slug}: Topic member is missing a GameSeoProfile`);
+      continue;
+    }
+
+    if (!hasText(profile.primaryKeyword)) {
+      errors.push(`${slug}: missing primaryKeyword`);
+    }
+    if (profile.secondaryKeywords.length < 2) {
+      errors.push(`${slug}: needs at least 2 secondaryKeywords`);
+    }
+    if (!hasText(profile.mechanics.objective.en) || !hasText(profile.mechanics.objective.zh)) {
+      errors.push(`${slug}: missing bilingual gameplay objective`);
+    }
+    if (profile.mechanics.controls.length < 1) {
+      errors.push(`${slug}: missing verified controls`);
+    }
+    if (profile.mechanics.specialMechanics.length < 1) {
+      errors.push(`${slug}: missing game-specific mechanics`);
+    }
+
+    for (const locale of ["en", "zh"] as const) {
+      const content = profile.content[locale];
+      validateLocalizedSeo(slug, locale, content, errors);
+
+      const metaOwner = metaTitles[locale].get(content.metaTitle);
+      if (metaOwner && metaOwner !== slug) {
+        errors.push(`${slug}/${locale}: duplicate metaTitle also used by ${metaOwner}`);
+      } else {
+        metaTitles[locale].set(content.metaTitle, slug);
+      }
+
+      const h1Owner = h1s[locale].get(content.h1);
+      if (h1Owner && h1Owner !== slug) {
+        errors.push(`${slug}/${locale}: duplicate h1 also used by ${h1Owner}`);
+      } else {
+        h1s[locale].set(content.h1, slug);
+      }
+    }
+  }
+
+  if (errors.length > 0) {
+    throw new Error(`Topic game SEO completion gate failed:\n${errors.join("\n")}`);
+  }
+
+  const finalized = { ...profiles };
+  for (const slug of TOPIC_GAME_SLUGS) {
+    finalized[slug] = {
+      ...finalized[slug],
+      seoStatus: "optimized",
+    };
+  }
+
+  return finalized;
+}
+
+export const GAME_PROFILES: Record<string, GameSeoProfile> =
+  finalizeTopicGameProfiles(RAW_GAME_PROFILES);
 
 export function getGameProfileConfig(slug: string): GameSeoProfile | undefined {
   return GAME_PROFILES[slug];

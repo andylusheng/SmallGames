@@ -4,6 +4,7 @@ import ts from "typescript";
 
 const roots = ["src/data/game-profiles.ts", "src/data/game-profiles"];
 const qaStatuses = new Set(["reviewed", "optimized"]);
+const profileFactories = new Set(["reviewedProfile", "optimizedProfile"]);
 
 function collectTypeScriptFiles(target) {
   if (!fs.existsSync(target)) return [];
@@ -74,7 +75,7 @@ for (const sourcePath of sourceFiles) {
     if (
       ts.isCallExpression(node) &&
       ts.isIdentifier(node.expression) &&
-      node.expression.text === "reviewedProfile" &&
+      profileFactories.has(node.expression.text) &&
       node.arguments.length > 0 &&
       ts.isObjectLiteralExpression(node.arguments[0])
     ) {
