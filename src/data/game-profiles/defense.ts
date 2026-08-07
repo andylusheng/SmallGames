@@ -1,0 +1,128 @@
+import type { GameSeoProfile } from "@/data/game-profiles";
+import { reviewedProfile } from "@/data/game-profiles/factory";
+
+export const DEFENSE_GAME_PROFILES: Record<string, GameSeoProfile> = {
+  "tower-defense": reviewedProfile({
+    slug: "tower-defense",
+    primaryKeyword: "tower defense game",
+    secondaryKeywords: ["tower defense online", "free tower defense game", "browser tower defense", "tower defense no download"],
+    containsViolence: true,
+    mechanics: {
+      objective: { en: "Place four tower types on grass tiles and stop enemies from following the fixed path to your base.", zh: "在草地区域布置4种防御塔，阻止敌人沿固定路线抵达基地。" },
+      controls: ["mouse", "touch"],
+      scoringTitle: { en: "Tower Defense Economy", zh: "Tower Defense 经济规则" },
+      scoringValueLabel: { en: "Gold / Effect", zh: "金币 / 效果" },
+      scoring: [
+        { id: "basic", label: { en: "Basic tower", zh: "基础塔" }, value: { en: "25 gold", zh: "25金币" }, note: { en: "10 damage, 2.5-cell range, 30-frame fire rate.", zh: "10伤害、2.5格射程、30帧攻击间隔。" } },
+        { id: "sniper", label: { en: "Sniper tower", zh: "狙击塔" }, value: { en: "50 gold", zh: "50金币" }, note: { en: "40 damage and 4.5-cell range, but a slower 80-frame fire rate.", zh: "40伤害、4.5格射程，但攻击间隔为80帧。" } },
+        { id: "splash", label: { en: "Splash tower", zh: "范围塔" }, value: { en: "75 gold", zh: "75金币" }, note: { en: "15 direct damage plus half damage inside a 1.2-cell splash radius.", zh: "15点直接伤害，并对1.2格范围内其他敌人造成一半伤害。" } },
+        { id: "slow", label: { en: "Slow tower", zh: "减速塔" }, value: { en: "40 gold", zh: "40金币" }, note: { en: "5 damage and applies a temporary slow that reduces enemy movement to 40% speed.", zh: "5点伤害并施加临时减速，使敌人移动速度降到40%。" } },
+      ],
+      specialMechanics: [
+        { en: "You start with 100 gold and 20 HP. Towers can be placed only on grass, never on the enemy path or an occupied tile.", zh: "开局拥有100金币和20点HP；防御塔只能放在草地，不能放在敌人路线或已占用格子。" },
+        { en: "Wave N contains 5 + 3N enemies. Base enemy HP is 30 + 20N and enemy speed also rises with the wave.", zh: "第N波包含5+3N个敌人；基础HP为30+20N，移动速度也会随波次提高。" },
+        { en: "Every third wave ends with a boss that has four times the base HP, moves at 60% normal speed and awards 20 gold.", zh: "每3波的最后一个敌人是Boss：拥有4倍基础HP、60%普通速度，击杀奖励20金币。" },
+        { en: "Clearing a wave grants a bonus of 10 + 2 × wave gold before the next wave can be started.", zh: "清完一波后会获得10+2×当前波次的额外金币，再手动开始下一波。" },
+      ],
+      endCondition: { en: "Each enemy that reaches the end of the path removes 1 HP. The run ends when HP reaches zero; clicking the board after Game Over resets the run.", zh: "每个抵达终点的敌人都会扣1点HP；HP归零时结束，Game Over 后点击棋盘可重开。" },
+      progress: { en: "Wave, kills, towers, gold and HP exist only for the active run; this implementation does not save progress to localStorage.", zh: "波次、击杀、防御塔、金币和HP只存在于当前游玩过程，本实现不会写入 localStorage。" },
+      gameplayTopics: ["defense", "strategy"],
+    },
+    content: {
+      en: {
+        metaTitle: "Tower Defense Game – Build 4 Tower Types Online",
+        metaDescription: "Play Tower Defense online with Basic, Sniper, Splash and Slow towers. Start with 100 gold and 20 HP, then survive scaling enemy waves and bosses.",
+        h1: "Tower Defense – Build Towers and Survive Enemy Waves",
+        intro: "Spend limited gold on four tower types, place them off the fixed enemy path and survive waves that grow in size, HP and speed.",
+        about: ["This Tower Defense game is built around placement and economy rather than direct character control. The path is fixed, so every purchase is a tradeoff between range, damage, fire rate and special effects.", "Wave pressure rises continuously: enemy count, health and speed scale upward, while every third wave adds a high-HP boss."],
+        howToPlay: ["Choose Basic, Sniper, Splash or Slow from the tower bar.", "Tap or click an empty grass cell to buy and place the selected tower.", "Press Start Wave and let towers attack automatically; use kill rewards and wave-clear bonuses to prepare for the next wave.", "Keep enemies from reaching the base before your 20 HP is depleted."],
+        rules: ["Towers cannot be placed on path cells or on top of another tower.", "Basic costs 25, Sniper 50, Splash 75 and Slow 40 gold.", "Enemies that reach the base remove 1 HP; the run ends at 0 HP.", "Every third wave includes a boss with four times the normal base HP."],
+        tips: ["Use Snipers where long sight lines let their 4.5-cell range matter.", "Splash towers are most valuable where several path segments pass close together.", "Slow towers deal little damage, so combine their movement penalty with stronger damage towers.", "Do not spend all gold before a wave unless the new placement covers a real path segment; wave-clear bonuses are your main guaranteed refill."],
+        faq: [
+          { q: "How many tower types are in Tower Defense?", a: "There are four: Basic, Sniper, Splash and Slow. They differ in cost, damage, range, attack rate and special effects." },
+          { q: "How do Tower Defense waves scale?", a: "Wave N spawns 5 + 3N enemies. Base enemy HP is 30 + 20N, and movement speed rises with the wave up to the coded cap." },
+          { q: "When do bosses appear?", a: "Every third wave makes the final enemy a boss with four times base HP, 60% normal speed and a 20-gold reward." },
+          { q: "What happens when an enemy reaches the base?", a: "You lose 1 HP. The game starts at 20 HP and ends when HP reaches zero." },
+        ],
+      },
+      zh: {
+        metaTitle: "Tower Defense 塔防游戏 – 在线布置4种防御塔",
+        metaDescription: "在线玩 Tower Defense：基础塔、狙击塔、范围塔和减速塔共4种。开局100金币、20HP，抵挡持续增强的敌人波次和Boss。",
+        h1: "Tower Defense – 布置防御塔抵挡敌人波次",
+        intro: "用有限金币购买4种不同防御塔，避开固定敌人路线进行布置，并抵挡数量、HP和速度持续增长的波次。",
+        about: ["这款 Tower Defense 的核心是布置和经济管理，而不是直接操控角色。敌人路线固定，因此每次购买都要在射程、伤害、攻击频率和特殊效果之间做取舍。", "波次压力会持续上升：敌人数量、生命值和速度逐波提高，并且每3波出现一次高HP Boss。"],
+        howToPlay: ["在塔栏选择基础塔、狙击塔、范围塔或减速塔。", "点击空草地购买并放置当前选择的防御塔。", "点击 Start Wave 开始波次，防御塔会自动攻击；利用击杀奖励和清波奖励继续建设。", "在20点HP被消耗完之前阻止敌人抵达基地。"],
+        rules: ["防御塔不能放在敌人路线，也不能覆盖已有防御塔。", "基础塔25金币、狙击塔50、范围塔75、减速塔40。", "每个漏到基地的敌人扣1HP；HP归零结束。", "每3波的最后一个敌人会变成4倍基础HP的Boss。"],
+        tips: ["把狙击塔放在能发挥4.5格射程的长视野位置。", "范围塔适合路线折返、多个路段靠得很近的位置。", "减速塔伤害低，应和高伤害塔组合使用。", "不要为了花光金币而随意建塔；清波奖励是下一波前最稳定的金币补充。"],
+        faq: [
+          { q: "Tower Defense 有几种防御塔？", a: "共有4种：基础塔、狙击塔、范围塔和减速塔，它们的价格、伤害、射程、攻击频率和特殊效果不同。" },
+          { q: "敌人波次怎么增强？", a: "第N波会生成5+3N个敌人，基础HP为30+20N，移动速度也会随波次提高。" },
+          { q: "Boss 什么时候出现？", a: "每3波的最后一个敌人是Boss，拥有4倍基础HP、60%普通速度，击杀后奖励20金币。" },
+          { q: "敌人到达基地会怎样？", a: "每漏过1个敌人扣1HP。开局20HP，降到0时游戏结束。" },
+        ],
+      },
+    },
+  }),
+
+  "plant-defense": reviewedProfile({
+    slug: "plant-defense",
+    primaryKeyword: "plant defense game",
+    secondaryKeywords: ["plant defense online", "garden defense game", "plant tower defense", "free plant defense game"],
+    containsViolence: true,
+    mechanics: {
+      objective: { en: "Spend sun on plants across an 8×5 lawn and stop zombies from crossing any of the five rows.", zh: "在8×5草坪上消耗阳光布置植物，阻止僵尸穿过5条路线。" },
+      controls: ["mouse", "touch"],
+      scoringTitle: { en: "Plants, Sun and Score", zh: "植物、阳光与得分" },
+      scoringValueLabel: { en: "Cost / Reward", zh: "费用 / 收益" },
+      scoring: [
+        { id: "sunflower", label: { en: "Sunflower", zh: "向日葵" }, value: { en: "50 sun", zh: "50阳光" }, note: { en: "3 HP and produces +25 sun every 200 update ticks.", zh: "3HP，每200个更新周期生产25阳光。" } },
+        { id: "shooter", label: { en: "Shooter", zh: "射手植物" }, value: { en: "100 sun", zh: "100阳光" }, note: { en: "3 HP and fires every 60 ticks when an enemy is ahead in the same row.", zh: "3HP；同一行前方有敌人时每60个周期发射一次。" } },
+        { id: "wall", label: { en: "Wall", zh: "墙" }, value: { en: "50 sun", zh: "50阳光" }, note: { en: "10 HP and blocks enemies without shooting.", zh: "10HP，只负责阻挡敌人，不会射击。" } },
+        { id: "kill", label: { en: "Defeat one enemy", zh: "击败1个敌人" }, points: 10, note: { en: "Every defeated zombie adds 10 score.", zh: "每击败1个僵尸增加10分。" } },
+      ],
+      specialMechanics: [
+        { en: "The lawn has 8 columns and 5 rows. Each cell can hold at most one plant.", zh: "草坪为8列×5行，每个格子最多放1株植物。" },
+        { en: "A falling sun token is created every 180 ticks, but the current code does not provide a collection handler for those drops; reliable sun income comes from Sunflowers.", zh: "每180个周期会生成一个下落阳光图标，但当前代码没有为它实现收集事件；稳定阳光收入实际来自向日葵。" },
+        { en: "Enemy spawn interval is max(60, 180 − 15 × wave); enemy HP and speed also rise with the wave.", zh: "敌人生成间隔为 max(60, 180−15×波次)，HP和速度也会随波次提高。" },
+        { en: "The wave number rises after score reaches each 100-point threshold.", zh: "分数达到每个100分门槛后，波次会提高。" },
+      ],
+      endCondition: { en: "The run ends immediately when any enemy moves past the left edge of the lawn. Tap the lawn after Game Over to reset.", zh: "任意敌人穿过草坪左边界时立即结束；Game Over 后点击草坪可以重置。" },
+      progress: { en: "Best score is saved in localStorage under plant-defense-best; the current board, sun and wave are not persisted.", zh: "最高分保存在 localStorage 的 plant-defense-best；当前棋盘、阳光和波次不会持久化。" },
+      gameplayTopics: ["defense", "strategy"],
+    },
+    content: {
+      en: {
+        metaTitle: "Plant Defense Game – Sunflower, Shooter & Wall Strategy",
+        metaDescription: "Play Plant Defense online on an 8×5 lawn. Spend sun on Sunflowers, Shooters and Walls, earn 10 points per zombie and survive faster waves.",
+        h1: "Plant Defense – Defend an 8×5 Garden with 3 Plant Types",
+        intro: "Build an economy with Sunflowers, attack with Shooters and stall zombies with Walls while five lanes become faster and tougher over time.",
+        about: ["Plant Defense uses a five-lane defense layout with an 8×5 placement grid. The three plant types have deliberately different jobs: resource generation, ranged damage and blocking.", "The game becomes harder by shortening spawn intervals and increasing zombie health and speed as the wave number rises."],
+        howToPlay: ["Choose Sunflower, Shooter or Wall from the shop.", "Tap an empty lawn cell; the plant is placed only if you have enough sun.", "Use Sunflowers to generate more sun, Shooters to attack zombies in their row and Walls to absorb damage.", "Keep every zombie from crossing the left edge while building score in 10-point kills."],
+        rules: ["Sunflower and Wall each cost 50 sun; Shooter costs 100.", "Only one plant can occupy a grid cell.", "Each zombie defeated is worth 10 points.", "If one zombie reaches the left edge, the entire run ends."],
+        tips: ["Establish Sunflowers before filling every lane with expensive Shooters; otherwise the initial 50 sun cannot fund much defense.", "Walls have 10 HP versus 3 HP for the other plants, so place them where they can buy Shooters extra firing time.", "Because Shooters only fire when an enemy is ahead in the same row, distribute them across threatened lanes rather than stacking one row."],
+        faq: [
+          { q: "What plants are in Plant Defense?", a: "Sunflower costs 50 sun and produces resources, Shooter costs 100 and fires at enemies in its row, and Wall costs 50 and has 10 HP for blocking." },
+          { q: "How do waves increase in Plant Defense?", a: "The wave rises at 100-point score thresholds. Higher waves reduce enemy spawn intervals and increase enemy HP and speed." },
+          { q: "How is score earned?", a: "Each defeated zombie awards 10 points." },
+          { q: "Does Plant Defense save a best score?", a: "Yes. A new best score is stored in localStorage in the current browser." },
+        ],
+      },
+      zh: {
+        metaTitle: "Plant Defense 植物防御游戏 – 向日葵、射手与墙",
+        metaDescription: "在线玩 Plant Defense：8×5草坪、3种植物。用向日葵产阳光、射手攻击、墙阻挡；每击败僵尸10分，波次持续加快。",
+        h1: "Plant Defense – 用3种植物守住8×5花园",
+        intro: "向日葵负责经济、射手负责攻击、墙负责拖延，在5条路线不断加速增强的僵尸压力下守住花园。",
+        about: ["Plant Defense 使用5条路线和8×5布置网格。3种植物职责清晰：资源生产、远程攻击和高HP阻挡。", "随着波次提高，敌人生成间隔缩短，同时HP和移动速度增加，因此后期需要更稳定的阳光经济和更完整的路线覆盖。"],
+        howToPlay: ["在商店选择向日葵、射手植物或墙。", "点击空草坪格；阳光足够时才会成功放置。", "用向日葵持续生产阳光，用射手攻击同一路线前方的敌人，用墙拖延敌人。", "每击败1个敌人获得10分，并阻止任何敌人穿过左边界。"],
+        rules: ["向日葵和墙各50阳光，射手100阳光。", "每个网格只能放1株植物。", "每击败1个僵尸获得10分。", "只要有1个僵尸穿过左边界，本局立即结束。"],
+        tips: ["先建立一定数量的向日葵，再大量购买100阳光的射手，否则开局50阳光无法支撑防线。", "墙有10HP，而另外两种植物只有3HP，适合放在前方为射手争取攻击时间。", "射手只会攻击同一路线前方的敌人，因此要覆盖不同路线，不要全部堆在一行。"],
+        faq: [
+          { q: "Plant Defense 有哪些植物？", a: "向日葵50阳光并生产资源；射手100阳光并攻击同一行敌人；墙50阳光、10HP，用于阻挡。" },
+          { q: "波次如何提高？", a: "分数达到每个100分门槛后波次提高；更高波次会缩短敌人生成间隔，并提高HP和速度。" },
+          { q: "怎么得分？", a: "每击败1个僵尸获得10分。" },
+          { q: "最高分会保存吗？", a: "会。刷新最高分时会写入当前浏览器的 localStorage。" },
+        ],
+      },
+    },
+  }),
+};
