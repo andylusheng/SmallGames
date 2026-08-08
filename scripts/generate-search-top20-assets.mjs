@@ -39,6 +39,9 @@ for (const game of games) {
   if (!mode) throw new Error(`Missing runtime mode for ${game.slug}`);
   const dir = path.join(outRoot, game.slug);
   fs.mkdirSync(dir, {recursive:true});
+  const runtimeScript = game.slug === 'cascade-solitaire'
+    ? '/games/_search-top20/cascade.js'
+    : '/games/_search-top20/runtime.js';
   const html = `<!doctype html>
 <html lang="en">
 <head>
@@ -51,7 +54,7 @@ for (const game of games) {
 <body>
 <div id="app"></div>
 <script>window.ZP_GAME=${JSON.stringify({slug:game.slug,title:game.title,mode})};</script>
-<script src="/games/_search-top20/runtime.js"></script>
+<script src="${runtimeScript}"></script>
 </body>
 </html>`;
   fs.writeFileSync(path.join(dir, 'index.html'), html);
