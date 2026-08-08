@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import NextLink from "next/link";
 import {
+  getAllGames,
   getAllSlugs,
   getGameBySlug,
   getRelatedGames,
@@ -34,6 +35,40 @@ function lp(locale: string, href: string) {
 
 function zh(locale: string, value: string) {
   return locale === "zh-tw" ? toZhTwText(value) : value;
+}
+
+function getCrossCategoryRecommendations(game: Game, limit = 4): Game[] {
+  const seed = Array.from(game.slug).reduce((hash, char) => ((hash * 31) + char.charCodeAt(0)) >>> 0, 7);
+  const buckets = new Map<string, Game[]>();
+
+  getAllGames()
+    .filter((item) => item.id !== game.id && item.category !== game.category)
+    .forEach((item) => {
+      const bucket = buckets.get(item.category) ?? [];
+      bucket.push(item);
+      buckets.set(item.category, bucket);
+    });
+
+  for (const bucket of buckets.values()) {
+    bucket.sort((a, b) =>
+      Number(b.popular) - Number(a.popular) ||
+      Number(b.featured) - Number(a.featured) ||
+      b.updatedAt.localeCompare(a.updatedAt) ||
+      a.slug.localeCompare(b.slug)
+    );
+  }
+
+  const categories = Array.from(buckets.keys()).sort();
+  if (categories.length === 0) return [];
+
+  const offset = seed % categories.length;
+  const orderedCategories = [...categories.slice(offset), ...categories.slice(0, offset)];
+
+  return orderedCategories.slice(0, limit).map((category, index) => {
+    const bucket = buckets.get(category)!;
+    const topPool = bucket.slice(0, Math.min(3, bucket.length));
+    return topPool[(seed + index) % topPool.length];
+  });
 }
 
 export function gameStaticParams() {
@@ -136,6 +171,7 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
   const topicContent = primaryTopic ? getLocalizedTopicSeo(primaryTopic, locale) : undefined;
   const relatedGames = getRelatedGames(game, 8);
   const categoryGames = getGamesByCategory(game.category).filter((item) => item.id !== game.id).slice(0, 4);
+  const crossCategoryGames = getCrossCategoryRecommendations(game, 4);
   const fallbackSeo = getGameSeo(game, locale);
   const longDescription = fallbackSeo.longDescription || getLocalizedGameDescription(game, locale);
   const aboutParagraphs = p2?.about ?? longDescription.split("\n").filter(Boolean);
@@ -144,6 +180,20 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
   const faqs = getGameFaqs(game, locale);
   const difficulty = fallbackSeo.difficulty || (isEn ? "Easy" : zh(locale, "简单"));
   const localize = (value: { en: string; zh: string }) => isEn ? value.en : zh(locale, value.zh);
+  const sameCategoryTitle = locale === "en"
+    ? `More ${t(`categories.${game.category}`)} Games`
+    : locale === "es"
+      ? `Más juegos de ${t(`categories.${game.category}`)}`
+      : locale === "zh-tw"
+        ? `更多${t(`categories.${game.category}`)}遊戲`
+        : `更多${t(`categories.${game.category}`)}游戏`;
+  const exploreOtherTitle = locale === "en"
+    ? "Explore Other Games"
+    : locale === "es"
+      ? "Descubre otros juegos"
+      : locale === "zh-tw"
+        ? "探索其他遊戲"
+        : "探索其他游戏";
 
   const infoRows: string[][] = [
     [isEn ? "Game Name" : zh(locale, "游戏名称"), game.title],
@@ -365,15 +415,38 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
 
           <aside className="hidden lg:block">
             <div className="sticky top-24 rounded-xl border border-white/10 bg-surface/40 p-4">
-              <h2 className="text-sm font-semibold text-white">{isEn ? `More ${t(`categories.${game.category}`)} Games` : zh(locale, `更多${t(`categories.${game.category}`)}游戏`)}</h2>
-              <div className="mt-3 space-y-3">
-                {categoryGames.map((item) => (
-                  <NextLink key={item.slug} href={lp(locale, `/game/${item.slug}`)} className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-white/5">
-                    <img src={item.thumbnail} alt="" className="h-12 w-12 rounded-lg object-cover" loading="lazy" />
-                    <div className="min-w-0"><div className="truncate text-sm font-medium text-white">{item.title}</div><div className="mt-0.5 line-clamp-1 text-xs text-gray-500">{getLocalizedGameDescription(item, locale)}</div></div>
-                  </NextLink>
-                ))}
-              </div>
+              <section>
+                <h2 className="text-sm font-semibold text-white">{sameCategoryTitle}</h2>
+                <div className="mt-3 space-y-3">
+                  {categoryGames.map((item) => (
+                    <NextLink key={item.slug} href={lp(locale, `/game/${item.slug}`)} className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-white/5">
+                      <img src={item.thumbnail} alt="" width="48" height="48" className="h-12 w-12 rounded-lg object-cover" loading="lazy" decoding="async" />
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-medium text-white">{item.title}</div>
+                        <div className="mt-0.5 line-clamp-1 text-xs text-gray-500">{getLocalizedGameDescription(item, locale)}</div>
+                      </div>
+                    </NextLink>
+                  ))}
+                </div>
+              </section>
+
+              {crossCategoryGames.length > 0 && (
+                <section className="mt-4 border-t border-white/10 pt-4">
+                  <h2 className="text-sm font-semibold text-white">{exploreOtherTitle}</h2>
+                  <div className="mt-3 space-y-3">
+                    {crossCategoryGames.map((item) => (
+                      <NextLink key={item.slug} href={lp(locale, `/game/${item.slug}`)} className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-white/5">
+                        <img src={item.thumbnail} alt="" width="48" height="48" className="h-12 w-12 rounded-lg object-cover" loading="lazy" decoding="async" />
+                        <div className="min-w-0">
+                          <div className="truncate text-sm font-medium text-white">{item.title}</div>
+                          <div className="mt-0.5 truncate text-xs font-medium text-primary/80">{t(`categories.${item.category}`)}</div>
+                          <div className="mt-0.5 line-clamp-1 text-xs text-gray-500">{getLocalizedGameDescription(item, locale)}</div>
+                        </div>
+                      </NextLink>
+                    ))}
+                  </div>
+                </section>
+              )}
             </div>
           </aside>
         </div>
