@@ -37,6 +37,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/zh`, lastModified: SITE_UPDATED_AT, changeFrequency: "weekly", priority: 0.9 },
     { url: `${BASE_URL}/zh-tw`, lastModified: SITE_UPDATED_AT, changeFrequency: "weekly", priority: 0.95 },
     { url: `${BASE_URL}/es`, lastModified: SITE_UPDATED_AT, changeFrequency: "weekly", priority: 0.95 },
+    { url: `${BASE_URL}/all-games`, lastModified: SITE_UPDATED_AT, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${BASE_URL}/zh/all-games`, lastModified: SITE_UPDATED_AT, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${BASE_URL}/zh-tw/all-games`, lastModified: SITE_UPDATED_AT, changeFrequency: "weekly", priority: 0.75 },
+    { url: `${BASE_URL}/es/all-games`, lastModified: SITE_UPDATED_AT, changeFrequency: "weekly", priority: 0.75 },
     ...["privacy", "terms", "dmca", "about"].flatMap((path) => [
       { url: `${BASE_URL}/${path}`, lastModified: SITE_UPDATED_AT, changeFrequency: "yearly" as const, priority: path === "about" ? 0.3 : 0.2 },
       { url: `${BASE_URL}/zh/${path}`, lastModified: SITE_UPDATED_AT, changeFrequency: "yearly" as const, priority: path === "about" ? 0.3 : 0.2 },
