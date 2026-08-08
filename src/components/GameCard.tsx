@@ -26,7 +26,7 @@ export default function GameCard({ game, trackingSource }: GameCardProps) {
     <Link
       href={`/game/${game.slug}`}
       onClick={handleClick}
-      className="group relative flex flex-col overflow-hidden rounded-xl border border-white/5 bg-surface transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10"
+      className="game-card-breathe group relative flex flex-col overflow-hidden rounded-xl border border-white/5 bg-surface transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-dark-light">
         <img
