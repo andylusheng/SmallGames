@@ -19,9 +19,10 @@
 - generated 游戏：0
 - Production branch：`master`
 - Hosting：Cloudflare Pages
-- 当前正式语言：English / 简体中文 / 繁體中文（台灣） / Español
+- 正式语言：English / 简体中文 / 繁體中文（台灣） / Español
+- 简体中文版：页面结构、100 游戏、9 Category、9 Topic、Search、Legal、Sitemap、hreflang、独立中文搜索索引、独立 Smoke QA 已完成
 - 移动端 Header：390px 宽度必须完整落在单屏内，不允许横向溢出
-- 语言切换：统一使用地球图标下拉菜单，顶部只显示当前语言简写 `EN / 简 / 繁 / ES`
+- 语言切换：统一使用地球图标下拉菜单，顶部显示当前语言简写 `EN / 简 / 繁 / ES`
 
 第一轮观察窗口：
 
@@ -92,6 +93,11 @@ L0  Free Play Games / Free Online Games
 /zh/game/{slug}
 /zh/{topic}-games
 /zh/{category}
+/zh/search
+/zh/about
+/zh/privacy
+/zh/terms
+/zh/dmca
 ```
 
 ### 繁體中文（台灣）
@@ -114,16 +120,18 @@ L0  Free Play Games / Free Online Games
 
 语言目录彼此独立，不把不同语言页面混进同一 URL。
 
-文件结构：
+主要文件：
 
 ```text
 src/app/zh/
 src/app/zh-tw/
 src/app/es/
 
+src/messages/zh.json
 src/messages/zh-tw.json
 src/messages/es.json
 
+src/data/zh/category-seo.ts
 src/data/zh-tw/
 src/data/es/
 ```
@@ -131,10 +139,10 @@ src/data/es/
 语言切换规则：
 
 - Header 使用 `Globe` 地球图标 + 下拉菜单。
-- 顶部不再横向平铺 `English / Español / ...`。
-- 当前语言使用简写：`EN / 简 / 繁 / ES`。
+- 顶部不横向平铺语言全称。
+- 当前语言简写：`EN / 简 / 繁 / ES`。
 - 下拉菜单展示完整语言名称。
-- 切换语言时尽量保持当前等价路径，例如 `/game/2048` → `/es/game/2048`。
+- 切换语言时保持当前等价路径，例如 `/game/2048` → `/zh/game/2048` → `/es/game/2048`。
 
 多语言 SEO：
 
@@ -142,12 +150,78 @@ src/data/es/
 - hreflang：`en`、`zh`、`zh-TW`、`es`。
 - `x-default` 指向 English。
 - Search 页面 `noindex, follow` 且不进 sitemap。
-- Raw Runtime 不参与 SEO 页面竞争。
+- Raw Runtime 不作为 SEO 落地页。
 - Open Graph / Structured Data 使用对应 locale / inLanguage。
 
 ---
 
-## 4. 技术与部署
+## 4. 简体中文版标准
+
+简体版当前不是占位版本，而是正式语言版本。
+
+### 页面结构
+
+已包含：
+
+- `/zh` 首页
+- 100 个 `/zh/game/{slug}`
+- 9 个 `/zh/{category}`
+- 9 个 `/zh/{topic}-games`
+- `/zh/search`
+- About / Privacy / Terms / DMCA / Not Found
+
+### 游戏内容
+
+- 100 个游戏使用现有 `GameSeoProfile.zh` 事实内容。
+- Title / Description / H1 / How to Play / Rules / FAQ 继续以真实 Runtime 为准。
+- 不重新发明中文版本玩法。
+
+### Category 内容
+
+9 个简体 Category 已使用单独的事实化内容层：
+
+```text
+src/data/zh/category-seo.ts
+```
+
+当前规则：
+
+- 不统一宣称“所有游戏支持触屏”。
+- 不统一宣称“固定 60fps”。
+- 不统一宣称“自动保存”。
+- 不统一宣称“有离线收益 / Boss / 氮气 / 正式体育计分”等常见机制。
+- 手机、键盘、鼠标支持按具体游戏说明。
+- 保存、计分、关卡和结束条件按当前 Runtime 说明。
+
+该事实化 Category 内容同时作为繁體版 Category 的简体事实源，再经过繁体 / 台湾用语转换，避免两套事实漂移。
+
+### 中文搜索
+
+简体搜索已使用独立索引：
+
+```text
+public/games-index-zh.json
+```
+
+生成脚本：
+
+```text
+scripts/generate-game-index.js
+```
+
+Build 时生成：
+
+```text
+games-index.json          English
+games-index-zh.json       简体中文
+games-index-zh-tw.json    繁體中文
+```
+
+`/zh/search` 不再读取英文 `games-index.json`。
+
+---
+
+## 5. 技术与部署
 
 | 项目 | 当前实现 |
 |---|---|
@@ -174,6 +248,8 @@ npm run build
     ↓
 seo:verify
     ↓
+generate-game-index
+    ↓
 Next.js static export
     ↓
 out/
@@ -193,7 +269,7 @@ NEXT_PUBLIC_SITE_URL=https://zeroplaygames.com
 
 ---
 
-## 5. 路由与索引策略
+## 6. 路由与索引策略
 
 应索引：
 
@@ -222,7 +298,7 @@ NEXT_PUBLIC_SITE_URL=https://zeroplaygames.com
 
 ---
 
-## 6. 100 游戏库存
+## 7. 100 游戏库存
 
 | Category | 数量 | 单页 SEO |
 |---|---:|---:|
@@ -250,7 +326,7 @@ Production Build 强制校验 inventory 与 Profile slug 一一对应。
 
 ---
 
-## 7. 9 个正式 Gameplay Topic
+## 8. 9 个正式 Gameplay Topic
 
 | Topic | URL | Members |
 |---|---|---|
@@ -268,7 +344,7 @@ Topic 以真实主要机制划分，不只看名字和 tags。
 
 ---
 
-## 8. 单游戏 Page Standard
+## 9. 单游戏 Page Standard
 
 100 个正式游戏必须有：
 
@@ -314,7 +390,7 @@ Topic backlink（适用时）
 
 ---
 
-## 9. SEO Completion Gate
+## 10. SEO Completion Gate
 
 `npm run build` 前执行 SEO 验证。
 
@@ -335,11 +411,11 @@ Topic backlink（适用时）
 
 ---
 
-## 10. 当前 QA 标准
+## 11. 当前 QA 标准
 
 ### 当前阶段不要求逐款真人移动端通关验证
 
-`testedMobile=true` **不再作为当前版本上线门槛，也不是当前阶段必须补齐的 KPI**。
+`testedMobile=true` 不作为当前版本上线门槛，也不是当前阶段必须补齐的 KPI。
 
 当前发布验收重点只有三类：
 
@@ -377,7 +453,7 @@ Desktop screenshot
 
 ---
 
-## 11. 移动端 UI 标准
+## 12. 移动端 UI 标准
 
 移动端优先级：
 
@@ -404,7 +480,7 @@ Header 规则：
 
 ---
 
-## 12. Structured Data
+## 13. Structured Data
 
 - `VideoGame`：只输出可验证字段。
 - `BreadcrumbList`：优先体现主 Gameplay Topic，否则回到 Category。
@@ -415,7 +491,7 @@ Header 规则：
 
 ---
 
-## 13. CI / Visual SEO QA
+## 14. CI / Visual SEO QA
 
 Build CI：
 
@@ -431,21 +507,37 @@ Visual QA 当前覆盖：
 English 100 Game Pages × desktop/mobile/runtime
 9 Topic Hubs × desktop/mobile
 Mobile Shell baselines
-zh-TW smoke QA
-Spanish smoke QA
+
+Simplified Chinese smoke:
+/zh
+/zh/action
+/zh/game/quick-tap
+/zh/tap-games
++ public/games-index-zh.json existence
+
+Traditional Chinese smoke:
+/zh-tw
+/zh-tw/action
+/zh-tw/game/quick-tap
+/zh-tw/tap-games
+
+Spanish smoke:
+/es
+/es/action
+/es/game/quick-tap
+/es/tap-games
 ```
 
-移动截图标准尺寸包含：
+Locale smoke 页面抓取：
 
 ```text
-390 × 844
+1440×1200 desktop
+390×844 mobile
 ```
-
-该检查代表页面布局 / 加载 / visual regression，不代表必须人工通关每款游戏。
 
 ---
 
-## 14. Analytics 与观察指标
+## 15. Analytics 与观察指标
 
 GA4 当前事件：
 
@@ -460,7 +552,7 @@ related_game_click
 game_error
 ```
 
-GSC 早期基线，截至 2026-08-04：
+早期 GSC 基线（截至 2026-08-04）：
 
 ```text
 13 clicks
@@ -470,96 +562,97 @@ EN game pages ≈ 607 impressions / 10 clicks
 Mobile CTR > Desktop CTR
 ```
 
-2026-08-21 第一轮复盘重点：
+2026-08-21 第一轮复盘至少观察：
 
-- English / zh / zh-tw / es 按路径拆分表现
-- indexed pages
-- impressions / clicks / CTR / avg position
-- 新 Query
-- Position 4–20 Query
-- 有曝光无点击页面
-- game_start / game_loaded / game_30s / game_60s
-- related_game_click
-- game_error
+1. English impressions / clicks / CTR / avg position
+2. `/zh/` impressions / clicks / indexed pages / Query
+3. `/zh-tw/` impressions / clicks / indexed pages / Query
+4. `/es/` impressions / clicks / indexed pages / Query
+5. 100 optimized 英文游戏页表现
+6. 9 Topic Hub 表现
+7. 新出现 Query 数量
+8. Position 4–20 的机会 Query
+9. 有曝光无点击页面
+10. game_start / game_30s / game_60s
+11. related_game_click
+12. Country × Language 路径
 
-判断规则：
+判定：
 
-- 有曝光无点击 → 查 Title / Description / Search Intent。
-- 有点击无 `game_start` → 查首屏、Start 和页面产品入口。
-- `game_start` 高但 30s 低 → 查 Runtime / 游戏体验，不继续堆 SEO 文本。
-- Query 与现有页高度相关 → 优先更新当前页，不新造 URL。
-- 稳定机制 Query Cluster 出现后再考虑新 Topic。
-
----
-
-## 15. 当前已完成
-
-```text
-P0/P1 Technical SEO
-100 game inventory cleanup
-100 source-grounded game SEO profiles
-100 / 100 game content SEO optimized
-9 Gameplay Topic Hubs
-English production routes
-/zh/ routes
-/zh-tw/ 独立繁體路由和本地化层
-/es/ 独立西班牙语路由和本地化层
-canonical / hreflang / sitemap
-100-game SEO Completion Gate
-Visual SEO QA pipeline
-GA4 game events
-390px mobile Header 修复
-Globe language dropdown
-```
+- 有曝光、无点击 → 优先改 Title / Description / 意图匹配。
+- 有点击、无 `game_start` → 修首屏 / 产品入口。
+- `game_start` 高但 30s 留存低 → 修游戏，不堆 SEO 文字。
+- Query 与现有页面高度相关 → 回填当前页，默认不新建 URL。
+- 某机制形成稳定 Query Cluster → 再决定是否扩新 Topic。
 
 ---
 
 ## 16. 当前决策
 
-到 2026-08-21 之前：
+### 已完成
 
 ```text
-不大规模重写 100 个 Game SEO 页面
-不为了数量新增 Topic
-不频繁改 Title / 正文
-不要求逐款真人移动端验证
-
-重点：
-检查页面 / 文案 / Runtime 是否正常
-修 Bug
-观察 Google 索引
-观察 GSC Query
-观察 GA4 engagement
-记录真实用户问题
+P0/P1 Technical SEO
+100 game inventory
+100 Runtime 源码复核
+100 source-grounded single-game SEO profiles
+100 / 100 game content SEO optimized
+9 Gameplay Topic Hubs
+English production routes
+/zh/ 简体中文正式版本
+/zh/ 独立中文搜索索引
+/zh/ 9 Category 事实化内容
+/zh/ 独立 locale smoke QA
+/zh-tw/ 独立繁體中文版本
+/es/ 独立西班牙语版本
+canonical / hreflang / sitemap
+100-game SEO Completion Gate
+Visual SEO QA pipeline
+390px mobile Header 修复
+Globe language dropdown
 ```
 
-下一阶段是否扩 Situation Pages、Games Like、New Games、榜单类页面，以真实 GSC + GA4 数据决定，不批量制造薄页面。
+### 当前阶段
+
+```text
+冻结无数据依据的大规模单游戏 SEO 改写
+不为了数量继续新增 Topic
+不频繁修改 100 个页面 Title / 正文
+
+主要动作：
+观察 GSC 各语言索引和 Query
+观察 GA4 engagement
+记录新 Query
+修技术 Bug
+修明显产品 Bug
+处理 Runtime 错误
+```
 
 ---
 
 ## 17. 技术债
 
-1. Next.js 15.5.2 后续升级到已修复安全版本。
-2. 清理旧 `@cloudflare/next-on-pages` 依赖和遗留 deploy scripts。
-3. npm audit 告警单独升级验证。
-4. Schema 字段继续保守维护。
-5. Topic 不以数量为 KPI。
-6. 多语言翻译继续做语言质量抽查，不能机械翻译玩法事实。
+1. Next.js 15.5.2 存在安全升级提示，后续升级到已修复版本。
+2. `@cloudflare/next-on-pages` 属于旧部署遗留依赖；当前正式链路是 static export。
+3. npm audit 仍有依赖安全告警，需要单独升级验证。
+4. `VideoGame.operatingSystem` 等 Schema 字段继续按真实平台能力保守维护。
+5. Topic 不以数量为 KPI；没有真实语义差异和搜索需求时不创建空 Hub。
+6. 多语言内容继续检查本地语言质量，不能只做字面翻译。
 
 ---
 
 ## 18. 文档维护规则
 
-1. `docs/README.md` 是唯一 SSOT。
-2. 新增 / 删除游戏必须同步库存与分类计数。
-3. 新 Topic 必须同步 URL 与 Members。
-4. 新语言使用独立 route folder / message / locale data layer。
-5. 正式游戏保持 `seoStatus=optimized`。
-6. 当前阶段 `testedMobile` 不作为上线门槛。
-7. UI / SEO / CI / 部署 / i18n / QA 标准变化直接更新本文。
-8. GSC 出现新阶段基线再更新，不写每日流水账。
-9. 过期规则直接删除，历史交给 Git 保存。
+1. `docs/` 只维护本 `README.md` 作为 SSOT。
+2. 新增 / 删除游戏要同步总数和分类计数。
+3. 新 Topic 上线要同步成员和 URL。
+4. 新语言必须有独立 route folder、message / locale data，并加入 canonical / hreflang / sitemap / smoke QA。
+5. 正式游戏进入库存前必须通过 Profile 与 SEO Gate。
+6. 页面、内容、Runtime 正常是当前 QA 上线门槛；不要求 100 款逐个人工通关。
+7. SEO / Mobile / CI / 部署 / i18n 标准变化直接改本文，不创建平行规划文档。
+8. GSC 出现有意义的新阶段基线再更新，不写每日流水账。
+9. 过期规则直接删除，Git 历史保存历史。
 
-当前最重要的项目状态：
+当前项目状态：
 
-> **100 个正式游戏 SEO、9 个 Topic Hub、English / zh / zh-TW / es 四套路由均已进入生产体系；当前重点从继续堆页面转向页面与 Runtime 稳定性、Google 索引、GSC Query 和 GA4 行为验证。移动端不再要求逐款真人验证，当前验收以页面无破版、内容描述准确、游戏可正常加载运行且无明显 Bug 为准。**
+> **100 个正式游戏、9 个 Topic、4 套语言已经形成稳定生产架构。简体中文版已补齐独立搜索索引、9 个 Category 事实化内容和独立 Smoke QA；当前重点转向 Google 索引 / Query / CTR 与真实游戏行为数据观察。**
