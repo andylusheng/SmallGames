@@ -1,75 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Lemonade Stand</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:16px;color:#fff}
-h1{font-size:20px;margin-bottom:8px}
-.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px;font-size:12px;width:min(340px,92vw)}
-.stat{background:#0f3460;padding:8px;border-radius:8px;text-align:center}
-.stat span{color:#4fc3f7;font-weight:bold;font-size:15px;display:block}
-#stand{width:min(340px,92vw);background:#16213e;border-radius:12px;padding:14px;margin-bottom:12px}
-.item{display:flex;justify-content:space-between;align-items:center;padding:10px;margin-bottom:6px;background:#1a1a2e;border-radius:8px}
-.item button{padding:6px 14px;background:#4fc3f7;border:none;border-radius:6px;color:#1a1a2e;font-weight:bold;cursor:pointer;font-size:12px}
-.item button:disabled{background:#555;cursor:not-allowed}
-.item .info{font-size:12px}
-.item .info b{color:#ffc107}
-#weather{margin-bottom:10px;font-size:14px;padding:8px 16px;background:#0f3460;border-radius:8px}
-#msg{font-size:12px;color:#aaa;text-align:center;margin-top:8px}
-#serve{padding:12px 30px;background:#ffc107;border:none;border-radius:8px;color:#1a1a2e;font-weight:bold;cursor:pointer;font-size:15px;margin-top:8px}
-</style>
-</head>
-<body>
-<h1>🍋 Lemonade Stand</h1>
-<div class="stats">
-<div class="stat">Money<span id="money">$20</span></div>
-<div class="stat">Day<span id="day">1</span></div>
-<div class="stat">Cups<span id="cups">10</span></div>
-<div class="stat">Price<span id="price">$1.0</span></div>
-<div class="stat">Recipe<span id="recipe">Lv1</span></div>
-<div class="stat">Best<span id="bs">$0</span></div>
-</div>
-<div id="weather">☀️ Sunny - Great day for lemonade!</div>
-<div id="stand">
-<div class="item"><div class="info">🍋 Buy Lemons (5 cups)<br><b>$3</b></div><button id="bLemon">Buy</button></div>
-<div class="item"><div class="info">📈 Raise Price (+$0.5)<br>Higher price = fewer buyers</div><button id="bPrice">Raise</button></div>
-<div class="item"><div class="info">📉 Lower Price (-$0.5)<br>Lower price = more buyers</div><button id="bPriceD">Lower</button></div>
-<div class="item"><div class="info">⭐ Upgrade Recipe<br><b>$15</b> - Better taste, more sales</div><button id="bRecipe">Upgrade</button></div>
-</div>
-<button id="serve">🥤 Open for Business!</button>
-<div id="msg">Buy supplies, set your price, then open shop! Weather affects sales.</div>
-<script>
-let money=20,day=1,cups=10,price=1.0,recipe=1,best=+localStorage.getItem('lemonade-best')||0;
-document.getElementById('bs').textContent='$'+best;
-const weathers=[{icon:'☀️',name:'Sunny',mult:1.5},{icon:'⛅',name:'Cloudy',mult:1.0},{icon:'🌧️',name:'Rainy',mult:0.5},{icon:'🔥',name:'Hot',mult:2.0},{icon:'❄️',name:'Cold',mult:0.3}];
-let weather=weathers[0];
-function updateUI(){document.getElementById('money').textContent='$'+money.toFixed(0);document.getElementById('day').textContent=day;document.getElementById('cups').textContent=cups;document.getElementById('price').textContent='$'+price.toFixed(1);document.getElementById('recipe').textContent='Lv'+recipe;
-document.getElementById('bLemon').disabled=money<3;document.getElementById('bRecipe').disabled=money<15;}
-document.getElementById('bLemon').addEventListener('click',()=>{if(money>=3){money-=3;cups+=5;updateUI();}});
-document.getElementById('bPrice').addEventListener('click',()=>{price=Math.min(5,price+0.5);updateUI();});
-document.getElementById('bPriceD').addEventListener('click',()=>{price=Math.max(0.5,price-0.5);updateUI();});
-document.getElementById('bRecipe').addEventListener('click',()=>{if(money>=15){money-=15;recipe++;updateUI();}});
-document.getElementById('serve').addEventListener('click',()=>{
-const baseCustomers=Math.floor(5+Math.random()*8);
-const priceEffect=Math.max(0.2,2-price*0.4);
-const recipeEffect=1+recipe*0.3;
-const customers=Math.min(cups,Math.floor(baseCustomers*weather.mult*priceEffect*recipeEffect));
-const revenue=customers*price;
-money+=revenue;cups-=customers;
-document.getElementById('msg').textContent='📊 Day '+day+': '+weather.icon+' '+weather.name+' | '+customers+' customers served! Earned $'+revenue.toFixed(1);
-day++;
-weather=weathers[Math.floor(Math.random()*weathers.length)];
-document.getElementById('weather').textContent=weather.icon+' '+weather.name+' - '+(weather.mult>=1.5?'Great day for lemonade!':weather.mult>=1?'Decent day.':'Tough day for sales...');
-if(money>best){best=Math.floor(money);localStorage.setItem('lemonade-best',best);document.getElementById('bs').textContent='$'+best;}
-if(cups<=0&&money<3){document.getElementById('msg').textContent='💸 Bankrupt! You ran out of money and supplies. Refresh to restart.';}
-updateUI();});
-updateUI();
-</script>
-<script>
-(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
-</script>
-</body>
-</html>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>Lemonade Stand</title><style>*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,Arial,sans-serif;background:#07111f;color:#fff}body{display:flex;align-items:center;justify-content:center;padding:12px}.game{width:min(410px,96vw)}.title{text-align:center;font-size:23px;font-weight:900;margin-bottom:8px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.stat{background:#101a31;border:1px solid #ffffff14;border-radius:11px;padding:7px 4px;text-align:center;font-size:9px;color:#94a3b8}.stat b{display:block;color:#fff;font-size:15px}.weather{margin-top:8px;background:linear-gradient(135deg,#17365b,#17213b);border:1px solid #ffffff14;border-radius:16px;padding:12px;display:flex;justify-content:space-between;align-items:center}.weather .icon{font-size:34px}.weather .copy{flex:1;margin-left:10px}.weather .copy b{display:block;font-size:14px}.weather .copy span{font-size:10px;color:#cbd5e1}.demand{margin-top:5px;height:6px;background:#111827;border-radius:999px;overflow:hidden}.demand i{display:block;height:100%;background:linear-gradient(90deg,#fb7185,#fbbf24,#34d399);transition:width .2s}.panel{margin-top:8px;background:#101a31;border:1px solid #ffffff12;border-radius:16px;padding:10px}.row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 5px;border-bottom:1px solid #ffffff0e}.row:last-child{border-bottom:0}.info b{font-size:12px;display:block}.info span{font-size:10px;color:#94a3b8}.btn{border:0;border-radius:10px;padding:8px 12px;font-weight:900;background:#38bdf8;color:#07111f;cursor:pointer}.btn:disabled{opacity:.4}.price{display:flex;gap:5px}.price .btn{padding:7px 10px}.serve{width:100%;margin-top:8px;padding:12px;border:0;border-radius:12px;font-weight:900;font-size:14px;background:linear-gradient(135deg,#fbbf24,#fb923c);color:#281600}.msg{margin-top:7px;min-height:38px;text-align:center;font-size:11px;color:#cbd5e1;line-height:1.4}.summary{margin-top:7px;background:#0b1428;border:1px solid #ffffff0f;border-radius:12px;padding:9px;font-size:10px;color:#94a3b8;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;text-align:center}.summary b{display:block;color:#fff;font-size:13px}.over{display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:#020617d8}.card{width:min(300px,86vw);background:#101a31;border:1px solid #ffffff1a;border-radius:20px;padding:22px;text-align:center}.card h2{margin:0 0 6px}.card p{font-size:13px;color:#cbd5e1}.card .btn{width:100%;margin-top:8px}</style></head><body><main class="game"><div class="title">🍋 Lemonade Stand</div><div class="stats"><div class="stat">MONEY<b id="money">$20</b></div><div class="stat">DAY<b id="day">1</b></div><div class="stat">CUPS<b id="cups">10</b></div><div class="stat">BEST<b id="best">$0</b></div></div><section class="weather"><div id="icon" class="icon">☀️</div><div class="copy"><b id="weatherName">Sunny</b><span id="forecast">Strong demand for cold drinks.</span><div class="demand"><i id="demand"></i></div></div></section><section class="panel"><div class="row"><div class="info"><b>🍋 Lemons</b><span>Buy supplies for 5 cups · $3</span></div><button id="buyLemon" class="btn">Buy</button></div><div class="row"><div class="info"><b>💵 Price per cup</b><span>Higher price lowers demand.</span></div><div class="price"><button id="priceDown" class="btn">−</button><b id="price">$1.0</b><button id="priceUp" class="btn">+</button></div></div><div class="row"><div class="info"><b>⭐ Recipe Lv.<span id="recipe">1</span></b><span>Better recipe increases demand · $15</span></div><button id="upgrade" class="btn">Upgrade</button></div></section><button id="serve" class="serve">🥤 Open for Business</button><div id="msg" class="msg">Check the weather, set your price, and decide when to invest in your recipe.</div><div class="summary"><div>LAST CUSTOMERS<b id="lastCustomers">—</b></div><div>LAST REVENUE<b id="lastRevenue">—</b></div><div>TOTAL SOLD<b id="sold">0</b></div></div></main><div id="over" class="over"><div class="card"><h2>Stand Closed</h2><p id="ovText"></p><button id="again" class="btn">Start Fresh</button></div></div><script>
+let money=20,day=1,cups=10,price=1,recipe=1,sold=0,best=+localStorage.getItem('lemonade-best')||0;const weathers=[{icon:'☀️',name:'Sunny',mult:1.5,text:'Strong demand for cold drinks.'},{icon:'⛅',name:'Cloudy',mult:1,text:'Average foot traffic today.'},{icon:'🌧️',name:'Rainy',mult:.55,text:'Fewer people are outside.'},{icon:'🔥',name:'Hot',mult:2,text:'Excellent lemonade weather.'},{icon:'❄️',name:'Cold',mult:.35,text:'Demand will be very low.'}],moneyEl=document.getElementById('money'),dayEl=document.getElementById('day'),cupsEl=document.getElementById('cups'),bestEl=document.getElementById('best'),priceEl=document.getElementById('price'),recipeEl=document.getElementById('recipe'),iconEl=document.getElementById('icon'),weatherName=document.getElementById('weatherName'),forecast=document.getElementById('forecast'),demand=document.getElementById('demand'),msg=document.getElementById('msg'),over=document.getElementById('over'),ovText=document.getElementById('ovText');let weather=weathers[0];bestEl.textContent='$'+best;
+function demandValue(){return Math.max(.08,Math.min(1,weather.mult*(2-price*.4)*(1+recipe*.3)/3.3))}
+function update(){moneyEl.textContent='$'+money.toFixed(1);dayEl.textContent=day;cupsEl.textContent=cups;priceEl.textContent='$'+price.toFixed(1);recipeEl.textContent=recipe;iconEl.textContent=weather.icon;weatherName.textContent=weather.name;forecast.textContent=weather.text;demand.style.width=(demandValue()*100)+'%';document.getElementById('buyLemon').disabled=money<3;document.getElementById('upgrade').disabled=money<15;document.getElementById('priceDown').disabled=price<=.5;document.getElementById('priceUp').disabled=price>=5}
+function reset(){money=20;day=1;cups=10;price=1;recipe=1;sold=0;weather=weathers[0];document.getElementById('lastCustomers').textContent='—';document.getElementById('lastRevenue').textContent='—';document.getElementById('sold').textContent='0';msg.textContent='Check the weather, set your price, and decide when to invest in your recipe.';over.style.display='none';update()}
+function nextWeather(){let next;do{next=weathers[Math.floor(Math.random()*weathers.length)]}while(next===weather&&weathers.length>1);weather=next}
+document.getElementById('buyLemon').onclick=()=>{if(money>=3){money-=3;cups+=5;msg.textContent='Supplies stocked: +5 cups.';update()}};document.getElementById('priceUp').onclick=()=>{price=Math.min(5,price+.5);update()};document.getElementById('priceDown').onclick=()=>{price=Math.max(.5,price-.5);update()};document.getElementById('upgrade').onclick=()=>{if(money>=15){money-=15;recipe++;msg.textContent=`Recipe upgraded to Lv.${recipe}. Customers will tolerate a little more price.`;navigator.vibrate?.(10);update()}};
+document.getElementById('serve').onclick=()=>{const base=6+Math.floor(Math.random()*7),customers=Math.min(cups,Math.max(0,Math.floor(base*weather.mult*Math.max(.2,2-price*.4)*(1+recipe*.3)))),revenue=customers*price;money+=revenue;cups-=customers;sold+=customers;document.getElementById('lastCustomers').textContent=customers;document.getElementById('lastRevenue').textContent='$'+revenue.toFixed(1);document.getElementById('sold').textContent=sold;msg.textContent=`Day ${day}: ${weather.icon} ${weather.name} · served ${customers} customer${customers===1?'':'s'} · earned $${revenue.toFixed(1)}.`;day++;if(money>best){best=Math.floor(money);localStorage.setItem('lemonade-best',best);bestEl.textContent='$'+best}if(cups<=0&&money<3){ovText.textContent=`Bankrupt on day ${day-1}. Best cash record: $${best}. Lower prices on weak days and keep supply money in reserve.`;over.style.display='flex';return}nextWeather();update();navigator.vibrate?.(customers>=8?15:0)};document.getElementById('again').onclick=reset;update();
+</script></body></html>
