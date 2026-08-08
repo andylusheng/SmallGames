@@ -30,6 +30,8 @@ export interface CatalogGameProfileSeed {
   durationSeconds?: number;
   endCondition?: LocalizedText;
   progress: LocalizedText;
+  publishedAt?: string;
+  updatedAt?: string;
 }
 
 function loc(items: LocalizedText[], locale: SupportedLocale): string[] {
@@ -89,6 +91,8 @@ export function catalogProfile(seed: CatalogGameProfileSeed): GameSeoProfile {
     primaryKeyword: seed.primaryKeyword,
     secondaryKeywords: seed.secondaryKeywords,
     containsViolence: seed.containsViolence,
+    publishedAt: seed.publishedAt,
+    updatedAt: seed.updatedAt,
     mechanics: {
       objective: seed.objective,
       durationSeconds: seed.durationSeconds,

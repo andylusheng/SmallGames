@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/generate-search-top20-assets.mjs && node --check public/games/_search-top20/runtime.js",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -10,7 +11,7 @@
     "pages:build": "npx @cloudflare/next-on-pages",
     "pages:deploy": "npm run pages:build && wrangler pages deploy .vercel/output/static",
     "seo:verify": "node scripts/verify-all-game-seo.mjs",
-    "prebuild": "npm run seo:verify && node scripts/generate-game-index.js"
+    "prebuild": "node scripts/generate-search-top20-assets.mjs && node --check public/games/_search-top20/runtime.js && npm run seo:verify && node scripts/generate-game-index.js"
   },
   "dependencies": {
     "lucide-react": "^1.25.0",

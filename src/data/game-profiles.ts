@@ -1,4 +1,5 @@
 import localGamesData from "@/data/games.json";
+import searchTop20GamesData from "@/data/games-search-top20.json";
 import { TAP_GAME_PROFILES } from "@/data/game-profiles/tap";
 import { MERGE_GAME_PROFILES } from "@/data/game-profiles/merge";
 import { MERGE_DEFENSE_REBUILD_PROFILE } from "@/data/game-profiles/merge-defense";
@@ -15,6 +16,7 @@ import { CATALOG_CASUAL_PUZZLE_GAME_PROFILES } from "@/data/game-profiles/catalo
 import { CATALOG_RACING_SHOOTING_GAME_PROFILES } from "@/data/game-profiles/catalog-racing-shooting";
 import { CATALOG_SPORTS_STRATEGY_GAME_PROFILES } from "@/data/game-profiles/catalog-sports-strategy";
 import { FLAGSHIP_NINE_PROFILES } from "@/data/game-profiles/flagship-nine";
+import { SEARCH_TOP20_GAME_PROFILES } from "@/data/game-profiles/search-top20";
 
 export type SupportedLocale = "en" | "zh";
 
@@ -71,13 +73,13 @@ export interface GameSeoProfile {
 
 export const GAMEPLAY_TOPIC_MEMBERS: Record<string, string[]> = {
   tap: ["quick-tap", "tap-tower", "tap-tycoon", "balloon-pop", "gravity-flip", "color-switch"],
-  merge: ["hex-merge", "merge-defense", "pet-merge", "2048"],
+  merge: ["hex-merge", "merge-defense", "pet-merge", "2048", "fusion-4096"],
   defense: ["tower-defense", "plant-defense", "merge-defense"],
   memory: ["memory-cards", "memory-sequence"],
-  reaction: ["quick-tap", "reaction-test", "whack-a-mole", "fruit-catch", "avoid-blocks", "tile-hop", "table-tennis"],
-  number: ["2048", "number-puzzle", "speed-math", "sudoku", "hex-merge"],
-  word: ["word-scramble", "word-search", "hangman"],
-  classic: ["tetris", "minesweeper", "tic-tac-toe", "pong", "space-invaders", "brick-breaker", "pac-man", "frogger"],
+  reaction: ["quick-tap", "reaction-test", "whack-a-mole", "fruit-catch", "avoid-blocks", "tile-hop", "table-tennis", "neon-snake", "pulse-jumper", "fossil-sprint", "void-runner", "gravity-slope"],
+  number: ["2048", "number-puzzle", "speed-math", "sudoku", "hex-merge", "zen-sudoku", "fusion-4096"],
+  word: ["word-scramble", "word-search", "hangman", "word-hunt-grid"],
+  classic: ["tetris", "minesweeper", "tic-tac-toe", "pong", "space-invaders", "brick-breaker", "pac-man", "frogger", "aurora-solitaire", "cascade-solitaire", "maze-muncher", "grid-three", "open-cell-cards", "neon-stack", "crown-draughts", "heart-trick", "star-spades"],
   idle: ["cookie-clicker", "idle-miner", "idle-factory", "tap-tycoon", "lemonade-stand", "pet-merge"],
 };
 
@@ -98,10 +100,15 @@ const RAW_GAME_PROFILES: Record<string, GameSeoProfile> = {
   ...CATALOG_RACING_SHOOTING_GAME_PROFILES,
   ...CATALOG_SPORTS_STRATEGY_GAME_PROFILES,
   ...FLAGSHIP_NINE_PROFILES,
+  ...SEARCH_TOP20_GAME_PROFILES,
 };
 
 export const TOPIC_GAME_SLUGS = Array.from(new Set(Object.values(GAMEPLAY_TOPIC_MEMBERS).flat()));
-export const INVENTORY_GAME_SLUGS = (localGamesData as { slug: string }[]).map((game) => game.slug);
+export const INVENTORY_GAME_SLUGS = [
+  ...(localGamesData as { slug: string }[]).map((game) => game.slug),
+  ...(searchTop20GamesData as { slug: string }[]).map((game) => game.slug),
+];
+const EXPECTED_PRODUCTION_GAMES = 120;
 
 function hasText(value: string | undefined): boolean {
   return Boolean(value?.trim());
@@ -121,7 +128,7 @@ function validateLocalizedSeo(slug: string, locale: SupportedLocale, content: Lo
 }
 
 /**
- * 100-game SEO completion gate.
+ * Production-game SEO completion gate.
  *
  * Every game in the production inventory must have exactly one source-grounded
  * GameSeoProfile before the build can succeed. Source files may still carry the
@@ -137,8 +144,8 @@ function finalizeAllGameProfiles(profiles: Record<string, GameSeoProfile>): Reco
   const metaTitles: Record<SupportedLocale, Map<string, string>> = { en: new Map(), zh: new Map() };
   const h1s: Record<SupportedLocale, Map<string, string>> = { en: new Map(), zh: new Map() };
 
-  if (INVENTORY_GAME_SLUGS.length !== 100) {
-    errors.push(`inventory count is ${INVENTORY_GAME_SLUGS.length}; expected exactly 100 production games`);
+  if (INVENTORY_GAME_SLUGS.length !== EXPECTED_PRODUCTION_GAMES) {
+    errors.push(`inventory count is ${INVENTORY_GAME_SLUGS.length}; expected exactly ${EXPECTED_PRODUCTION_GAMES} production games`);
   }
 
   for (const slug of INVENTORY_GAME_SLUGS) {
@@ -169,7 +176,7 @@ function finalizeAllGameProfiles(profiles: Record<string, GameSeoProfile>): Reco
   }
 
   for (const slug of profileSlugs) {
-    if (!inventory.has(slug)) errors.push(`${slug}: profile does not map to a production games.json entry`);
+    if (!inventory.has(slug)) errors.push(`${slug}: profile does not map to a production inventory entry`);
   }
 
   if (profileSlugs.length !== INVENTORY_GAME_SLUGS.length) {
@@ -177,7 +184,7 @@ function finalizeAllGameProfiles(profiles: Record<string, GameSeoProfile>): Reco
   }
 
   if (errors.length > 0) {
-    throw new Error(`100-game SEO completion gate failed:\n${errors.join("\n")}`);
+    throw new Error(`Production-game SEO completion gate failed:\n${errors.join("\n")}`);
   }
 
   const finalized = { ...profiles };

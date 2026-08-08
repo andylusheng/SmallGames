@@ -2,10 +2,14 @@ import fs from "node:fs";
 import path from "node:path";
 import ts from "typescript";
 
-const inventory = JSON.parse(fs.readFileSync("src/data/games.json", "utf8"));
+const baseInventory = JSON.parse(fs.readFileSync("src/data/games.json", "utf8"));
+const searchTop20Inventory = JSON.parse(fs.readFileSync("src/data/games-search-top20.json", "utf8"));
+const inventory = [...baseInventory, ...searchTop20Inventory];
+const EXPECTED_PRODUCTION_GAMES = 120;
 const inventorySlugs = new Set(inventory.map((game) => game.slug));
+const inventoryIds = new Set(inventory.map((game) => game.id));
 const profileRoots = ["src/data/game-profiles.ts", "src/data/game-profiles"];
-const factories = new Set(["reviewedProfile", "optimizedProfile", "catalogProfile"]);
+const factories = new Set(["reviewedProfile", "optimizedProfile", "catalogProfile", "demandProfile"]);
 const sourceStatuses = new Set(["reviewed", "optimized"]);
 
 function files(target) {
@@ -55,11 +59,28 @@ for (const sourcePath of [...new Set(profileRoots.flatMap(files))]) {
 
 const missing = [...inventorySlugs].filter((slug) => !found.has(slug));
 const extra = [...found].filter((slug) => !inventorySlugs.has(slug));
-if (inventory.length !== 100 || found.size !== 100 || missing.length || extra.length) {
+const missingAssets = inventory.flatMap((game) => {
+  const targets = [
+    ["runtime", path.join("public", game.gameUrl.replace(/^\//, ""))],
+    ["thumbnail", path.join("public", game.thumbnail.replace(/^\//, ""))],
+  ];
+  return targets.filter(([, target]) => !fs.existsSync(target)).map(([kind, target]) => `${game.slug}: missing ${kind} ${target}`);
+});
+const duplicateSlugs = inventory.length !== inventorySlugs.size;
+const duplicateIds = inventory.length !== inventoryIds.size;
+
+if (
+  inventory.length !== EXPECTED_PRODUCTION_GAMES ||
+  found.size !== EXPECTED_PRODUCTION_GAMES ||
+  missing.length || extra.length || missingAssets.length || duplicateSlugs || duplicateIds
+) {
   throw new Error([
-    `100-game SEO verification failed: inventory=${inventory.length}, profiles=${found.size}`,
-    missing.length ? `missing: ${missing.join(", ")}` : "",
-    extra.length ? `extra: ${extra.join(", ")}` : "",
+    `Production SEO verification failed: inventory=${inventory.length}, profiles=${found.size}, expected=${EXPECTED_PRODUCTION_GAMES}`,
+    duplicateSlugs ? "duplicate game slugs detected" : "",
+    duplicateIds ? "duplicate game ids detected" : "",
+    missing.length ? `missing profiles: ${missing.join(", ")}` : "",
+    extra.length ? `extra profiles: ${extra.join(", ")}` : "",
+    ...missingAssets,
   ].filter(Boolean).join("\n"));
 }
-console.log(`SEO verification passed: ${found.size}/${inventory.length} production games have source-grounded profiles.`);
+console.log(`SEO verification passed: ${found.size}/${inventory.length} production games have source-grounded profiles and runtime assets.`);

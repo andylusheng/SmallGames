@@ -1,4 +1,5 @@
 import localGamesData from "@/data/games.json";
+import searchTop20GamesData from "@/data/games-search-top20.json";
 import zhSeoData from "@/data/zh-seo.json";
 import {
   GAMEPLAY_TOPIC_MEMBERS,
@@ -61,6 +62,10 @@ type RawGameSeo = GameSeo & { faq?: { q: string; a: string }[] };
 
 const DEFAULT_PUBLISHED_AT = "2026-07-21";
 const DEFAULT_UPDATED_AT = "2026-07-21";
+const rawGames: RawGame[] = [
+  ...(localGamesData as RawGame[]),
+  ...(searchTop20GamesData as RawGame[]),
+];
 
 function sanitizeSeoContent(seo: RawGameSeo): GameSeo {
   const longDescription = seo.longDescription
@@ -90,14 +95,19 @@ function sanitizeSeoContent(seo: RawGameSeo): GameSeo {
   return { longDescription, features, tips: seo.tips, difficulty: seo.difficulty };
 }
 
-const games: Game[] = (localGamesData as RawGame[]).map((rawGame) => {
+const games: Game[] = rawGames.map((rawGame) => {
   const { dateAdded: _dateAdded, plays: _plays, rating: _rating, faq: _faq, ...game } = rawGame;
   const profile = getGameProfileConfig(rawGame.slug);
+  const publishedAt = rawGame.dateAdded ?? profile?.publishedAt ?? DEFAULT_PUBLISHED_AT;
+  const updatedAt = [rawGame.dateAdded, profile?.updatedAt, DEFAULT_UPDATED_AT]
+    .filter((value): value is string => Boolean(value))
+    .sort()
+    .at(-1) ?? DEFAULT_UPDATED_AT;
   return {
     ...game,
     description: profile?.content.en.metaDescription ?? game.description,
-    publishedAt: profile?.publishedAt ?? DEFAULT_PUBLISHED_AT,
-    updatedAt: profile?.updatedAt ?? DEFAULT_UPDATED_AT,
+    publishedAt,
+    updatedAt,
     seoStatus: profile?.seoStatus ?? "generated",
     testedMobile: profile?.testedMobile ?? false,
     containsViolence: profile?.containsViolence ?? null,
