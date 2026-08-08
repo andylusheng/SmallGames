@@ -1,98 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Avoid Blocks</title>
-<style>
-*{margin:0;padding:0}
-body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;overflow:hidden}
-#ui{color:#fff;margin-bottom:6px;font-size:16px}
-#ui span{color:#4fc3f7;font-weight:bold}
-canvas{border-radius:8px;touch-action:none}
-#msg{color:#aaa;margin-top:6px;font-size:12px}
-</style>
-</head>
-<body>
-<div id="ui">Score: <span id="sc">0</span> | Best: <span id="bs">0</span></div>
-<canvas id="c"></canvas>
-<div id="msg">Move left/right to dodge falling blocks!</div>
-<script>
-const cv=document.getElementById('c'),ctx=cv.getContext('2d');
-const W=Math.min(860,innerWidth-16),H=Math.min(640,innerHeight-80);
-cv.width=W;cv.height=H;
-let player,blocks,score,best=+localStorage.getItem('ab-best')||0;
-let gameOver=false,started=false,frame=0;
-document.getElementById('bs').textContent=best;
-function init(){
-  player={x:W/2,y:H-40,w:24,h:24};
-  blocks=[];score=0;frame=0;gameOver=false;started=false;
-  document.getElementById('sc').textContent=0;
-}
-function update(){
-  if(!started||gameOver)return;
-  frame++;
-  const speed=2+score*0.03;
-  if(frame%Math.max(15,40-Math.floor(score/5))===0){
-    const size=20+Math.random()*30;
-    blocks.push({x:Math.random()*(W-size),y:-size,w:size,h:size,speed:speed+Math.random()*2,color:`hsl(${Math.random()*360},70%,50%)`});
-  }
-  for(let b of blocks)b.y+=b.speed;
-  blocks=blocks.filter(b=>{
-    if(b.y>H){score++;document.getElementById('sc').textContent=score;return false;}
-    return true;
-  });
-  for(let b of blocks){
-    if(player.x<b.x+b.w&&player.x+player.w>b.x&&player.y<b.y+b.h&&player.y+player.h>b.y){
-      gameOver=true;
-      if(score>best){best=score;localStorage.setItem('ab-best',best);}
-      document.getElementById('bs').textContent=best;
-    }
-  }
-}
-function draw(){
-  ctx.fillStyle='#16213e';ctx.fillRect(0,0,W,H);
-  for(let b of blocks){
-    ctx.fillStyle=b.color;
-    ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,4);ctx.fill();
-  }
-  ctx.fillStyle='#4fc3f7';
-  ctx.beginPath();ctx.roundRect(player.x,player.y,player.w,player.h,6);ctx.fill();
-  ctx.fillStyle='#fff';
-  ctx.beginPath();ctx.arc(player.x+8,player.y+8,3,0,Math.PI*2);ctx.fill();
-  ctx.beginPath();ctx.arc(player.x+16,player.y+8,3,0,Math.PI*2);ctx.fill();
-  if(!started&&!gameOver){
-    ctx.fillStyle='rgba(0,0,0,0.4)';ctx.fillRect(0,0,W,H);
-    ctx.fillStyle='#fff';ctx.font='bold 20px Arial';ctx.textAlign='center';
-    ctx.fillText('TAP TO START',W/2,H/2);
-  }
-  if(gameOver){
-    ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);
-    ctx.fillStyle='#e94560';ctx.font='bold 24px Arial';ctx.textAlign='center';
-    ctx.fillText('HIT!',W/2,H/2-12);
-    ctx.fillStyle='#fff';ctx.font='15px Arial';
-    ctx.fillText('Score: '+score+' | Tap to retry',W/2,H/2+18);
-  }
-}
-function loop(){update();draw();requestAnimationFrame(loop);}
-cv.addEventListener('pointermove',e=>{
-  if(!started||gameOver)return;
-  const r=cv.getBoundingClientRect();
-  player.x=Math.max(0,Math.min(W-player.w,e.clientX-r.left-player.w/2));
-});
-cv.addEventListener('pointerdown',e=>{
-  if(!started){started=true;return;}
-  if(gameOver){init();started=true;return;}
-  const r=cv.getBoundingClientRect();
-  player.x=Math.max(0,Math.min(W-player.w,e.clientX-r.left-player.w/2));
-});
-document.addEventListener('keydown',e=>{
-  if(!started){started=true;return;}
-  if(gameOver){init();started=true;return;}
-  if(e.code==='ArrowLeft')player.x=Math.max(0,player.x-20);
-  if(e.code==='ArrowRight')player.x=Math.min(W-player.w,player.x+20);
-});
-init();loop();
-</script>
-</body>
-</html>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>Avoid Blocks</title><style>*{box-sizing:border-box}html,body{margin:0;height:100%;font-family:Inter,Arial,sans-serif;background:#050816;color:#fff}body{display:flex;align-items:center;justify-content:center;overflow:hidden}.wrap{position:relative;width:min(720px,100vw);height:min(680px,100vh);background:#07111f;overflow:hidden}.hud{position:absolute;z-index:3;left:10px;right:10px;top:10px;display:flex;justify-content:space-between}.group{display:flex;gap:6px}.pill{background:#071126cc;border:1px solid #ffffff18;border-radius:10px;padding:6px 9px;font-size:10px;color:#94a3b8}.pill b{display:block;color:#fff;font-size:15px}.pill.combo b{color:#fbbf24}canvas{display:block;width:100%;height:100%;touch-action:none}.overlay{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:#020617bf}.card{width:min(310px,86vw);background:#101a34;border:1px solid #ffffff1a;border-radius:20px;padding:22px;text-align:center}.card h1{margin:0 0 6px;font-size:28px}.card p{color:#cbd5e1;font-size:13px;line-height:1.45}.btn{border:0;border-radius:12px;padding:11px 22px;font-weight:900;background:linear-gradient(135deg,#38bdf8,#818cf8);color:#07111f}.hint{position:absolute;bottom:9px;left:50%;transform:translateX(-50%);font-size:10px;color:#94a3b8;background:#020617aa;padding:5px 8px;border-radius:999px;white-space:nowrap}</style></head><body><main id="wrap" class="wrap"><div class="hud"><div class="group"><div class="pill">SCORE<b id="sc">0</b></div><div class="pill combo">NEAR MISS<b id="combo">×0</b></div></div><div class="group"><div class="pill">LEVEL<b id="level">1</b></div><div class="pill">BEST<b id="best">0</b></div></div></div><canvas id="c"></canvas><div class="hint">Move with pointer / touch / ← →</div><div id="overlay" class="overlay"><div class="card"><h1 id="title">◇ Avoid Blocks</h1><p id="summary">Dodge falling blocks. Survive close calls to build a near-miss streak and score faster.</p><button id="play" class="btn">Start Run</button></div></div></main><script>
+const c=document.getElementById('c'),x=c.getContext('2d'),wrap=document.getElementById('wrap'),sc=document.getElementById('sc'),comboEl=document.getElementById('combo'),levelEl=document.getElementById('level'),bestEl=document.getElementById('best'),overlay=document.getElementById('overlay'),title=document.getElementById('title'),summary=document.getElementById('summary'),play=document.getElementById('play');let D=Math.min(devicePixelRatio||1,2),W,H,player,blocks=[],trail=[],fx=[],score=0,best=+localStorage.getItem('ab-best')||0,combo=0,frame=0,running=false,shake=0,keys={};bestEl.textContent=best;
+function resize(){const r=wrap.getBoundingClientRect();W=r.width;H=r.height;c.width=W*D;c.height=H*D;x.setTransform(D,0,0,D,0,0);if(player){player.y=H-52;player.x=Math.min(W-player.w,player.x)}}addEventListener('resize',resize);resize();
+function reset(){player={x:W/2-13,y:H-52,w:26,h:26};blocks=[];trail=[];fx=[];score=0;combo=0;frame=0;shake=0;sc.textContent=0;comboEl.textContent='×0';levelEl.textContent='1';running=true;overlay.style.display='none'}
+function spawnBlock(){const level=1+Math.floor(score/12),wide=Math.random()<.2&&level>=3,w=wide?70+Math.random()*70:24+Math.random()*34;blocks.push({x:Math.random()*(W-w),y:-45,w,h:wide?18+Math.random()*15:24+Math.random()*34,v:2.2+level*.24+Math.random()*1.6,color:`hsl(${190+Math.random()*150} 75% 60%)`,passed:false})}
+function burst(px,py,color){for(let i=0;i<8;i++){const a=Math.random()*6.28,s=1+Math.random()*3;fx.push({x:px,y:py,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:22,color})}}
+function end(){running=false;if(score>best){best=score;localStorage.setItem('ab-best',best);bestEl.textContent=best}title.textContent=score>=best?'🏆 New Best':'Run Over';summary.textContent=`Score ${score} · Best ${best} · near-miss streak ${combo}. Close calls score bonus points.`;play.textContent='Run Again';overlay.style.display='flex';navigator.vibrate?.(45)}
+function update(){if(!running)return;frame++;const level=1+Math.floor(score/12);levelEl.textContent=level;if(keys.ArrowLeft)player.x-=6;if(keys.ArrowRight)player.x+=6;player.x=Math.max(2,Math.min(W-player.w-2,player.x));if(frame%Math.max(12,38-level*2)===0)spawnBlock();trail.unshift({x:player.x+player.w/2,y:player.y+player.h/2});trail=trail.slice(0,8);for(let i=blocks.length-1;i>=0;i--){const b=blocks[i];b.y+=b.v;if(!b.passed&&b.y>b.y&&false){}const hit=player.x<b.x+b.w&&player.x+player.w>b.x&&player.y<b.y+b.h&&player.y+player.h>b.y;if(hit){shake=15;burst(player.x+13,player.y+13,'#fb7185');end();return}if(!b.passed&&b.y>b.y){}if(!b.passed&&b.y>player.y+player.h){b.passed=true;const gap=Math.min(Math.abs((b.x+b.w)-player.x),Math.abs((player.x+player.w)-b.x));if(gap<22){combo++;score+=1+Math.min(4,Math.floor(combo/3));comboEl.textContent='×'+combo;burst(player.x+13,player.y,'#fbbf24');navigator.vibrate?.(8)}else{score++;combo=Math.max(0,combo-1);comboEl.textContent='×'+combo}sc.textContent=score}if(b.y>H+60)blocks.splice(i,1)}for(let i=fx.length-1;i>=0;i--){const f=fx[i];f.x+=f.vx;f.y+=f.vy;if(--f.life<=0)fx.splice(i,1)}if(shake>0)shake*=.82}
+function draw(){x.save();if(shake>1)x.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#07111f');g.addColorStop(1,'#101a38');x.fillStyle=g;x.fillRect(-20,-20,W+40,H+40);x.strokeStyle='#ffffff08';x.lineWidth=1;for(let yy=80;yy<H;yy+=48){x.beginPath();x.moveTo(0,yy);x.lineTo(W,yy);x.stroke()}for(let i=trail.length-1;i>=0;i--){const t=trail[i];x.globalAlpha=(trail.length-i)/trail.length*.18;x.fillStyle='#38bdf8';x.beginPath();x.arc(t.x,t.y,4+i*.5,0,6.28);x.fill()}x.globalAlpha=1;for(const b of blocks){x.shadowBlur=12;x.shadowColor=b.color;x.fillStyle=b.color;x.beginPath();x.roundRect(b.x,b.y,b.w,b.h,6);x.fill();x.shadowBlur=0;x.fillStyle='#ffffff22';x.fillRect(b.x+5,b.y+5,Math.max(4,b.w-10),3)}x.shadowBlur=18;x.shadowColor='#38bdf8';x.fillStyle='#38bdf8';x.beginPath();x.roundRect(player.x,player.y,player.w,player.h,8);x.fill();x.shadowBlur=0;x.fillStyle='#fff';x.beginPath();x.arc(player.x+8,player.y+9,2.5,0,6.28);x.arc(player.x+18,player.y+9,2.5,0,6.28);x.fill();for(const f of fx){x.globalAlpha=f.life/22;x.fillStyle=f.color;x.fillRect(f.x,f.y,3,3)}x.globalAlpha=1;x.restore()}
+function loop(){update();draw();requestAnimationFrame(loop)}function move(clientX){const r=c.getBoundingClientRect();player.x=Math.max(0,Math.min(W-player.w,(clientX-r.left)*W/r.width-player.w/2))}c.addEventListener('pointerdown',e=>move(e.clientX));c.addEventListener('pointermove',e=>move(e.clientX));document.addEventListener('keydown',e=>{keys[e.key]=true;if(['ArrowLeft','ArrowRight'].includes(e.key))e.preventDefault()});document.addEventListener('keyup',e=>keys[e.key]=false);play.onclick=reset;player={x:W/2-13,y:H-52,w:26,h:26};requestAnimationFrame(loop);
+</script></body></html>
