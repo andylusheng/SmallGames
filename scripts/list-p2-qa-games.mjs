@@ -4,7 +4,8 @@ import ts from "typescript";
 
 const roots = ["src/data/game-profiles.ts", "src/data/game-profiles"];
 const qaStatuses = new Set(["reviewed", "optimized"]);
-const profileFactories = new Set(["reviewedProfile", "optimizedProfile", "catalogProfile"]);
+const profileFactories = new Set(["reviewedProfile", "optimizedProfile", "catalogProfile", "demandProfile"]);
+const EXPECTED_PRODUCTION_GAMES = 120;
 
 function collectTypeScriptFiles(target) {
   if (!fs.existsSync(target)) return [];
@@ -72,7 +73,9 @@ for (const sourcePath of sourceFiles) {
 const result = [...candidates].sort();
 
 if (result.length === 0) throw new Error("No optimized games found for Visual SEO QA");
-if (result.length !== 100) throw new Error(`Visual SEO QA discovered ${result.length} games; expected exactly 100`);
+if (result.length !== EXPECTED_PRODUCTION_GAMES) {
+  throw new Error(`Visual SEO QA discovered ${result.length} games; expected exactly ${EXPECTED_PRODUCTION_GAMES}`);
+}
 
 if (process.argv.includes("--json")) process.stdout.write(`${JSON.stringify(result)}\n`);
 else process.stdout.write(`${result.join("\n")}\n`);
