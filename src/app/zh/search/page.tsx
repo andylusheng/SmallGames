@@ -15,7 +15,7 @@ function SearchContent() {
 
   useEffect(() => {
     let active = true;
-    fetch("/games-index.json")
+    fetch("/games-index-zh.json")
       .then((response) => {
         if (!response.ok) throw new Error(`Search index failed: ${response.status}`);
         return response.json() as Promise<GameCardData[]>;
@@ -52,7 +52,7 @@ function SearchContent() {
         </p>
       )}
       {query ? (
-        <GameGrid games={results} trackingSource="search" />
+        <GameGrid games={results} trackingSource="search" locale="zh" />
       ) : (
         <p className="py-12 text-center text-gray-500">{t("placeholder")}</p>
       )}
@@ -62,7 +62,7 @@ function SearchContent() {
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={<div className="py-12 text-center text-gray-500">Loading...</div>}>
+    <Suspense fallback={<div className="py-12 text-center text-gray-500">加载中...</div>}>
       <SearchContent />
     </Suspense>
   );
