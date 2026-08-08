@@ -1,60 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Merge Defense</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:10px;color:#fff}
-h1{font-size:20px;margin-bottom:6px}
-.hud{display:flex;gap:16px;margin-bottom:8px;font-size:13px}
-.hud span{color:#4fc3f7;font-weight:bold}
-#grid{display:grid;grid-template-columns:repeat(5,56px);gap:4px;margin-bottom:10px}
-.slot{width:56px;height:56px;background:#16213e;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;border:2px solid #0f3460;transition:all .15s;position:relative}
-.slot.filled{border-color:#4fc3f7}
-.slot .lvl{position:absolute;bottom:2px;right:4px;font-size:9px;color:#ffc107}
-#buy{padding:10px 24px;background:#4fc3f7;border:none;border-radius:8px;color:#1a1a2e;font-weight:bold;cursor:pointer;font-size:14px;margin-bottom:8px}
-#buy:disabled{background:#555;cursor:not-allowed}
-#msg{font-size:12px;color:#aaa;text-align:center}
-#wave-info{font-size:13px;margin-bottom:6px;color:#e94560}
-</style>
-</head>
-<body>
-<h1>🛡️ Merge Defense</h1>
-<div class="hud">Gold: <span id="gold">50</span> | Wave: <span id="wv">1</span> | HP: <span id="hp">20</span> | Best: <span id="bs">0</span></div>
-<div id="wave-info">Enemies incoming...</div>
-<div id="grid"></div>
-<button id="buy">Buy Tower (20g)</button>
-<div id="msg">Merge same-level towers to upgrade! Towers auto-attack enemies.</div>
-<script>
-const gridEl=document.getElementById('grid');
-let gold=50,wave=1,hp=20,towers=Array(10).fill(null),enemies=[],selected=null,waveTimer=0,gameOver=false,best=+localStorage.getItem('merge-defense-best')||0;
-document.getElementById('bs').textContent=best;
-const emojis=['🔫','🔫','💥','💥','⚡','⚡','🌟','🌟','☄️','☄️'];
-function render(){gridEl.innerHTML='';towers.forEach((t,i)=>{const slot=document.createElement('div');slot.className='slot'+(t?' filled':'');if(t){slot.innerHTML=emojis[t-1]+'<span class="lvl">L'+t+'</span>';}
-slot.addEventListener('click',()=>onSlot(i));gridEl.appendChild(slot);});
-document.getElementById('gold').textContent=gold;document.getElementById('wv').textContent=wave;document.getElementById('hp').textContent=hp;
-document.getElementById('buy').disabled=gold<20;}
-function onSlot(i){if(gameOver)return;if(selected===null){if(towers[i]){selected=i;gridEl.children[i].style.borderColor='#ffc107';}}else{if(i===selected){selected=null;render();return;}
-if(towers[i]&&towers[i]===towers[selected]&&towers[i]<10){towers[i]=towers[i]+1;towers[selected]=null;gold+=5;selected=null;render();}else if(!towers[i]){towers[i]=towers[selected];towers[selected]=null;selected=null;render();}else{selected=null;render();}}}
-document.getElementById('buy').addEventListener('click',()=>{if(gold<20||gameOver)return;gold-=20;const empty=towers.indexOf(null);if(empty===-1){gold+=20;return;}towers[empty]=1;render();});
-function spawnWave(){const n=3+wave*2;for(let i=0;i<n;i++){setTimeout(()=>{if(!gameOver)enemies.push({hp:2+wave,maxHp:2+wave,x:100,y:-20-i*40,speed:0.3+wave*0.05});},i*500);}}
-spawnWave();
-function update(){if(gameOver)return;waveTimer++;
-enemies.forEach((en,i)=>{en.y+=en.speed;
-towers.forEach(t=>{if(!t)return;if(waveTimer%(30-t*2)===0){en.hp-=t;}});
-if(en.hp<=0){enemies.splice(i,1);gold+=3+wave;render();}
-if(en.y>100){enemies.splice(i,1);hp--;document.getElementById('hp').textContent=hp;if(hp<=0){gameOver=true;if(wave>best){best=wave;localStorage.setItem('merge-defense-best',best);document.getElementById('bs').textContent=best;}document.getElementById('wave-info').textContent='💀 Game Over! Wave '+wave+' reached. Tap Buy to restart.';}}});
-if(enemies.length===0&&waveTimer>60){wave++;waveTimer=0;document.getElementById('wave-info').textContent='⚔️ Wave '+wave+' incoming!';spawnWave();render();}
-document.getElementById('wave-info').textContent='⚔️ Wave '+wave+' | Enemies: '+enemies.length;}
-function drawEnemies(){const info=document.getElementById('wave-info');let bar='';enemies.slice(0,8).forEach(en=>{const pct=Math.round(en.hp/en.maxHp*100);bar+='👾';});if(enemies.length>0)info.textContent='⚔️ Wave '+wave+' | '+bar+' ('+enemies.length+' left)';}
-setInterval(()=>{update();drawEnemies();},50);
-document.getElementById('buy').addEventListener('dblclick',()=>{if(gameOver){gameOver=false;gold=50;wave=1;hp=20;towers=Array(10).fill(null);enemies=[];waveTimer=0;document.getElementById('wave-info').textContent='Enemies incoming...';spawnWave();render();}});
-render();
-</script>
-<script>
-(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
-</script>
-</body>
-</html>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>Merge Defense</title><style>*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,Arial,sans-serif;background:#07111f;color:#fff}body{display:flex;align-items:center;justify-content:center;padding:10px}.game{width:min(410px,96vw)}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.title{font-size:22px;font-weight:900}.hud{display:flex;gap:5px}.pill{background:#101a31;border:1px solid #ffffff14;border-radius:10px;padding:6px 8px;text-align:center;font-size:9px;color:#94a3b8}.pill b{display:block;font-size:14px;color:#fff}.pill.gold b{color:#fbbf24}.battle{position:relative;background:linear-gradient(#112540,#0c182b);border:1px solid #ffffff12;border-radius:18px;padding:8px;box-shadow:0 18px 60px #0006}.battle canvas{width:100%;height:160px;display:block;border-radius:12px;background:#0a1426}.wavebar{height:5px;background:#111827;border-radius:999px;overflow:hidden;margin-top:7px}.wavebar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#38bdf8,#a78bfa)}.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px}.slot{aspect-ratio:1;background:linear-gradient(#15223d,#10192e);border:2px solid #233250;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:23px;position:relative;cursor:pointer;transition:.15s}.slot.filled{border-color:#38bdf8}.slot.sel{border-color:#fbbf24;transform:translateY(-2px);box-shadow:0 0 0 3px #fbbf2420}.lvl{position:absolute;right:4px;bottom:3px;font-size:9px;color:#fbbf24;font-weight:900}.controls{display:flex;gap:7px;margin-top:9px}.btn{flex:1;border:0;border-radius:11px;padding:10px;font-weight:900;background:linear-gradient(135deg,#38bdf8,#818cf8);color:#07111f}.btn.alt{background:#1e293b;color:#cbd5e1;border:1px solid #ffffff12}.btn:disabled{opacity:.45}.msg{font-size:11px;color:#cbd5e1;margin-top:7px;min-height:28px;text-align:center}.over{display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:#020617d4}.card{width:min(300px,86vw);background:#101a31;border:1px solid #ffffff1a;border-radius:20px;padding:22px;text-align:center}.card h2{margin:0 0 6px}.card p{font-size:13px;color:#cbd5e1}.card .btn{width:100%;margin-top:8px}</style></head><body><main class="game"><div class="top"><div class="title">🛡️ Merge Defense</div><div class="hud"><div class="pill gold">GOLD<b id="gold">50</b></div><div class="pill">WAVE<b id="wave">1</b></div><div class="pill">HP<b id="hp">20</b></div><div class="pill">BEST<b id="best">0</b></div></div></div><section class="battle"><canvas id="c"></canvas><div class="wavebar"><i id="bar"></i></div></section><div id="grid" class="grid"></div><div class="controls"><button id="buy" class="btn">Buy Tower · 20g</button><button id="restart" class="btn alt">Restart</button></div><div id="msg" class="msg">Buy towers, then merge equal levels. Higher levels fire faster and hit harder.</div></main><div id="over" class="over"><div class="card"><h2>Defense Broken</h2><p id="summary"></p><button id="again" class="btn">Defend Again</button></div></div><script>
+const c=document.getElementById('c'),x=c.getContext('2d'),gridEl=document.getElementById('grid'),goldEl=document.getElementById('gold'),waveEl=document.getElementById('wave'),hpEl=document.getElementById('hp'),bestEl=document.getElementById('best'),bar=document.getElementById('bar'),msg=document.getElementById('msg'),buy=document.getElementById('buy'),over=document.getElementById('over'),summary=document.getElementById('summary');let D=Math.min(devicePixelRatio||1,2),W=360,H=160,gold=50,wave=1,hp=20,best=+localStorage.getItem('merge-defense-best')||0,towers=Array(10).fill(null),selected=null,enemies=[],shots=[],fx=[],spawnQueue=0,spawnGap=0,waveActive=false,between=50,running=true,frame=0;bestEl.textContent=best;
+function resize(){W=c.clientWidth;H=c.clientHeight;c.width=W*D;c.height=H*D;x.setTransform(D,0,0,D,0,0)}addEventListener('resize',resize);
+function stats(){goldEl.textContent=gold;waveEl.textContent=wave;hpEl.textContent=hp;buy.disabled=gold<20||!running}
+function renderGrid(){gridEl.innerHTML='';towers.forEach((t,i)=>{const s=document.createElement('button');s.className='slot'+(t?' filled':'')+(selected===i?' sel':'');s.innerHTML=t?`<span>${['','🔹','🔷','💠','⚡','🌟','☄️'][Math.min(t,6)]}</span><span class="lvl">L${t}</span>`:'';s.onclick=()=>slot(i);gridEl.appendChild(s)});stats()}
+function slot(i){if(!running)return;if(selected===null){if(towers[i])selected=i;renderGrid();return}if(i===selected){selected=null;renderGrid();return}if(towers[i]&&towers[i]===towers[selected]){towers[i]++;towers[selected]=null;gold+=5;selected=null;msg.textContent=`Merged to level ${towers[i]} · +5g bonus`;fx.push({x:W*.5,y:H*.75,life:30,text:'MERGE!'});navigator.vibrate?.(12)}else if(!towers[i]){towers[i]=towers[selected];towers[selected]=null;selected=null}else selected=i;renderGrid()}
+function startWave(){waveActive=true;spawnQueue=3+wave*2;spawnGap=0;between=0;msg.textContent=`Wave ${wave} incoming`}
+function spawnEnemy(){const tank=wave>=3&&Math.random()<.2,fast=wave>=2&&!tank&&Math.random()<.28,hpBase=2+wave;enemies.push({x:W+18,y:54+Math.random()*42,hp:tank?hpBase*2:hpBase,max:tank?hpBase*2:hpBase,speed:tank?.45:fast?.95:.65,color:tank?'#fb7185':fast?'#fbbf24':'#a78bfa',size:tank?15:10})}
+function fire(){const power=towers.reduce((a,t)=>a+(t||0),0);if(!power||!enemies.length)return;for(let i=0;i<towers.length;i++){const level=towers[i];if(!level)continue;const rate=Math.max(12,40-level*4);if(frame%rate)continue;const target=enemies.reduce((a,b)=>a.x<b.x?a:b);shots.push({x:28+i%5*16,y:132-Math.floor(i/5)*14,tx:target,damage:level*.7+1,color:['','#38bdf8','#34d399','#fbbf24','#fb923c','#fb7185','#c084fc'][Math.min(level,6)]})}}
+function kill(e){gold+=3+wave;e.dead=true;fx.push({x:e.x,y:e.y,life:25,text:'+'+(3+wave)});stats()}
+function end(){running=false;waveActive=false;if(wave>best){best=wave;localStorage.setItem('merge-defense-best',best);bestEl.textContent=best}summary.textContent=`Reached wave ${wave} · Best ${best}. Merge towers earlier to raise total firepower.`;over.style.display='flex'}
+function reset(){gold=50;wave=1;hp=20;towers=Array(10).fill(null);selected=null;enemies=[];shots=[];fx=[];spawnQueue=0;spawnGap=0;waveActive=false;between=45;running=true;frame=0;bar.style.width='0';over.style.display='none';msg.textContent='Buy towers, then merge equal levels. Higher levels fire faster and hit harder.';renderGrid();stats()}
+function update(){if(!running)return;frame++;if(!waveActive){if(--between<=0)startWave();return}if(spawnQueue>0&&++spawnGap>28){spawnGap=0;spawnQueue--;spawnEnemy()}for(const e of enemies){e.x-=e.speed+.02*wave;if(e.x<8){e.dead=true;hp--;hpEl.textContent=hp;if(hp<=0){end();return}}}enemies=enemies.filter(e=>!e.dead);fire();for(let i=shots.length-1;i>=0;i--){const s=shots[i];if(!s.tx||s.tx.dead){shots.splice(i,1);continue}const dx=s.tx.x-s.x,dy=s.tx.y-s.y,d=Math.hypot(dx,dy);if(d<9){s.tx.hp-=s.damage;fx.push({x:s.tx.x,y:s.tx.y,life:10,text:''});if(s.tx.hp<=0)kill(s.tx);shots.splice(i,1)}else{s.x+=dx/d*7;s.y+=dy/d*7}}enemies=enemies.filter(e=>!e.dead);for(let i=fx.length-1;i>=0;i--)if(--fx[i].life<=0)fx.splice(i,1);const total=3+wave*2,progress=1-(spawnQueue+enemies.length)/Math.max(1,total);bar.style.width=Math.max(0,Math.min(100,progress*100))+'%';if(spawnQueue===0&&enemies.length===0&&shots.length===0){waveActive=false;gold+=8+wave*2;msg.textContent=`Wave ${wave} cleared · +${8+wave*2}g`;wave++;between=55;bar.style.width='0';renderGrid()}}
+function draw(){x.clearRect(0,0,W,H);const g=x.createLinearGradient(0,0,W,0);g.addColorStop(0,'#0b1b2e');g.addColorStop(1,'#142746');x.fillStyle=g;x.fillRect(0,0,W,H);x.strokeStyle='#243b5c';x.lineWidth=18;x.beginPath();x.moveTo(0,78);x.lineTo(W,78);x.stroke();x.setLineDash([8,9]);x.strokeStyle='#ffffff24';x.lineWidth=2;x.beginPath();x.moveTo(0,78);x.lineTo(W,78);x.stroke();x.setLineDash([]);x.fillStyle='#22c55e';x.fillRect(0,43,8,70);x.fillStyle='#94a3b8';x.font='11px Arial';x.fillText('BASE',12,20);for(const e of enemies){x.shadowBlur=12;x.shadowColor=e.color;x.fillStyle=e.color;x.beginPath();x.arc(e.x,e.y,e.size,0,6.28);x.fill();x.shadowBlur=0;x.fillStyle='#07111f';x.fillRect(e.x-e.size,e.y-e.size-7,e.size*2,3);x.fillStyle='#34d399';x.fillRect(e.x-e.size,e.y-e.size-7,e.size*2*Math.max(0,e.hp/e.max),3)}for(const s of shots){x.fillStyle=s.color;x.beginPath();x.arc(s.x,s.y,3,0,6.28);x.fill()}for(let i=0;i<towers.length;i++){const t=towers[i];if(!t)continue;const px=28+i%5*16,py=132-Math.floor(i/5)*14;x.fillStyle=['','#38bdf8','#34d399','#fbbf24','#fb923c','#fb7185','#c084fc'][Math.min(t,6)];x.fillRect(px-4,py-4,8,8)}for(const f of fx){x.globalAlpha=f.life/30;x.fillStyle='#fff';x.font='bold 11px Arial';if(f.text)x.fillText(f.text,f.x,f.y-f.life*.4)}x.globalAlpha=1}
+function loop(){update();draw();requestAnimationFrame(loop)}buy.onclick=()=>{if(gold<20||!running)return;const i=towers.indexOf(null);if(i<0){msg.textContent='Grid full · merge two equal towers first';return}gold-=20;towers[i]=1;renderGrid()};document.getElementById('restart').onclick=reset;document.getElementById('again').onclick=reset;resize();reset();requestAnimationFrame(loop);
+</script></body></html>
