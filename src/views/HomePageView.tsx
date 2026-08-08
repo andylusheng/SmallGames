@@ -24,7 +24,7 @@ const CATEGORY_ICONS: Record<string, string> = {
   idle: "💤",
 };
 
-function categoryHighlights(category: string, limit = 4): Game[] {
+function categoryHighlights(category: string, limit = 5): Game[] {
   return [...getGamesByCategory(category)]
     .sort((a, b) =>
       Number(b.popular) - Number(a.popular) ||
@@ -41,38 +41,15 @@ export default function HomePageView({ locale }: HomePageViewProps) {
   const popular = getPopularGames(10);
   const categoryGroups = CATEGORY_ORDER.map((category) => ({
     category,
-    games: getGamesByCategory(category),
     highlights: categoryHighlights(category),
   }));
-
-  const browseCategories = locale === "en"
-    ? "Browse Game Categories"
+  const viewMoreGames = locale === "en"
+    ? "View more games"
     : locale === "zh-tw"
-      ? "瀏覽遊戲分類"
+      ? "查看更多遊戲"
       : locale === "es"
-        ? "Explorar categorías de juegos"
-        : "浏览游戏分类";
-  const allGamesLabel = locale === "en"
-    ? "View all 100 games"
-    : locale === "zh-tw"
-      ? "查看全部 100 款遊戲"
-      : locale === "es"
-        ? "Ver los 100 juegos"
-        : "查看全部100款游戏";
-  const viewAllCategory = (categoryName: string, count: number) => locale === "en"
-    ? `View all ${count} ${categoryName} games`
-    : locale === "zh-tw"
-      ? `查看全部 ${count} 款${categoryName}遊戲`
-      : locale === "es"
-        ? `Ver los ${count} juegos de ${categoryName}`
-        : `查看全部${count}款${categoryName}游戏`;
-  const gameCountLabel = (count: number) => locale === "en"
-    ? `${count} games`
-    : locale === "zh-tw"
-      ? `${count} 款遊戲`
-      : locale === "es"
-        ? `${count} juegos`
-        : `${count}款游戏`;
+        ? "Ver más juegos"
+        : "查看更多游戏";
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-4 md:py-6">
@@ -89,30 +66,10 @@ export default function HomePageView({ locale }: HomePageViewProps) {
         <GameGrid games={popular} trackingSource="home" locale={locale} priorityCount={2} />
       </section>
 
-      <section className="mb-8">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-xl font-bold text-white">{browseCategories}</h2>
-          <NextLink href={`${prefix}/all-games`} className="text-sm font-medium text-primary hover:underline">{allGamesLabel}</NextLink>
-        </div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          {categoryGroups.map(({ category, games }) => (
-            <NextLink
-              key={category}
-              href={`${prefix}/${category}`}
-              className="group rounded-xl border border-white/10 bg-surface/60 p-4 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-surface"
-            >
-              <div className="text-2xl" aria-hidden="true">{CATEGORY_ICONS[category]}</div>
-              <div className="mt-3 text-sm font-semibold text-white group-hover:text-primary">{t(`categories.${category}`)}</div>
-              <div className="mt-1 text-xs text-gray-500">{gameCountLabel(games.length)}</div>
-            </NextLink>
-          ))}
-        </div>
-      </section>
-
       <AdBanner className="mb-8" />
 
       <div className="space-y-10">
-        {categoryGroups.map(({ category, games, highlights }) => {
+        {categoryGroups.map(({ category, highlights }) => {
           const categoryName = t(`categories.${category}`);
           return (
             <section key={category} className="lazy-section">
@@ -122,7 +79,7 @@ export default function HomePageView({ locale }: HomePageViewProps) {
                   {categoryName}
                 </h2>
                 <NextLink href={`${prefix}/${category}`} className="text-sm font-medium text-primary hover:underline">
-                  {viewAllCategory(categoryName, games.length)}
+                  {viewMoreGames}
                 </NextLink>
               </div>
               <GameGrid games={highlights} trackingSource="home" locale={locale} />
