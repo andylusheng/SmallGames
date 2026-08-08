@@ -1,86 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Memory Sequence</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;padding:20px;color:#fff}
-h1{font-size:22px;margin-bottom:8px}
-.hud{display:flex;gap:16px;margin-bottom:16px;font-size:14px}
-.hud span{color:#4fc3f7;font-weight:bold}
-#status{font-size:16px;margin-bottom:16px;min-height:24px;color:#ffc107}
-#pads{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:min(280px,80vw)}
-.pad{aspect-ratio:1;border-radius:16px;cursor:pointer;transition:all .15s;opacity:.6;border:3px solid transparent}
-.pad:active{transform:scale(.95)}
-.pad.lit{opacity:1;transform:scale(1.05);border-color:#fff}
-.pad.wrong{opacity:1;background:#e94560!important}
-#p0{background:#e94560}#p1{background:#4fc3f7}#p2{background:#ffc107}#p3{background:#4caf50}
-#best{margin-top:12px;font-size:13px;color:#aaa}
-</style>
-</head>
-<body>
-<h1>🧠 Memory Sequence</h1>
-<div class="hud">Level: <span id="lv">0</span> | Best: <span id="bs">0</span></div>
-<div id="status">Watch the pattern...</div>
-<div id="pads">
-<div class="pad" id="p0"></div>
-<div class="pad" id="p1"></div>
-<div class="pad" id="p2"></div>
-<div class="pad" id="p3"></div>
-</div>
-<div id="best">Repeat the sequence by tapping pads</div>
-<script>
-let seq=[],input=[],level=0,playing=false,best=+localStorage.getItem('memseq_best')||0;
-document.getElementById('bs').textContent=best;
-const pads=[...document.querySelectorAll('.pad')];
-pads.forEach((p,i)=>p.addEventListener('pointerdown',()=>tap(i)));
-function lightPad(i,dur=400){
-  pads[i].classList.add('lit');
-  setTimeout(()=>pads[i].classList.remove('lit'),dur);
-}
-function playSeq(){
-  playing=false;
-  document.getElementById('status').textContent='Watch...';
-  let i=0;
-  const iv=setInterval(()=>{
-    if(i>0)pads[seq[i-1]].classList.remove('lit');
-    if(i>=seq.length){clearInterval(iv);playing=true;document.getElementById('status').textContent='Your turn!';return}
-    lightPad(seq[i],500);i++;
-  },600);
-}
-function nextLevel(){
-  level++;input=[];
-  document.getElementById('lv').textContent=level;
-  seq.push(Math.floor(Math.random()*4));
-  setTimeout(playSeq,500);
-}
-function tap(i){
-  if(!playing)return;
-  lightPad(i,200);
-  input.push(i);
-  const idx=input.length-1;
-  if(input[idx]!==seq[idx]){
-    playing=false;
-    pads[i].classList.add('wrong');
-    setTimeout(()=>pads[i].classList.remove('wrong'),500);
-    document.getElementById('status').textContent='❌ Wrong! Game Over';
-    if(level-1>best){best=level-1;localStorage.setItem('memseq_best',best);document.getElementById('bs').textContent=best}
-    setTimeout(()=>{level=0;seq=[];document.getElementById('lv').textContent=0;nextLevel()},1500);
-    return;
-  }
-  if(input.length===seq.length){
-    playing=false;
-    document.getElementById('status').textContent='✅ Correct!';
-    if(level>best){best=level;localStorage.setItem('memseq_best',best);document.getElementById('bs').textContent=best}
-    setTimeout(nextLevel,800);
-  }
-}
-nextLevel();
-</script>
-<script>
-(function(){function z(){document.body.style.zoom=1;var w=Math.max(document.documentElement.scrollWidth,320);var h=Math.max(document.documentElement.scrollHeight,320);var s=Math.min((innerWidth-12)/w,(innerHeight-12)/h,1.85);if(s>1.05)document.body.style.zoom=s;else document.body.style.zoom=1}z();addEventListener('resize',z)})();
-</script>
-</body>
-</html>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>Memory Sequence</title><style>*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,Arial,sans-serif;background:#07111f;color:#fff}body{display:flex;align-items:center;justify-content:center;padding:14px}.game{width:min(390px,96vw);text-align:center}.title{font-size:24px;font-weight:900;margin-bottom:7px}.hud{display:flex;justify-content:center;gap:7px;margin-bottom:8px}.pill{background:#101a31;border:1px solid #ffffff14;border-radius:11px;padding:7px 14px;font-size:10px;color:#94a3b8}.pill b{display:block;color:#fff;font-size:17px}.status{height:30px;font-weight:800;font-size:14px;color:#fbbf24;margin-bottom:8px}.board{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:10px;width:min(330px,84vw);margin:auto;padding:12px;border-radius:24px;background:linear-gradient(155deg,#111b34,#0c1428);border:1px solid #ffffff14;box-shadow:0 24px 70px #0006}.pad{aspect-ratio:1;border:0;border-radius:22px;opacity:.55;cursor:pointer;transition:transform .11s,opacity .11s,filter .11s;box-shadow:inset 0 3px 8px #ffffff22,0 12px 26px #0005}.pad:active{transform:scale(.94)}.pad.lit{opacity:1;transform:scale(1.045);filter:brightness(1.35);box-shadow:0 0 26px currentColor,inset 0 3px 10px #ffffff44}.pad.wrong{background:#ef4444!important;opacity:1;animation:shake .25s}@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}#p0{background:#fb7185;color:#fb7185}#p1{background:#38bdf8;color:#38bdf8}#p2{background:#fbbf24;color:#fbbf24}#p3{background:#34d399;color:#34d399}.progress{height:5px;background:#111827;border-radius:999px;overflow:hidden;margin:10px auto 0;width:min(330px,84vw)}.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#38bdf8,#a78bfa);transition:width .12s}.hint{font-size:11px;color:#94a3b8;margin-top:8px}.overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#020617d0}.card{width:min(300px,86vw);background:#101a31;border:1px solid #ffffff1a;border-radius:20px;padding:22px}.card h2{margin:0 0 6px}.card p{font-size:13px;color:#cbd5e1;line-height:1.45}.btn{border:0;border-radius:12px;padding:11px 22px;font-weight:900;background:linear-gradient(135deg,#38bdf8,#818cf8);color:#07111f;width:100%;margin-top:8px}</style></head><body><main class="game"><div class="title">🧠 Memory Sequence</div><div class="hud"><div class="pill">LEVEL<b id="lv">0</b></div><div class="pill">SPEED<b id="speed">1.0×</b></div><div class="pill">BEST<b id="bs">0</b></div></div><div id="status" class="status">Ready?</div><div class="board"><button class="pad" id="p0"></button><button class="pad" id="p1"></button><button class="pad" id="p2"></button><button class="pad" id="p3"></button></div><div class="progress"><i id="prog"></i></div><div class="hint">Watch the full pattern, then repeat it in order.</div></main><div id="overlay" class="overlay"><div class="card"><h2 id="ovTitle">Memory Sequence</h2><p id="ovText">Each round adds one step. The playback gradually speeds up as your level grows.</p><button id="start" class="btn">Start</button></div></div><script>
+const pads=[...document.querySelectorAll('.pad')],lv=document.getElementById('lv'),speedEl=document.getElementById('speed'),bs=document.getElementById('bs'),status=document.getElementById('status'),prog=document.getElementById('prog'),overlay=document.getElementById('overlay'),ovTitle=document.getElementById('ovTitle'),ovText=document.getElementById('ovText'),start=document.getElementById('start');let seq=[],input=[],level=0,accept=false,best=+localStorage.getItem('memseq_best')||0,audio=null,token=0;bs.textContent=best;const tones=[261.6,329.6,392,523.3];
+function sound(i,d=.12){try{audio=audio||new (window.AudioContext||window.webkitAudioContext)();const o=audio.createOscillator(),g=audio.createGain();o.type='sine';o.frequency.value=tones[i]||130;g.gain.setValueAtTime(.055,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+d);o.connect(g);g.connect(audio.destination);o.start();o.stop(audio.currentTime+d)}catch(e){}}
+function flash(i,d=220){pads[i].classList.add('lit');sound(i,Math.max(.07,d/1000*.6));setTimeout(()=>pads[i].classList.remove('lit'),d)}
+function delay(ms){return new Promise(r=>setTimeout(r,ms))}function speed(){return Math.max(250,620-level*22)}
+async function playSeq(my){accept=false;status.textContent='Watch…';prog.style.width='0';const gap=speed();speedEl.textContent=(620/gap).toFixed(1)+'×';await delay(350);for(let i=0;i<seq.length;i++){if(my!==token)return;flash(seq[i],Math.min(330,gap*.6));prog.style.width=((i+1)/seq.length*100)+'%';await delay(gap)}if(my!==token)return;input=[];prog.style.width='0';accept=true;status.textContent='Your turn!'}
+function next(){level++;lv.textContent=level;seq.push(Math.floor(Math.random()*4));status.textContent=level%5===0?'🔥 Speed round!':'Next sequence';const my=++token;setTimeout(()=>playSeq(my),500)}
+async function fail(i){accept=false;token++;pads[i].classList.add('wrong');sound(-1,.18);navigator.vibrate?.(55);setTimeout(()=>pads[i].classList.remove('wrong'),350);const survived=Math.max(0,level-1);if(survived>best){best=survived;localStorage.setItem('memseq_best',best);bs.textContent=best}status.textContent='Wrong sequence';await delay(650);ovTitle.textContent=survived>=best&&survived>0?'🏆 New Best':'Sequence Lost';ovText.textContent=`Reached level ${survived} · Best ${best}. Watch the rhythm as well as the colors.`;start.textContent='Try Again';overlay.style.display='flex'}
+function tap(i){if(!accept)return;flash(i,150);input.push(i);prog.style.width=(input.length/seq.length*100)+'%';const k=input.length-1;if(input[k]!==seq[k]){fail(i);return}if(input.length===seq.length){accept=false;status.textContent=level%5===0?'✨ Perfect speed round':'✓ Correct';if(level>best){best=level;localStorage.setItem('memseq_best',best);bs.textContent=best}navigator.vibrate?.(10);setTimeout(next,650)}}pads.forEach((p,i)=>p.addEventListener('pointerdown',()=>tap(i)));
+function newGame(){token++;seq=[];input=[];level=0;accept=false;lv.textContent='0';speedEl.textContent='1.0×';prog.style.width='0';overlay.style.display='none';status.textContent='Get ready…';setTimeout(next,450)}start.onclick=newGame;
+</script></body></html>
