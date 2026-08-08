@@ -6,6 +6,7 @@ const gamesPath = path.join(__dirname, "../src/data/games.json");
 const profilesDir = path.join(__dirname, "../src/data/game-profiles");
 const zhTwConvertPath = path.join(__dirname, "../src/data/zh-tw/convert.ts");
 const output = path.join(__dirname, "../public/games-index.json");
+const zhOutput = path.join(__dirname, "../public/games-index-zh.json");
 const zhTwOutput = path.join(__dirname, "../public/games-index-zh-tw.json");
 const defaultPublishedAt = "2026-07-21";
 const defaultUpdatedAt = "2026-07-21";
@@ -157,6 +158,23 @@ const index = games.map(({ id, title, slug, description, category, thumbnail, ta
   };
 });
 
+const zhIndex = games.map(({ id, title, slug, description, category, thumbnail, tags, featured, popular }) => {
+  const profile = profileOverrides.get(slug);
+  return {
+    id,
+    title: profile?.zhTitle ?? title,
+    slug,
+    description: profile?.zhDescription ?? description,
+    category,
+    thumbnail,
+    tags,
+    featured,
+    popular,
+    publishedAt: profile?.publishedAt ?? defaultPublishedAt,
+    updatedAt: profile?.updatedAt ?? defaultUpdatedAt,
+  };
+});
+
 const zhTwIndex = games.map(({ id, title, slug, description, category, thumbnail, tags, featured, popular }) => {
   const profile = profileOverrides.get(slug);
   return {
@@ -175,6 +193,8 @@ const zhTwIndex = games.map(({ id, title, slug, description, category, thumbnail
 });
 
 fs.writeFileSync(output, JSON.stringify(index));
+fs.writeFileSync(zhOutput, JSON.stringify(zhIndex));
 fs.writeFileSync(zhTwOutput, JSON.stringify(zhTwIndex));
 console.log(`Generated ${index.length} English search entries with ${profileOverrides.size} profile overrides.`);
+console.log(`Generated ${zhIndex.length} Simplified Chinese search entries.`);
 console.log(`Generated ${zhTwIndex.length} Traditional Chinese search entries.`);

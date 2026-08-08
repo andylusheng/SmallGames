@@ -3,6 +3,7 @@ import NextLink from "next/link";
 import { getCategories, getGamesByCategory } from "@/lib/games";
 import { getServerTranslations } from "@/lib/server-i18n";
 import { getCategorySeo } from "@/data/category-seo";
+import { getZhCategorySeo } from "@/data/zh/category-seo";
 import { toZhTwDeep, toZhTwText } from "@/data/zh-tw/convert";
 import GameGrid from "@/components/GameGrid";
 import AdBanner from "@/components/AdBanner";
@@ -39,6 +40,7 @@ export default async function CategoryPageView({ locale, slug }: CategoryPageVie
   const categories = getCategories();
   const isEn = locale === "en";
   const isZhTw = locale === "zh-tw";
+  const isZh = locale === "zh";
   const prefix = isEn ? "" : `/${locale}`;
   const z = (value: string) => isZhTw ? toZhTwText(value) : value;
 
@@ -46,7 +48,7 @@ export default async function CategoryPageView({ locale, slug }: CategoryPageVie
 
   const games = getGamesByCategory(slug);
   const categoryName = t(`categories.${slug}`);
-  const rawSeo = getCategorySeo(slug, isZhTw ? "zh" : locale);
+  const rawSeo = isZh || isZhTw ? getZhCategorySeo(slug) : getCategorySeo(slug, locale);
   const seo = rawSeo && isZhTw ? toZhTwDeep(rawSeo) : rawSeo;
 
   return (
