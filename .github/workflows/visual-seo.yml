@@ -9,6 +9,7 @@ on:
       - "src/data/game-profiles/**"
       - "src/data/topic-seo.ts"
       - "src/data/topic-seo/**"
+      - "src/data/zh/**"
       - "src/data/zh-tw/**"
       - "src/data/es/**"
       - "src/lib/games.ts"
@@ -39,6 +40,7 @@ on:
       - "src/data/game-profiles/**"
       - "src/data/topic-seo.ts"
       - "src/data/topic-seo/**"
+      - "src/data/zh/**"
       - "src/data/zh-tw/**"
       - "src/data/es/**"
       - "src/lib/games.ts"
@@ -155,6 +157,20 @@ jobs:
             --screenshot="$TETRIS_OUTPUT/runtime-mobile.png" "$TETRIS_URL"
           test -s "$TETRIS_OUTPUT/runtime-mobile.png"
           echo "- home, action category, Tetris page, Tetris mobile runtime" >> "$GITHUB_STEP_SUMMARY"
+
+          echo "## Simplified Chinese locale smoke QA" >> "$GITHUB_STEP_SUMMARY"
+          ZH_HOME="$(resolve_page_url /zh)"
+          ZH_ACTION="$(resolve_page_url /zh/action)"
+          ZH_GAME="$(resolve_page_url /zh/game/quick-tap)"
+          ZH_TOPIC="$(resolve_page_url /zh/tap-games)"
+          curl -fsS "$ZH_HOME" | grep -q '免费在线'
+          curl -fsS "$ZH_GAME" | grep -q 'inLanguage'
+          test -s public/games-index-zh.json
+          capture_page "$ZH_HOME" "$GITHUB_WORKSPACE/artifacts/visual-seo/zh/home"
+          capture_page "$ZH_ACTION" "$GITHUB_WORKSPACE/artifacts/visual-seo/zh/action-category"
+          capture_page "$ZH_GAME" "$GITHUB_WORKSPACE/artifacts/visual-seo/zh/quick-tap"
+          capture_page "$ZH_TOPIC" "$GITHUB_WORKSPACE/artifacts/visual-seo/zh/tap-games"
+          echo "- zh home, category, game and topic desktop/mobile + Simplified Chinese search index" >> "$GITHUB_STEP_SUMMARY"
 
           echo "## Traditional Chinese locale smoke QA" >> "$GITHUB_STEP_SUMMARY"
           ZHTW_HOME="$(resolve_page_url /zh-tw)"
