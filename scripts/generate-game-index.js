@@ -3,6 +3,7 @@ const path = require("path");
 const ts = require("typescript");
 
 const gamesPath = path.join(__dirname, "../src/data/games.json");
+const searchTop20GamesPath = path.join(__dirname, "../src/data/games-search-top20.json");
 const profilesDir = path.join(__dirname, "../src/data/game-profiles");
 const zhTwConvertPath = path.join(__dirname, "../src/data/zh-tw/convert.ts");
 const output = path.join(__dirname, "../public/games-index.json");
@@ -32,6 +33,16 @@ function objectProperty(objectLiteral, name) {
   const property = findProperty(objectLiteral, name);
   if (!property || !ts.isPropertyAssignment(property) || !ts.isObjectLiteralExpression(property.initializer)) return undefined;
   return property.initializer;
+}
+
+function pairProperty(objectLiteral, name) {
+  const property = findProperty(objectLiteral, name);
+  if (!property || !ts.isPropertyAssignment(property) || !ts.isCallExpression(property.initializer)) return undefined;
+  const call = property.initializer;
+  if (!ts.isIdentifier(call.expression) || call.expression.text !== "pair" || call.arguments.length < 2) return undefined;
+  const [en, zh] = call.arguments;
+  if (!ts.isStringLiteral(en) || !ts.isStringLiteral(zh)) return undefined;
+  return { en: en.text, zh: zh.text };
 }
 
 function collectProfileFiles(dir) {
@@ -87,6 +98,27 @@ function loadProfileOverrides() {
         mergeOverride(overrides, slug, { enDescription, zhDescription, zhTitle });
       }
 
+      if (
+        ts.isCallExpression(node) &&
+        ts.isIdentifier(node.expression) &&
+        node.expression.text === "demandProfile" &&
+        node.arguments.length > 0 &&
+        ts.isObjectLiteralExpression(node.arguments[0])
+      ) {
+        const seed = node.arguments[0];
+        const slug = stringProperty(seed, "slug");
+        const title = stringProperty(seed, "title");
+        const zhTitle = stringProperty(seed, "zhTitle");
+        const objective = pairProperty(seed, "objective");
+        const enDescription = objective && title
+          ? `${objective.en} Play ${title} free in your browser with clear controls and instant restart.`
+          : undefined;
+        const zhDescription = objective && zhTitle
+          ? `${objective.zh} 直接在浏览器免费游玩${zhTitle}，操作清晰，可随时重新开始。`
+          : undefined;
+        mergeOverride(overrides, slug, { enDescription, zhDescription, zhTitle });
+      }
+
       ts.forEachChild(node, visit);
     }
 
@@ -137,12 +169,21 @@ function loadZhTwConverter() {
   };
 }
 
-const games = JSON.parse(fs.readFileSync(gamesPath, "utf8"));
+const games = [
+  ...JSON.parse(fs.readFileSync(gamesPath, "utf8")),
+  ...JSON.parse(fs.readFileSync(searchTop20GamesPath, "utf8")),
+];
 const profileOverrides = loadProfileOverrides();
 const toZhTw = loadZhTwConverter();
+const effectiveDates = (game, profile) => {
+  const publishedAt = game.dateAdded ?? profile?.publishedAt ?? defaultPublishedAt;
+  const updatedAt = [game.dateAdded, profile?.updatedAt, defaultUpdatedAt].filter(Boolean).sort().at(-1) ?? defaultUpdatedAt;
+  return { publishedAt, updatedAt };
+};
 
-const index = games.map(({ id, title, slug, description, category, thumbnail, tags, featured, popular }) => {
+const index = games.map(({ id, title, slug, description, category, thumbnail, tags, featured, popular, dateAdded }) => {
   const profile = profileOverrides.get(slug);
+  const dates = effectiveDates({ dateAdded }, profile);
   return {
     id,
     title,
@@ -153,13 +194,13 @@ const index = games.map(({ id, title, slug, description, category, thumbnail, ta
     tags,
     featured,
     popular,
-    publishedAt: profile?.publishedAt ?? defaultPublishedAt,
-    updatedAt: profile?.updatedAt ?? defaultUpdatedAt,
+    ...dates,
   };
 });
 
-const zhIndex = games.map(({ id, title, slug, description, category, thumbnail, tags, featured, popular }) => {
+const zhIndex = games.map(({ id, title, slug, description, category, thumbnail, tags, featured, popular, dateAdded }) => {
   const profile = profileOverrides.get(slug);
+  const dates = effectiveDates({ dateAdded }, profile);
   return {
     id,
     title: profile?.zhTitle ?? title,
@@ -170,13 +211,13 @@ const zhIndex = games.map(({ id, title, slug, description, category, thumbnail, 
     tags,
     featured,
     popular,
-    publishedAt: profile?.publishedAt ?? defaultPublishedAt,
-    updatedAt: profile?.updatedAt ?? defaultUpdatedAt,
+    ...dates,
   };
 });
 
-const zhTwIndex = games.map(({ id, title, slug, description, category, thumbnail, tags, featured, popular }) => {
+const zhTwIndex = games.map(({ id, title, slug, description, category, thumbnail, tags, featured, popular, dateAdded }) => {
   const profile = profileOverrides.get(slug);
+  const dates = effectiveDates({ dateAdded }, profile);
   return {
     id,
     title: profile?.zhTitle ? toZhTw(profile.zhTitle) : title,
@@ -187,8 +228,7 @@ const zhTwIndex = games.map(({ id, title, slug, description, category, thumbnail
     tags,
     featured,
     popular,
-    publishedAt: profile?.publishedAt ?? defaultPublishedAt,
-    updatedAt: profile?.updatedAt ?? defaultUpdatedAt,
+    ...dates,
   };
 });
 
