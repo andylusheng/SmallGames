@@ -1,12 +1,6 @@
 "use client";
 
 import React, { createContext, useContext } from "react";
-import en from "@/messages/en.json";
-import zh from "@/messages/zh.json";
-import zhTw from "@/messages/zh-tw.json";
-import es from "@/messages/es.json";
-
-const messages: Record<string, any> = { en, zh, "zh-tw": zhTw, es };
 
 type MessagesContextType = {
   locale: string;
@@ -15,18 +9,20 @@ type MessagesContextType = {
 
 const MessagesContext = createContext<MessagesContextType>({
   locale: "en",
-  messages: en,
+  messages: {},
 });
 
 export function I18nProvider({
   locale,
+  messages,
   children,
 }: {
   locale: string;
+  messages: Record<string, any>;
   children: React.ReactNode;
 }) {
   return (
-    <MessagesContext.Provider value={{ locale, messages: messages[locale] || en }}>
+    <MessagesContext.Provider value={{ locale, messages }}>
       {children}
     </MessagesContext.Provider>
   );

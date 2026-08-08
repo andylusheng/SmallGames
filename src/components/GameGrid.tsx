@@ -6,6 +6,7 @@ interface GameGridProps {
   games: GameCardData[];
   trackingSource?: "related" | "home" | "category" | "search";
   locale?: string;
+  priorityCount?: number;
 }
 
 function toCardData(game: GameCardData, locale: string): GameCardData {
@@ -18,7 +19,7 @@ function toCardData(game: GameCardData, locale: string): GameCardData {
   };
 }
 
-export default function GameGrid({ games, trackingSource, locale = "en" }: GameGridProps) {
+export default function GameGrid({ games, trackingSource, locale = "en", priorityCount = 0 }: GameGridProps) {
   if (games.length === 0) {
     const emptyText = locale === "zh-tw"
       ? "找不到遊戲"
@@ -37,7 +38,14 @@ export default function GameGrid({ games, trackingSource, locale = "en" }: GameG
 
   return (
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-      {games.map((game) => <GameCard key={game.id} game={toCardData(game, locale)} trackingSource={trackingSource} />)}
+      {games.map((game, index) => (
+        <GameCard
+          key={game.id}
+          game={toCardData(game, locale)}
+          trackingSource={trackingSource}
+          priority={index < priorityCount}
+        />
+      ))}
     </div>
   );
 }

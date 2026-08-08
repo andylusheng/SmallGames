@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { I18nProvider } from "@/lib/i18n";
+import { getServerMessages } from "@/lib/server-i18n";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { buildLocaleMetadata, SITE_URL, SITE_NAME } from "@/lib/metadata";
@@ -10,6 +11,7 @@ export function generateMetadata(): Metadata {
 
 export default function ZhLayout({ children }: { children: React.ReactNode }) {
   const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
+  const localeMessages = getServerMessages("zh");
   const websiteJsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -47,7 +49,7 @@ export default function ZhLayout({ children }: { children: React.ReactNode }) {
         )}
       </head>
       <body className="flex min-h-screen flex-col bg-dark text-white antialiased">
-        <I18nProvider locale="zh">
+        <I18nProvider locale="zh" messages={localeMessages}>
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />

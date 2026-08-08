@@ -3,10 +3,14 @@ import zh from "@/messages/zh.json";
 import zhTw from "@/messages/zh-tw.json";
 import es from "@/messages/es.json";
 
-const messages: Record<string, any> = { en, zh, "zh-tw": zhTw, es };
+const messages: Record<string, Record<string, any>> = { en, zh, "zh-tw": zhTw, es };
+
+export function getServerMessages(locale: string): Record<string, any> {
+  return messages[locale] || en;
+}
 
 export function getServerTranslations(locale: string) {
-  const msgs = messages[locale] || en;
+  const msgs = getServerMessages(locale);
   return (key: string, params?: Record<string, any>) => {
     const keys = key.split(".");
     let value: any = msgs;

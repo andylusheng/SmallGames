@@ -9,9 +9,10 @@ import { Play } from "lucide-react";
 interface GameCardProps {
   game: GameCardData;
   trackingSource?: "related" | "home" | "category" | "search";
+  priority?: boolean;
 }
 
-export default function GameCard({ game, trackingSource }: GameCardProps) {
+export default function GameCard({ game, trackingSource, priority = false }: GameCardProps) {
   const t = useTranslations();
   const handleClick = () => {
     if (trackingSource === "related") {
@@ -32,8 +33,12 @@ export default function GameCard({ game, trackingSource }: GameCardProps) {
         <img
           src={game.thumbnail}
           alt={`${game.title} - Free Online Game`}
+          width={400}
+          height={300}
+          decoding="async"
+          loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : "auto"}
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-          loading="lazy"
         />
         <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary shadow-lg">
