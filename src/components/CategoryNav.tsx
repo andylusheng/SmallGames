@@ -27,7 +27,7 @@ interface CategoryNavProps {
 export default function CategoryNav({ mobileMenu = false, onNavigate }: CategoryNavProps) {
   const t = useTranslations();
   const pathname = usePathname();
-  const normalizedPath = pathname.replace(/^\/(?:zh-tw|zh)(?=\/|$)/, "") || "/";
+  const normalizedPath = pathname.replace(/^\/(?:zh-tw|zh|es)(?=\/|$)/, "") || "/";
 
   const itemClass = (active: boolean) =>
     `flex items-center gap-2 rounded-lg text-sm font-medium transition-colors ${
@@ -38,7 +38,7 @@ export default function CategoryNav({ mobileMenu = false, onNavigate }: Category
     <nav className="mx-auto max-w-7xl px-4" aria-label={mobileMenu ? "Game categories" : undefined}>
       <ul className={mobileMenu ? "grid grid-cols-2 gap-2 py-3" : "flex gap-1 overflow-x-auto py-2 scrollbar-none"}>
         <li>
-          <Link href="/" onClick={onNavigate} className={itemClass(normalizedPath === "/")}>
+          <Link href="/all-games" onClick={onNavigate} className={itemClass(normalizedPath === "/all-games")}>
             <span aria-hidden="true">{categoryIcons.all}</span>
             <span>{t("categories.all")}</span>
           </Link>

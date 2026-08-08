@@ -38,6 +38,11 @@ body {
   }
 }
 
+.lazy-section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 420px;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
