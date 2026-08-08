@@ -11,9 +11,9 @@
   canvas.width=480;canvas.height=270;ctx.imageSmoothingEnabled=false;
   const W=480,H=270,FIXED=1/60,STORE='merge-defense-pixel-2',PAD_COUNT=8;
 
-  // Conventional tower-defense flow: enemies enter from the left and the base is on the right.
-  const path=[[-18,78],[122,78],[122,135],[265,135],[265,82],[390,82],[390,150],[456,150]];
-  const fieldPads=[[65,42],[72,116],[165,102],[205,174],[240,100],[315,45],[345,120],[430,110]];
+  // Conventional horizontal tower-defense flow: enemies enter from the RIGHT and the base is on the LEFT.
+  const path=[[498,78],[358,78],[358,135],[215,135],[215,82],[90,82],[90,150],[24,150]];
+  const fieldPads=[[415,42],[408,116],[315,102],[275,174],[240,100],[165,45],[135,120],[50,110]];
   const grassBits=[[22,28],[58,205],[101,32],[147,209],[186,45],[224,218],[285,205],[322,24],[363,212],[421,35],[449,220],[28,178],[177,232],[308,178]];
 
   let save={bestWave:0,totalKills:0};
@@ -83,7 +83,7 @@
     buildMode=false;selectedPad=null;focusTarget=null;focusTimer=0;empUsed=false;phase='battle';phaseLabel.classList.add('battle');phaseText.textContent=`WAVE ${wave}`;
     spawnQueue=wavePlan(wave);spawnCooldown=.1;enemies=[];projectiles=[];bossHud.classList.remove('show');
     if(spawnQueue.includes('boss')){bossIntro=1.35;warning.classList.add('show');sound('boss');setTimeout(()=>warning.classList.remove('show'),1150)}else sound('wave');
-    setInfo(`Wave ${wave}`,'Enemies move LEFT → RIGHT. Tap an enemy to Focus Fire; EMP slows the whole wave once.');updateHud();
+    setInfo(`Wave ${wave}`,'Enemies move RIGHT → LEFT. Tap an enemy to Focus Fire; EMP slows the whole wave once.');updateHud();
   }
 
   function pos(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H}}
@@ -99,7 +99,7 @@
     }
     const pi=padAt(p.x,p.y);if(pi===null)return;
     if(buildMode){if(pads[pi]){sound('error');setInfo('Pad Occupied','Choose an empty glowing pad.');return}gold-=20;pads[pi]=tower();selectedPad=pi;buildMode=false;sound('buy');showToast('CORE DEPLOYED');updateHud();return}
-    if(!pads[pi]){selectedPad=null;setInfo('Build Phase','Enemies enter on the LEFT and attack the BASE on the RIGHT.');return}
+    if(!pads[pi]){selectedPad=null;setInfo('Build Phase','Enemies enter on the RIGHT and attack the BASE on the LEFT.');return}
     selectedPad=pi;drag={from:pi,startX:p.x,startY:p.y,moved:false};dragPos=p;canvas.setPointerCapture?.(e.pointerId);refreshSpecialize();
   });
   canvas.addEventListener('pointermove',e=>{if(!drag||phase!=='prep')return;dragPos=pos(e);if(!drag.moved&&Math.hypot(dragPos.x-drag.startX,dragPos.y-drag.startY)>8)drag.moved=true});
@@ -123,8 +123,8 @@
     if(d<3){if(e.pathIndex>=path.length-2){damageBase(e);return}e.pathIndex++;return}
     const m=e.slow>0?.42:1;if(e.slow>0)e.slow-=dt;const s=e.speed*m*dt;e.x+=dx/d*s;e.y+=dy/d*s;e.bob+=dt*5;
   }
-  function damageBase(e){e.dead=true;hp--;shake=Math.max(shake,4);sound('base');floaters.push({x:448,y:132,text:'BASE -1',life:.8,color:'#fb7185'});if(hp<=0)endGame();updateHud()}
-  function progress(e){return e.pathIndex+e.x/W}
+  function damageBase(e){e.dead=true;hp--;shake=Math.max(shake,4);sound('base');floaters.push({x:30,y:132,text:'BASE -1',life:.8,color:'#fb7185'});if(hp<=0)endGame();updateHud()}
+  function progress(e){return e.pathIndex+(W-e.x)/W}
   function targetForTower(px,py,r){
     if(focusTarget&&!focusTarget.dead&&focusTimer>0&&Math.hypot(focusTarget.x-px,focusTarget.y-py)<=r)return focusTarget;
     let best=null,bp=-Infinity;
@@ -158,7 +158,7 @@
   function updateFx(dt){particles.forEach(p=>{p.life-=dt;if(p.vx!==undefined){p.x+=p.vx*dt;p.y+=p.vy*dt}});particles=particles.filter(p=>p.life>0);floaters.forEach(f=>{f.life-=dt;f.y-=18*dt});floaters=floaters.filter(f=>f.life>0);if(empPulse>0)empPulse-=dt}
   function waveClear(){phase='prep';phaseLabel.classList.remove('battle');phaseText.textContent='PREP';const reward=12+wave*3;gold+=reward;persist();showToast(`WAVE CLEAR +${reward}g`);wave++;empUsed=false;focusTarget=null;focusTimer=0;projectiles=[];setInfo('Preparation',`Wave cleared. +${reward}g. Merge or reposition towers, then start the next wave.`);updateHud()}
   function endGame(){phase='over';persist();document.getElementById('finalWave').textContent=wave;document.getElementById('finalKills').textContent=kills;document.getElementById('bestWave').textContent=save.bestWave;document.getElementById('overText').textContent=`The base fell on wave ${wave}. Merge earlier and save EMP for dense waves.`;gameOver.classList.add('show')}
-  document.getElementById('again').onclick=()=>{pads=Array(PAD_COUNT).fill(null);selectedPad=null;buildMode=false;phase='prep';wave=1;hp=20;gold=60;kills=0;speed=1;enemies=[];projectiles=[];particles=[];floaters=[];gameOver.classList.remove('show');phaseLabel.classList.remove('battle');phaseText.textContent='PREP';setInfo('Build Phase','Enemies enter from the LEFT. Defend the BASE on the RIGHT.');updateHud()};
+  document.getElementById('again').onclick=()=>{pads=Array(PAD_COUNT).fill(null);selectedPad=null;buildMode=false;phase='prep';wave=1;hp=20;gold=60;kills=0;speed=1;enemies=[];projectiles=[];particles=[];floaters=[];gameOver.classList.remove('show');phaseLabel.classList.remove('battle');phaseText.textContent='PREP';setInfo('Build Phase','Enemies enter from the RIGHT. Defend the BASE on the LEFT.');updateHud()};
 
   function update(dt){
     updateFx(dt);
@@ -173,17 +173,17 @@
 
   function rect(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h))}
   function pixelText(text,x,y,color='#fff',size=8,align='left'){ctx.save();ctx.fillStyle=color;ctx.font=`bold ${size}px monospace`;ctx.textAlign=align;ctx.textBaseline='middle';ctx.fillText(text,Math.round(x),Math.round(y));ctx.restore()}
-  function arrow(x,y){ctx.fillStyle='#f7d889';ctx.beginPath();ctx.moveTo(x-5,y-4);ctx.lineTo(x+5,y);ctx.lineTo(x-5,y+4);ctx.closePath();ctx.fill()}
+  function arrow(x,y){ctx.fillStyle='#f7d889';ctx.beginPath();ctx.moveTo(x+5,y-4);ctx.lineTo(x-5,y);ctx.lineTo(x+5,y+4);ctx.closePath();ctx.fill()}
   function drawMap(){
     rect(0,0,W,H,'#46784d');
     for(let y=0;y<H;y+=16)for(let x=0;x<W;x+=16)if(((x+y)/16)%2===0)rect(x,y,16,16,'#4d8153');
     grassBits.forEach(([x,y],i)=>{rect(x,y,3,3,i%2?'#2f633c':'#356d42');if(i%3===0)rect(x+4,y+2,2,4,'#5d955e')});
     ctx.save();ctx.lineCap='square';ctx.lineJoin='miter';ctx.strokeStyle='#5b3d29';ctx.lineWidth=36;ctx.beginPath();ctx.moveTo(path[0][0],path[0][1]);for(let i=1;i<path.length;i++)ctx.lineTo(path[i][0],path[i][1]);ctx.stroke();ctx.strokeStyle='#b78a5c';ctx.lineWidth=24;ctx.stroke();ctx.setLineDash([8,8]);ctx.strokeStyle='#ead4a1';ctx.lineWidth=2;ctx.stroke();ctx.restore();
-    arrow(58,78);arrow(182,135);arrow(328,82);arrow(425,150);
-    drawSpawn(10,78);drawBase(456,150);
-    pixelText('SPAWN',12,52,'#fee2e2',7,'left');pixelText('BASE',456,178,'#d1fae5',7,'center');
+    arrow(422,78);arrow(298,135);arrow(152,82);arrow(55,150);
+    drawSpawn(468,78);drawBase(24,150);
+    pixelText('SPAWN',466,52,'#fee2e2',7,'right');pixelText('BASE',24,178,'#d1fae5',7,'center');
   }
-  function drawSpawn(x,y){rect(x-9,y-13,18,26,'#7f1d1d');rect(x-6,y-10,12,20,'#ef4444');rect(x-3,y-7,6,14,'#2b0b0b');rect(x+9,y-16,3,32,'#fecaca')}
+  function drawSpawn(x,y){rect(x-9,y-13,18,26,'#7f1d1d');rect(x-6,y-10,12,20,'#ef4444');rect(x-3,y-7,6,14,'#2b0b0b');rect(x-12,y-16,3,32,'#fecaca')}
   function drawBase(x,y){rect(x-13,y-13,26,26,'#0f2d38');rect(x-10,y-10,20,20,'#22d3ee');rect(x-7,y-7,14,14,'#083344');rect(x-4,y-4,8,8,'#a7f3d0');rect(x-15,y+13,30,4,'#16353d')}
   function drawPad(i){
     const[x,y]=fieldPads[i],t=pads[i],sel=selectedPad===i;ctx.save();ctx.strokeStyle=sel?'#fde047':t?'#4ade80':buildMode?'#67e8f9':'#5b8b67';ctx.lineWidth=2;ctx.setLineDash(t?[]:[3,3]);ctx.strokeRect(x-11,y-9,22,18);ctx.setLineDash([]);
@@ -191,7 +191,7 @@
     if(sel){const s=statsFor(t);ctx.strokeStyle=phase==='battle'?'#fef08a99':'#ffffff88';ctx.lineWidth=1;ctx.beginPath();ctx.arc(x,y,s.range,0,Math.PI*2);ctx.stroke()}
     drawTower(t,x,y,drag&&drag.from===i&&drag.moved?.45:1);pixelText(`L${t.level}`,x,y+14,'#fef08a',7,'center');ctx.restore();
   }
-  function drawTower(t,x,y,a=1){ctx.save();ctx.globalAlpha=a;const rapid=t.path==='rapid',blast=t.path==='blast';rect(x-7,y-5,14,10,blast?'#9a3412':rapid?'#0e7490':'#1d4ed8');rect(x-5,y-8,10,6,blast?'#fb923c':rapid?'#22d3ee':'#60a5fa');rect(x-3,y-11,6,4,'#f8fafc');const ang=t.aim||0,cx=Math.round(x+Math.cos(ang)*7),cy=Math.round(y+Math.sin(ang)*7);ctx.strokeStyle=blast?'#fed7aa':rapid?'#a5f3fc':'#dbeafe';ctx.lineWidth=blast?4:2;ctx.beginPath();ctx.moveTo(x,y-4);ctx.lineTo(cx,cy);ctx.stroke();if(t.pulse>0)rect(x-2,y-2,4,4,'#fff');ctx.restore()}
+  function drawTower(t,x,y,a=1){ctx.save();ctx.globalAlpha=a;const rapid=t.path==='rapid',blast=t.path==='blast';rect(x-7,y-5,14,10,blast?'#9a3412':rapid?'#0e7490':'#1d4ed8');rect(x-5,y-8,10,6,blast?'#fb923c':rapid?'#22d3ee':'#60a5fa');rect(x-3,y-11,6,4,'#f8fafc');const ang=t.aim||Math.PI,cx=Math.round(x+Math.cos(ang)*7),cy=Math.round(y+Math.sin(ang)*7);ctx.strokeStyle=blast?'#fed7aa':rapid?'#a5f3fc':'#dbeafe';ctx.lineWidth=blast?4:2;ctx.beginPath();ctx.moveTo(x,y-4);ctx.lineTo(cx,cy);ctx.stroke();if(t.pulse>0)rect(x-2,y-2,4,4,'#fff');ctx.restore()}
   function drawEnemy(e){
     const x=Math.round(e.x),y=Math.round(e.y+Math.sin(e.bob)*1),hit=e.hit>0;
     if(e.type==='runner'){rect(x-6,y-5,12,10,hit?'#fff':'#facc15');rect(x-4,y-7,8,3,'#854d0e');rect(x-8,y+4,4,3,'#fde68a');rect(x+4,y+4,4,3,'#fde68a')}
@@ -221,5 +221,5 @@
     enemies.forEach(e=>e.hit=Math.max(0,e.hit-frame));draw();requestAnimationFrame(loop);
   }
 
-  setInfo('Build Phase','Enemies enter from the LEFT. Defend the BASE on the RIGHT.');updateHud();requestAnimationFrame(loop);
+  setInfo('Build Phase','Enemies enter from the RIGHT. Defend the BASE on the LEFT.');updateHud();requestAnimationFrame(loop);
 })();
