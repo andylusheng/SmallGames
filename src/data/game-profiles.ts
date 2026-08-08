@@ -1,6 +1,7 @@
 import localGamesData from "@/data/games.json";
 import { TAP_GAME_PROFILES } from "@/data/game-profiles/tap";
 import { MERGE_GAME_PROFILES } from "@/data/game-profiles/merge";
+import { MERGE_DEFENSE_REBUILD_PROFILE } from "@/data/game-profiles/merge-defense";
 import { DEFENSE_GAME_PROFILES } from "@/data/game-profiles/defense";
 import { MEMORY_GAME_PROFILES } from "@/data/game-profiles/memory";
 import { REACTION_GAME_PROFILES } from "@/data/game-profiles/reaction";
@@ -82,6 +83,7 @@ export const GAMEPLAY_TOPIC_MEMBERS: Record<string, string[]> = {
 const RAW_GAME_PROFILES: Record<string, GameSeoProfile> = {
   ...TAP_GAME_PROFILES,
   ...MERGE_GAME_PROFILES,
+  ...MERGE_DEFENSE_REBUILD_PROFILE,
   ...DEFENSE_GAME_PROFILES,
   ...MEMORY_GAME_PROFILES,
   ...REACTION_GAME_PROFILES,
