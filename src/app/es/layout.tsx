@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { I18nProvider } from "@/lib/i18n";
+import { getServerMessages } from "@/lib/server-i18n";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { buildLocaleMetadata, SITE_NAME, SITE_URL } from "@/lib/metadata";
@@ -10,6 +11,7 @@ export function generateMetadata(): Metadata {
 
 export default function EsLayout({ children }: { children: React.ReactNode }) {
   const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
+  const localeMessages = getServerMessages("es");
   const websiteJsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -33,7 +35,7 @@ export default function EsLayout({ children }: { children: React.ReactNode }) {
         {adsenseClient && <script async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`} crossOrigin="anonymous" />}
       </head>
       <body className="flex min-h-screen flex-col bg-dark text-white antialiased">
-        <I18nProvider locale="es">
+        <I18nProvider locale="es" messages={localeMessages}>
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />
