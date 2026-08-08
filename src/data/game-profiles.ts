@@ -14,6 +14,7 @@ import { CATALOG_ARCADE_GAME_PROFILES } from "@/data/game-profiles/catalog-arcad
 import { CATALOG_CASUAL_PUZZLE_GAME_PROFILES } from "@/data/game-profiles/catalog-casual-puzzle";
 import { CATALOG_RACING_SHOOTING_GAME_PROFILES } from "@/data/game-profiles/catalog-racing-shooting";
 import { CATALOG_SPORTS_STRATEGY_GAME_PROFILES } from "@/data/game-profiles/catalog-sports-strategy";
+import { FLAGSHIP_NINE_PROFILES } from "@/data/game-profiles/flagship-nine";
 
 export type SupportedLocale = "en" | "zh";
 
@@ -96,6 +97,7 @@ const RAW_GAME_PROFILES: Record<string, GameSeoProfile> = {
   ...CATALOG_CASUAL_PUZZLE_GAME_PROFILES,
   ...CATALOG_RACING_SHOOTING_GAME_PROFILES,
   ...CATALOG_SPORTS_STRATEGY_GAME_PROFILES,
+  ...FLAGSHIP_NINE_PROFILES,
 };
 
 export const TOPIC_GAME_SLUGS = Array.from(new Set(Object.values(GAMEPLAY_TOPIC_MEMBERS).flat()));
