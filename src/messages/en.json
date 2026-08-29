@@ -25,13 +25,14 @@
   },
   "home": {
     "h1": "Play Free Online Games - No Download, No Sign-Up",
-    "intro": "Welcome to ZeroPlay Games — your destination for free online games that play instantly in your browser. Explore 100+ HTML5 games across puzzle, arcade, action, racing, sports, strategy and more. Every game is free to start and requires no download or installation. Browse on desktop or mobile; control support varies by title. Just pick a game and start playing in seconds.",
+    "intro": "Welcome to ZeroPlay Games — your destination for free online games that play instantly in your browser. Explore 124+ HTML5 games across puzzle, arcade, action, racing, sports, strategy and more. Every game is free to start and requires no download or installation. Browse on desktop or mobile; control support varies by title. Just pick a game and start playing in seconds.",
     "featured": "Featured Games",
     "newGames": "New Games",
     "popularGames": "Popular Games",
     "allGames": "All Games",
     "playNow": "Play Now",
-    "loadMore": "Load More"
+    "loadMore": "Load More",
+    "colorPuzzleGames": "Color & Match Games"
   },
   "game": {
     "play": "Play Game",
@@ -51,7 +52,7 @@
     "dmca": "DMCA",
     "contact": "Contact",
     "copyright": "All rights reserved.",
-    "description": "Play 100+ free online games in your browser. No downloads, no sign-ups. Just click and play!"
+    "description": "Play 124+ free online games in your browser. No downloads, no sign-ups. Just click and play!"
   },
   "search": {
     "placeholder": "Search games...",

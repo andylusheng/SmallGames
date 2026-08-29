@@ -25,13 +25,14 @@
   },
   "home": {
     "h1": "Juegos online gratis - sin descargar ni registrarse",
-    "intro": "Bienvenido a ZeroPlay Games. Juega a 100 juegos HTML5 gratis de puzles, arcade, acción, carreras, deportes, estrategia y más directamente en tu navegador. No necesitas descargar ni instalar nada. Puedes jugar desde ordenador o móvil; los controles dependen de cada juego.",
+    "intro": "Bienvenido a ZeroPlay Games. Juega a más de 124 juegos HTML5 gratis de puzles, arcade, acción, carreras, deportes, estrategia y más directamente en tu navegador. No necesitas descargar ni instalar nada. Puedes jugar desde ordenador o móvil; los controles dependen de cada juego.",
     "featured": "Juegos destacados",
     "newGames": "Juegos nuevos",
     "popularGames": "Juegos populares",
     "allGames": "Todos los juegos",
     "playNow": "Jugar ahora",
-    "loadMore": "Ver más"
+    "loadMore": "Ver más",
+    "colorPuzzleGames": "Juegos de colores y combinaciones"
   },
   "game": {
     "play": "Jugar",
@@ -51,7 +52,7 @@
     "dmca": "DMCA",
     "contact": "Contacto",
     "copyright": "Todos los derechos reservados.",
-    "description": "Juega a 100 juegos online gratis directamente en tu navegador. Sin descargas ni registro: abre un juego y empieza a jugar."
+    "description": "Juega a 124 juegos online gratis directamente en tu navegador. Sin descargas ni registro: abre un juego y empieza a jugar."
   },
   "search": {
     "placeholder": "Buscar juegos...",

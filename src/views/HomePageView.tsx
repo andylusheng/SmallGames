@@ -4,6 +4,7 @@ import GameGrid from "@/components/GameGrid";
 import {
   getGamesByCategory,
   getPopularGames,
+  getColorPuzzleGames,
   type Game,
 } from "@/lib/games";
 import { getServerTranslations } from "@/lib/server-i18n";
@@ -38,6 +39,7 @@ function categoryHighlights(category: string, limit = 5): Game[] {
 export default function HomePageView({ locale }: HomePageViewProps) {
   const t = getServerTranslations(locale);
   const prefix = locale === "en" ? "" : `/${locale}`;
+  const colorPuzzles = getColorPuzzleGames(10);
   const popular = getPopularGames(10);
   const categoryGroups = CATEGORY_ORDER.map((category) => ({
     category,
@@ -56,6 +58,14 @@ export default function HomePageView({ locale }: HomePageViewProps) {
       <section className="mb-4 md:mb-8">
         <h1 className="text-xl font-bold leading-tight text-white sm:text-2xl lg:text-3xl">{t("home.h1")}</h1>
         <p className="mt-2 max-w-4xl line-clamp-2 text-sm leading-relaxed text-gray-400 md:mt-3 md:line-clamp-none">{t("home.intro")}</p>
+      </section>
+
+      <section className="mb-8 rounded-2xl border border-cyan-400/15 bg-cyan-400/[0.035] p-4 md:p-5">
+        <div className="mb-4 flex items-center gap-2">
+          <span aria-hidden="true" className="text-xl">🎨</span>
+          <h2 className="text-xl font-bold text-white">{t("home.colorPuzzleGames")}</h2>
+        </div>
+        <GameGrid games={colorPuzzles} trackingSource="home" locale={locale} priorityCount={4} />
       </section>
 
       <section className="mb-8">

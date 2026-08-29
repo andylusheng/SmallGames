@@ -8,7 +8,11 @@ export type AnalyticsEvent =
   | "game_restart"
   | "fullscreen_click"
   | "related_game_click"
-  | "game_error";
+  | "game_error"
+  | "game_runtime_ready"
+  | "gameplay_begin"
+  | "game_complete"
+  | "game_fail";
 
 export function trackEvent(
   eventName: AnalyticsEvent,

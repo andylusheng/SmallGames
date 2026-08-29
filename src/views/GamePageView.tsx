@@ -138,7 +138,7 @@ export function buildFaqJsonLd(game: Game, locale: string) {
 export function buildBreadcrumbJsonLd(game: Game, locale: string, t: (key: string) => string) {
   const prefix = locale === "en" ? "" : `/${locale}`;
   const profile = getGameProfile(game);
-  const primaryTopic = profile?.mechanics.gameplayTopics[0];
+  const primaryTopic = profile?.mechanics.gameplayTopics.find((topic) => getLocalizedTopicSeo(topic, locale));
   const topicConfig = primaryTopic ? getTopicSeoConfig(primaryTopic) : undefined;
   const topicContent = primaryTopic ? getLocalizedTopicSeo(primaryTopic, locale) : undefined;
   const middle = topicConfig && topicContent
@@ -165,7 +165,7 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
   const profile = getGameProfile(game);
   const p2 = getLocalizedGameProfile(game, locale);
   const pageSeo = getGamePageSeo(game, locale);
-  const primaryTopic = profile?.mechanics.gameplayTopics[0];
+  const primaryTopic = profile?.mechanics.gameplayTopics.find((topic) => getLocalizedTopicSeo(topic, locale));
   const topicGames = primaryTopic ? getGamesByGameplayTopic(primaryTopic, game.slug, 6) : [];
   const topicHubHref = primaryTopic ? getTopicHubHref(primaryTopic, locale) : undefined;
   const topicContent = primaryTopic ? getLocalizedTopicSeo(primaryTopic, locale) : undefined;

@@ -14,7 +14,7 @@ export default function AboutPage() {
         <section>
           <h2 className="mb-2 text-lg font-semibold text-white">现有内容</h2>
           <p>
-            目前游戏目录包含 100+ 款 HTML5 游戏，覆盖动作、益智、街机、赛车、体育、策略和休闲等分类。不同游戏的设备与操作支持可能不同，我们会逐款测试并持续完善。
+            目前游戏目录包含 124+ 款 HTML5 游戏，覆盖动作、益智、街机、赛车、体育、策略和休闲等分类。不同游戏的设备与操作支持可能不同，我们会逐款测试并持续完善。
           </p>
         </section>
 

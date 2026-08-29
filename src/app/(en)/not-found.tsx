@@ -15,7 +15,7 @@ export default function NotFound() {
         </h1>
         <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-gray-400">
           The game or page you&apos;re looking for might have been moved or never existed.
-          But hey, there are more than 100 free games waiting for you!
+          But hey, there are more than 124 free games waiting for you!
         </p>
       </div>
 

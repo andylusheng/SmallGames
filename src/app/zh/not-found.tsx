@@ -15,7 +15,7 @@ export default function NotFoundZh() {
         </h1>
         <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-gray-400">
           你访问的游戏或页面可能已被移动或从未存在。
-          不过别担心，这里有100多款免费游戏等着你！
+          不过别担心，这里有124款免费游戏等着你！
         </p>
       </div>
 

@@ -17,6 +17,7 @@ import { CATALOG_RACING_SHOOTING_GAME_PROFILES } from "@/data/game-profiles/cata
 import { CATALOG_SPORTS_STRATEGY_GAME_PROFILES } from "@/data/game-profiles/catalog-sports-strategy";
 import { FLAGSHIP_NINE_PROFILES } from "@/data/game-profiles/flagship-nine";
 import { SEARCH_TOP20_GAME_PROFILES } from "@/data/game-profiles/search-top20";
+import { COLOR_PUZZLE_GAME_PROFILES } from "@/data/game-profiles/color-puzzle";
 
 export type SupportedLocale = "en" | "zh";
 
@@ -81,6 +82,7 @@ export const GAMEPLAY_TOPIC_MEMBERS: Record<string, string[]> = {
   word: ["word-scramble", "word-search", "hangman", "word-hunt-grid"],
   classic: ["tetris", "minesweeper", "tic-tac-toe", "pong", "space-invaders", "brick-breaker", "pac-man", "frogger", "aurora-solitaire", "cascade-solitaire", "maze-muncher", "grid-three", "open-cell-cards", "neon-stack", "crown-draughts", "heart-trick", "star-spades"],
   idle: ["cookie-clicker", "idle-miner", "idle-factory", "tap-tycoon", "lemonade-stand", "pet-merge"],
+  color: ["screw-sort-master", "color-block-route", "bus-queue-sort", "hexa-color-stack", "water-sort", "block-blast", "gem-crush", "bubble-pop", "hex-merge", "color-fill"],
 };
 
 const RAW_GAME_PROFILES: Record<string, GameSeoProfile> = {
@@ -101,6 +103,7 @@ const RAW_GAME_PROFILES: Record<string, GameSeoProfile> = {
   ...CATALOG_SPORTS_STRATEGY_GAME_PROFILES,
   ...FLAGSHIP_NINE_PROFILES,
   ...SEARCH_TOP20_GAME_PROFILES,
+  ...COLOR_PUZZLE_GAME_PROFILES,
 };
 
 export const TOPIC_GAME_SLUGS = Array.from(new Set(Object.values(GAMEPLAY_TOPIC_MEMBERS).flat()));
@@ -108,7 +111,7 @@ export const INVENTORY_GAME_SLUGS = [
   ...(localGamesData as { slug: string }[]).map((game) => game.slug),
   ...(searchTop20GamesData as { slug: string }[]).map((game) => game.slug),
 ];
-const EXPECTED_PRODUCTION_GAMES = 120;
+const EXPECTED_PRODUCTION_GAMES = 124;
 
 function hasText(value: string | undefined): boolean {
   return Boolean(value?.trim());

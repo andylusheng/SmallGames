@@ -5898,5 +5898,61 @@
         "a": "No download or installation is required. Space Pinball is a lightweight HTML5 browser game that loads in seconds. Your progress (high score) is saved locally in your browser, so it persists between visits on the same device."
       }
     ]
+  },
+  {
+    "id": "screw-sort-master",
+    "title": "Screw Sort Master",
+    "slug": "screw-sort-master",
+    "description": "Sort colorful screws into matching trays, clear layered boards, build combos, and unlock progressively denser color puzzles.",
+    "category": "puzzle",
+    "thumbnail": "/games/screw-sort-master/thumb.svg",
+    "gameUrl": "/games/screw-sort-master/index.html",
+    "tags": ["color", "sort", "screw", "match"],
+    "featured": true,
+    "popular": true,
+    "dateAdded": "2026-08-29",
+    "instructions": "Tap exposed screws to move them into matching color trays. Covered screws unlock as the upper layer is removed."
+  },
+  {
+    "id": "color-block-route",
+    "title": "Color Block Route",
+    "slug": "color-block-route",
+    "description": "Move bright blocks through a compact grid and guide each one into the matching colored exit with as few moves as possible.",
+    "category": "puzzle",
+    "thumbnail": "/games/color-block-route/thumb.svg",
+    "gameUrl": "/games/color-block-route/index.html",
+    "tags": ["color", "block", "route", "sort"],
+    "featured": true,
+    "popular": true,
+    "dateAdded": "2026-08-29",
+    "instructions": "Select a colored block, then use the arrow controls or keyboard arrows to move it one cell at a time into its matching exit."
+  },
+  {
+    "id": "bus-queue-sort",
+    "title": "Bus Queue Sort",
+    "slug": "bus-queue-sort",
+    "description": "Match colorful passengers to the right buses, manage a small waiting area, and clear the station before the queue jams.",
+    "category": "puzzle",
+    "thumbnail": "/games/bus-queue-sort/thumb.svg",
+    "gameUrl": "/games/bus-queue-sort/index.html",
+    "tags": ["color", "bus", "queue", "sort"],
+    "featured": true,
+    "popular": true,
+    "dateAdded": "2026-08-29",
+    "instructions": "Tap the front passenger in a queue. Matching colors board active buses immediately; other passengers use limited waiting slots."
+  },
+  {
+    "id": "hexa-color-stack",
+    "title": "Hexa Color Stack",
+    "slug": "hexa-color-stack",
+    "description": "Place colorful hex stacks, connect matching neighbors, trigger satisfying 5+ color clears, and chase the level score target.",
+    "category": "puzzle",
+    "thumbnail": "/games/hexa-color-stack/thumb.svg",
+    "gameUrl": "/games/hexa-color-stack/index.html",
+    "tags": ["color", "hexa", "merge", "match"],
+    "featured": true,
+    "popular": true,
+    "dateAdded": "2026-08-29",
+    "instructions": "Choose one of three hex stacks and place it on an empty cell. Connected same-color stacks clear when their combined count reaches five or more."
   }
 ]

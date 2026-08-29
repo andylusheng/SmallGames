@@ -17,9 +17,10 @@ export default function GamePlayer({ gameUrl, title, slug }: GamePlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasStarted, setHasStarted] = useState(false);
+  const [hasGameInput, setHasGameInput] = useState(false);
 
   useEffect(() => {
-    if (!hasStarted || isLoading) return;
+    if (!hasStarted || isLoading || !hasGameInput) return;
 
     const timer30 = window.setTimeout(() => trackEvent("game_30s", { game_slug: slug }), 30_000);
     const timer60 = window.setTimeout(() => trackEvent("game_60s", { game_slug: slug }), 60_000);
@@ -28,10 +29,37 @@ export default function GamePlayer({ gameUrl, title, slug }: GamePlayerProps) {
       window.clearTimeout(timer30);
       window.clearTimeout(timer60);
     };
-  }, [hasStarted, isLoading, slug]);
+  }, [hasStarted, isLoading, hasGameInput, slug]);
+
+  useEffect(() => {
+    const onMessage = (event: MessageEvent) => {
+      if (event.source !== iframeRef.current?.contentWindow) return;
+      const data = event.data as { source?: string; type?: string; result?: string; level?: number; score?: number; moves?: number } | null;
+      if (!data || data.source !== "zeroplay-game" || !data.type) return;
+
+      if (data.type === "runtime_ready") {
+        trackEvent("game_runtime_ready", { game_slug: slug });
+      } else if (data.type === "first_input") {
+        setHasGameInput(true);
+        trackEvent("gameplay_begin", { game_slug: slug });
+      } else if (data.type === "game_end") {
+        const eventName = data.result === "win" ? "game_complete" : "game_fail";
+        trackEvent(eventName, {
+          game_slug: slug,
+          ...(typeof data.level === "number" ? { level: data.level } : {}),
+          ...(typeof data.score === "number" ? { score: data.score } : {}),
+          ...(typeof data.moves === "number" ? { moves: data.moves } : {}),
+        });
+      }
+    };
+
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [slug]);
 
   const handleStart = () => {
     trackEvent("game_start", { game_slug: slug });
+    setHasGameInput(false);
     setHasStarted(true);
   };
 
@@ -56,6 +84,7 @@ export default function GamePlayer({ gameUrl, title, slug }: GamePlayerProps) {
   const handleReload = () => {
     trackEvent("game_restart", { game_slug: slug });
     if (iframeRef.current) {
+      setHasGameInput(false);
       setIsLoading(true);
       iframeRef.current.src = gameUrl;
     }

@@ -43,12 +43,12 @@ export function buildLocaleMetadata(locale: string): Metadata {
         : `${SITE_NAME} - 免费在线小游戏，无需下载`;
 
   const description = isEn
-    ? "Play 100 free online games instantly. No downloads, no sign-ups. Action, puzzle, arcade, racing games and more - just click and play!"
+    ? "Play 124 free online games instantly. No downloads, no sign-ups. Action, puzzle, arcade, racing games and more - just click and play!"
     : isZhTw
-      ? "立即暢玩 100 款免費線上遊戲。無需下載、無需註冊，包含動作、益智、街機、賽車、體育與策略遊戲，點開即可玩。"
+      ? "立即暢玩 124 款免費線上遊戲。無需下載、無需註冊，包含動作、益智、街機、賽車、體育與策略遊戲，點開即可玩。"
       : isEs
-        ? "Juega a 100 juegos online gratis directamente en tu navegador. Sin descargas ni registro: acción, puzles, arcade, carreras, deportes, estrategia y más."
-        : "即刻畅玩100多款免费在线小游戏。无需下载，无需注册。动作、益智、街机、赛车游戏应有尽有，点击即玩！";
+        ? "Juega a 124 juegos online gratis directamente en tu navegador. Sin descargas ni registro: acción, puzles, arcade, carreras, deportes, estrategia y más."
+        : "即刻畅玩124款免费在线小游戏。无需下载，无需注册。动作、益智、街机、赛车游戏应有尽有，点击即玩！";
 
   const ogLocale = isEn ? "en_US" : isZhTw ? "zh_TW" : isEs ? "es_ES" : "zh_CN";
   const keywords = isZhTw

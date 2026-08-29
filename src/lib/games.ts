@@ -126,6 +126,10 @@ export function getPopularGames(limit = 8): Game[] {
   const fallback = games.filter((game) => !game.popular);
   return [...curated, ...fallback].slice(0, limit);
 }
+const COLOR_PUZZLE_SLUGS = ["screw-sort-master", "hexa-color-stack", "bus-queue-sort", "color-block-route", "block-blast", "gem-crush", "water-sort", "bubble-pop", "hex-merge", "color-fill"];
+export function getColorPuzzleGames(limit = 10): Game[] {
+  return COLOR_PUZZLE_SLUGS.map((slug) => getGameBySlug(slug)).filter((game): game is Game => Boolean(game)).slice(0, limit);
+}
 export function getNewGames(limit = 8): Game[] {
   return [...games].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0, limit);
 }
