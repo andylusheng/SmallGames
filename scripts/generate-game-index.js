@@ -4,6 +4,7 @@ const ts = require("typescript");
 
 const gamesPath = path.join(__dirname, "../src/data/games.json");
 const searchTop20GamesPath = path.join(__dirname, "../src/data/games-search-top20.json");
+const colorPuzzleGamesPath = path.join(__dirname, "../src/data/games-color-puzzle.json");
 const profilesDir = path.join(__dirname, "../src/data/game-profiles");
 const zhTwConvertPath = path.join(__dirname, "../src/data/zh-tw/convert.ts");
 const output = path.join(__dirname, "../public/games-index.json");
@@ -170,6 +171,7 @@ function loadZhTwConverter() {
 }
 
 const games = [
+  ...JSON.parse(fs.readFileSync(colorPuzzleGamesPath, "utf8")),
   ...JSON.parse(fs.readFileSync(gamesPath, "utf8")),
   ...JSON.parse(fs.readFileSync(searchTop20GamesPath, "utf8")),
 ];
