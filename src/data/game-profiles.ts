@@ -1,5 +1,6 @@
 import localGamesData from "@/data/games.json";
 import searchTop20GamesData from "@/data/games-search-top20.json";
+import colorPuzzleGamesData from "@/data/games-color-puzzle.json";
 import { TAP_GAME_PROFILES } from "@/data/game-profiles/tap";
 import { MERGE_GAME_PROFILES } from "@/data/game-profiles/merge";
 import { MERGE_DEFENSE_REBUILD_PROFILE } from "@/data/game-profiles/merge-defense";
@@ -17,6 +18,7 @@ import { CATALOG_RACING_SHOOTING_GAME_PROFILES } from "@/data/game-profiles/cata
 import { CATALOG_SPORTS_STRATEGY_GAME_PROFILES } from "@/data/game-profiles/catalog-sports-strategy";
 import { FLAGSHIP_NINE_PROFILES } from "@/data/game-profiles/flagship-nine";
 import { SEARCH_TOP20_GAME_PROFILES } from "@/data/game-profiles/search-top20";
+import { COLOR_PUZZLE_GAME_PROFILES } from "@/data/game-profiles/color-puzzle";
 
 export type SupportedLocale = "en" | "zh";
 
@@ -101,14 +103,16 @@ const RAW_GAME_PROFILES: Record<string, GameSeoProfile> = {
   ...CATALOG_SPORTS_STRATEGY_GAME_PROFILES,
   ...FLAGSHIP_NINE_PROFILES,
   ...SEARCH_TOP20_GAME_PROFILES,
+  ...COLOR_PUZZLE_GAME_PROFILES,
 };
 
 export const TOPIC_GAME_SLUGS = Array.from(new Set(Object.values(GAMEPLAY_TOPIC_MEMBERS).flat()));
 export const INVENTORY_GAME_SLUGS = [
   ...(localGamesData as { slug: string }[]).map((game) => game.slug),
   ...(searchTop20GamesData as { slug: string }[]).map((game) => game.slug),
+  ...(colorPuzzleGamesData as { slug: string }[]).map((game) => game.slug),
 ];
-const EXPECTED_PRODUCTION_GAMES = 120;
+const EXPECTED_PRODUCTION_GAMES = 121;
 
 function hasText(value: string | undefined): boolean {
   return Boolean(value?.trim());
@@ -127,16 +131,6 @@ function validateLocalizedSeo(slug: string, locale: SupportedLocale, content: Lo
   if (content.faq.length < 3) errors.push(`${prefix}: needs at least 3 game-specific FAQ items`);
 }
 
-/**
- * Production-game SEO completion gate.
- *
- * Every game in the production inventory must have exactly one source-grounded
- * GameSeoProfile before the build can succeed. Source files may still carry the
- * legacy `reviewed` marker; once the full content gate passes, the exported
- * production profile is normalized to `optimized`.
- *
- * Manual mobile gameplay QA remains independent through `testedMobile`.
- */
 function finalizeAllGameProfiles(profiles: Record<string, GameSeoProfile>): Record<string, GameSeoProfile> {
   const errors: string[] = [];
   const inventory = new Set(INVENTORY_GAME_SLUGS);
