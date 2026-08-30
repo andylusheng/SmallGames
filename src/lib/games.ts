@@ -1,5 +1,6 @@
 import localGamesData from "@/data/games.json";
 import searchTop20GamesData from "@/data/games-search-top20.json";
+import colorPuzzleGamesData from "@/data/games-color-puzzle.json";
 import zhSeoData from "@/data/zh-seo.json";
 import {
   GAMEPLAY_TOPIC_MEMBERS,
@@ -63,6 +64,7 @@ type RawGameSeo = GameSeo & { faq?: { q: string; a: string }[] };
 const DEFAULT_PUBLISHED_AT = "2026-07-21";
 const DEFAULT_UPDATED_AT = "2026-07-21";
 const rawGames: RawGame[] = [
+  ...(colorPuzzleGamesData as RawGame[]),
   ...(localGamesData as RawGame[]),
   ...(searchTop20GamesData as RawGame[]),
 ];
