@@ -1,0 +1,38 @@
+[
+  {
+    "id": "bus-queue-sort",
+    "title": "Bus Queue Sort",
+    "slug": "bus-queue-sort",
+    "description": "Sort passengers by color, manage limited waiting slots, fill matching buses, and clear the station before you run out of moves.",
+    "category": "puzzle",
+    "thumbnail": "/games/bus-queue-sort/thumb.svg",
+    "gameUrl": "/games/bus-queue-sort/index.html",
+    "tags": [
+      "color sort",
+      "bus",
+      "queue",
+      "sorting",
+      "casual"
+    ],
+    "featured": true,
+    "popular": true,
+    "dateAdded": "2026-08-30",
+    "plays": 0,
+    "rating": 4.8,
+    "instructions": "Tap the front passenger in a queue. Matching colors board the active bus; other colors use a limited waiting slot. Fill buses and clear every passenger to win.",
+    "longDescription": "Bus Queue Sort is a color-sorting puzzle built around queue order, limited waiting space, and satisfying bus departures. Read the front of each line, choose passengers carefully, and keep the platform moving without filling every waiting slot.\nEach level is designed for short browser sessions with increasingly tighter move budgets and waiting limits. Buses leave when full, new opportunities open as queues advance, and boosters can rescue a difficult board.",
+    "features": [
+      "Color-matching queue puzzle with limited waiting slots",
+      "Buses fill and depart as matching passengers board",
+      "30 progressively tighter levels with saved local progress",
+      "Shuffle, Extra Slot, and Refresh Bus boosters",
+      "Combo, win, fail, sound, and visual feedback"
+    ],
+    "tips": [
+      "Prioritize colors already accepted by a bus before spending a waiting slot.",
+      "Look one or two passengers ahead in every queue before committing to a blocked color.",
+      "Save Extra Slot for boards where several queue fronts are temporarily mismatched."
+    ],
+    "difficulty": "Easy to Medium"
+  }
+]
