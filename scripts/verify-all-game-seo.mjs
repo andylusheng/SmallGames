@@ -4,8 +4,9 @@ import ts from "typescript";
 
 const baseInventory = JSON.parse(fs.readFileSync("src/data/games.json", "utf8"));
 const searchTop20Inventory = JSON.parse(fs.readFileSync("src/data/games-search-top20.json", "utf8"));
-const inventory = [...baseInventory, ...searchTop20Inventory];
-const EXPECTED_PRODUCTION_GAMES = 120;
+const colorPuzzleInventory = JSON.parse(fs.readFileSync("src/data/games-color-puzzle.json", "utf8"));
+const inventory = [...baseInventory, ...searchTop20Inventory, ...colorPuzzleInventory];
+const EXPECTED_PRODUCTION_GAMES = 121;
 const inventorySlugs = new Set(inventory.map((game) => game.slug));
 const inventoryIds = new Set(inventory.map((game) => game.id));
 const profileRoots = ["src/data/game-profiles.ts", "src/data/game-profiles"];
