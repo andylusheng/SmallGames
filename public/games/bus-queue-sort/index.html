@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bus Queue Sort — Play Free</title>
+<link rel="stylesheet" href="game.css">
+</head>
+<body>
+<div class="stage" id="stage">
+  <img class="art" id="art" alt="">
+  <div class="level-mask" id="levelLabel">LEVEL 1</div>
+  <div class="moves-mask" id="movesLabel">21</div>
+  <div class="cap purple" id="cap-purple">4/12</div>
+  <div class="cap yellow" id="cap-yellow">2/12</div>
+  <div class="cap blue" id="cap-blue">1/12</div>
+  <div class="cap green" id="cap-green">3/12</div>
+  <div id="dynamic"></div>
+  <div class="combo" id="combo">PERFECT ×2</div>
+  <div class="toast" id="toast">Passenger boarded</div>
+  <div class="confetti" id="confetti"></div>
+  <div class="tool-hit shuffle" onclick="useShuffle()" aria-label="Shuffle"></div>
+  <div class="tool-hit slot" onclick="useExtraSlot()" aria-label="Extra slot"></div>
+  <div class="tool-hit refresh" onclick="useRefresh()" aria-label="Refresh bus"></div>
+  <div class="overlay" id="winOverlay"><div class="modal"><h2>LEVEL CLEAR!</h2><div class="stars">★★★</div><p id="winText">Perfect sorting.</p><button onclick="nextLevel()">NEXT LEVEL</button></div></div>
+  <div class="overlay" id="loseOverlay"><div class="modal"><h2>PLATFORM FULL</h2><p>Waiting slots are full. Try another queue order.</p><button onclick="restartLevel()">TRY AGAIN</button></div></div>
+</div>
+<script src="game.js"></script>
+</body>
+</html>
