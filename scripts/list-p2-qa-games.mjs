@@ -5,7 +5,7 @@ import ts from "typescript";
 const roots = ["src/data/game-profiles.ts", "src/data/game-profiles"];
 const qaStatuses = new Set(["reviewed", "optimized"]);
 const profileFactories = new Set(["reviewedProfile", "optimizedProfile", "catalogProfile", "demandProfile"]);
-const EXPECTED_PRODUCTION_GAMES = 120;
+const EXPECTED_PRODUCTION_GAMES = 121;
 
 function collectTypeScriptFiles(target) {
   if (!fs.existsSync(target)) return [];
