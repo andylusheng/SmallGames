@@ -7,102 +7,40 @@
 <link rel="stylesheet" href="game.css">
 </head>
 <body>
-<div class="game-shell">
-  <header class="desktop-hud" aria-label="Game status">
-    <div class="hud-brand">
-      <span class="hud-route">BUS TERMINAL</span>
-      <strong>BUS QUEUE SORT</strong>
+<main class="stage" id="stage" aria-label="Bus Queue Sort">
+  <img class="art" id="art" alt="Bus Queue Sort">
+  <div id="dynamic" class="dynamic"></div>
+  <div id="runtimeHud" class="runtime-hud" aria-hidden="true">
+    <div id="movesValue" class="moves-value">24</div>
+    <div id="capPurple" class="cap-overlay purple">12/12</div>
+    <div id="capYellow" class="cap-overlay yellow">8/12</div>
+    <div id="capBlue" class="cap-overlay blue">6/12</div>
+    <div id="capGreen" class="cap-overlay green">10/12</div>
+  </div>
+  <div class="combo" id="combo">COMBO ×2</div>
+  <div class="toast" id="toast"></div>
+  <div class="confetti" id="confetti"></div>
+  <button class="tool-hit shuffle" id="shuffleHit" aria-label="Shuffle"></button>
+  <button class="tool-hit slot" id="slotHit" aria-label="Extra slot"></button>
+  <button class="tool-hit refresh" id="refreshHit" aria-label="Refresh passenger"></button>
+  <div class="overlay" id="winOverlay">
+    <div class="result-card">
+      <div class="result-ribbon">太棒了！</div>
+      <div class="result-stars">★★★</div>
+      <strong>关卡完成</strong>
+      <p id="winText">乘客已顺利上车</p>
+      <button id="nextButton">下一关 →</button>
     </div>
-    <div class="hud-stat"><small>LEVEL</small><b id="deskLevel">1</b></div>
-    <div class="hud-stat"><small>MOVES</small><b id="deskMoves">21</b></div>
-    <div class="hud-target">
-      <small>PASSENGER TARGET</small>
-      <div class="target-colors">
-        <span><i class="purple"></i>12</span><span><i class="yellow"></i>12</span><span><i class="blue"></i>12</span><span><i class="green"></i>12</span>
-      </div>
+  </div>
+  <div class="overlay" id="loseOverlay">
+    <div class="result-card fail">
+      <div class="result-ribbon">站台已满</div>
+      <strong>换个顺序试试</strong>
+      <p>候车位已用完。</p>
+      <button id="retryButton">重新挑战</button>
     </div>
-    <div class="hud-coins"><small>COINS</small><b>1,860</b><span>★★★</span></div>
-  </header>
-
-  <main class="game-layout">
-    <section class="playfield-wrap">
-      <div class="playfield-glow" aria-hidden="true"></div>
-      <div class="stage" id="stage">
-        <img class="art" id="art" alt="">
-        <div class="queue-clean" aria-hidden="true"><span></span><span></span></div>
-        <div class="level-mask" id="levelLabel">LEVEL 1</div>
-        <div class="moves-mask" id="movesLabel">21</div>
-        <div class="cap purple" id="cap-purple">4/12</div>
-        <div class="cap yellow" id="cap-yellow">2/12</div>
-        <div class="cap blue" id="cap-blue">1/12</div>
-        <div class="cap green" id="cap-green">3/12</div>
-        <div id="dynamic"></div>
-        <div class="combo" id="combo">PERFECT ×2</div>
-        <div class="toast" id="toast">Passenger boarded</div>
-        <div class="confetti" id="confetti"></div>
-        <div class="tool-hit shuffle" onclick="useShuffle()" aria-label="Shuffle"></div>
-        <div class="tool-hit slot" onclick="useExtraSlot()" aria-label="Extra slot"></div>
-        <div class="tool-hit refresh" onclick="useRefresh()" aria-label="Refresh bus"></div>
-        <div class="overlay" id="winOverlay"><div class="modal"><h2>LEVEL CLEAR!</h2><div class="stars">★★★</div><p id="winText">Perfect sorting.</p><button onclick="nextLevel()">NEXT LEVEL</button></div></div>
-        <div class="overlay" id="loseOverlay"><div class="modal"><h2>PLATFORM FULL</h2><p>Waiting slots are full. Try another queue order.</p><button onclick="restartLevel()">TRY AGAIN</button></div></div>
-      </div>
-    </section>
-
-    <aside class="waiting-bay" aria-label="Waiting bay and boosters">
-      <div class="bay-sign">
-        <span class="bay-icon">BUS</span>
-        <div><small>PLATFORM STATUS</small><strong id="deskNeed">PURPLE BUS BOARDING</strong></div>
-        <i class="need-light" id="deskNeedDot"></i>
-      </div>
-
-      <section class="bay-section">
-        <div class="section-head"><span>WAITING BAY</span><b id="deskWaitingCount">0 / 5</b></div>
-        <div class="waiting-slots" id="deskWaiting"></div>
-        <p>Wrong-color passengers wait here until their bus becomes active. Keep at least one seat open.</p>
-      </section>
-
-      <section class="bay-section compact">
-        <div class="section-head"><span>ROUND PROGRESS</span><b id="deskBoarded">0 / 14</b></div>
-        <div class="progress-track"><i id="deskProgress"></i></div>
-      </section>
-
-      <section class="boosters">
-        <button class="booster shuffle" onclick="useShuffle()"><span>⇆</span><strong>SHUFFLE</strong><small id="deskShuffle">3 LEFT</small></button>
-        <button class="booster slot" onclick="useExtraSlot()"><span>＋</span><strong>EXTRA SLOT</strong><small id="deskSlot">2 LEFT</small></button>
-        <button class="booster refresh" onclick="useRefresh()"><span>↻</span><strong>REFRESH</strong><small id="deskRefresh">2 LEFT</small></button>
-      </section>
-
-      <div class="bay-tip"><b>TIP</b><span>Only the passenger at the front of each queue can move.</span></div>
-    </aside>
-  </main>
-</div>
+  </div>
+</main>
 <script src="game.js"></script>
-<script>
-(function syncDesktopUI(){
-  const colors={purple:'#8b49e9',yellow:'#f4b216',blue:'#178fe3',green:'#36bc3d'};
-  const el=id=>document.getElementById(id);
-  function paint(){
-    if(typeof state==='undefined'||!state){requestAnimationFrame(paint);return;}
-    el('deskLevel').textContent=state.level;
-    el('deskMoves').textContent=state.moves;
-    el('deskBoarded').textContent=state.boarded+' / '+state.target;
-    el('deskWaitingCount').textContent=state.waiting.length+' / '+state.waitLimit;
-    el('deskProgress').style.width=Math.min(100,state.boarded/state.target*100)+'%';
-    el('deskShuffle').textContent=state.shuffleUses+' LEFT';
-    el('deskSlot').textContent=state.slotUses+' LEFT';
-    el('deskRefresh').textContent=state.refreshUses+' LEFT';
-    const need=typeof peekNeed==='function'?peekNeed():currentNeed();
-    el('deskNeed').textContent=String(need).toUpperCase()+' BUS BOARDING';
-    el('deskNeedDot').style.background=colors[need]||'#fff';
-    el('deskNeedDot').style.boxShadow='0 0 18px '+(colors[need]||'#fff');
-    el('deskWaiting').innerHTML=Array.from({length:state.waitLimit},(_,i)=>{
-      const item=state.waiting[i];
-      return '<span class="waiting-seat '+(item?'occupied':'')+'">'+(item?'<i style="background:'+colors[item.c]+'"></i><em></em>':'<u></u>')+'</span>';
-    }).join('');
-    requestAnimationFrame(paint);
-  }
-  requestAnimationFrame(paint);
-})();
-</script>
 </body>
 </html>
