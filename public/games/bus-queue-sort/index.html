@@ -50,6 +50,10 @@
     <path id="routeDash" class="route-dash" d=""/>
   </svg>
 
+  <button class="top-hit pause-hit" id="pauseHit" aria-label="Pause game"></button>
+  <button class="top-hit sound-hit" id="soundHit" aria-label="Toggle sound"></button>
+  <div class="sound-state" id="soundState" aria-hidden="true">♪</div>
+
   <div class="level-mask" id="levelLabel">LEVEL 42</div>
   <div class="moves-mask" id="movesLabel">24</div>
   <div class="cap purple" id="cap-purple">4/12</div>
@@ -69,6 +73,7 @@
   <button class="tool-hit slot" onclick="useExtraSlot()" aria-label="Extra slot"></button>
   <button class="tool-hit refresh" onclick="useRefresh()" aria-label="Refresh passenger"></button>
 
+  <div class="overlay pause-overlay" id="pauseOverlay"><div class="modal pause-modal"><div class="ribbon">PAUSED</div><h2>BUS QUEUE SORT</h2><p>Take your time. Your station is saved.</p><button id="resumeButton">RESUME</button><button class="secondary-modal-btn" id="restartPauseButton">RESTART LEVEL</button></div></div>
   <div class="overlay" id="winOverlay"><div class="modal"><div class="ribbon">PERFECT!</div><div class="stars">★★★</div><h2>LEVEL CLEAR</h2><p id="winText">The station is clear.</p><button onclick="nextLevel()">NEXT LEVEL</button></div></div>
   <div class="overlay" id="loseOverlay"><div class="modal lose"><div class="ribbon">TRY AGAIN</div><h2>PLATFORM FULL</h2><p>Waiting slots are full. Choose another queue order.</p><button onclick="restartLevel()">RESTART</button></div></div>
 </div>
