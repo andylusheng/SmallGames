@@ -1,7 +1,51 @@
 (() => {
   const stage = document.getElementById('stage');
   const busNode = c => document.getElementById('bus-' + c);
+  const pauseOverlay = document.getElementById('pauseOverlay');
+  const pauseHit = document.getElementById('pauseHit');
+  const soundHit = document.getElementById('soundHit');
+  const soundState = document.getElementById('soundState');
+  const resumeButton = document.getElementById('resumeButton');
+  const restartPauseButton = document.getElementById('restartPauseButton');
+  let muted = localStorage.getItem('busQueueMuted') === '1';
+  let soundTimer;
+
   const buzz = pattern => { try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (_) {} };
+  const coreSfx = window.sfx;
+  window.sfx = function(type) { if (!muted) return coreSfx(type); };
+
+  function showSoundState() {
+    if (!soundState) return;
+    soundState.textContent = muted ? '×' : '♪';
+    soundState.classList.toggle('muted', muted);
+    soundState.classList.add('show');
+    clearTimeout(soundTimer);
+    soundTimer = setTimeout(() => soundState.classList.remove('show'), 650);
+  }
+
+  function setPaused(value) {
+    if (!state || state.locked) return;
+    state.paused = value;
+    stage.classList.toggle('paused', value);
+    pauseOverlay.classList.toggle('show', value);
+    if (value) buzz(10);
+  }
+
+  if (pauseHit) pauseHit.addEventListener('click', () => setPaused(true));
+  if (resumeButton) resumeButton.addEventListener('click', () => setPaused(false));
+  if (restartPauseButton) restartPauseButton.addEventListener('click', () => {
+    setPaused(false);
+    restartLevel();
+  });
+  if (soundHit) soundHit.addEventListener('click', () => {
+    muted = !muted;
+    localStorage.setItem('busQueueMuted', muted ? '1' : '0');
+    showSoundState();
+    if (!muted) coreSfx('tool');
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && state && !state.locked) setPaused(!state.paused);
+  });
 
   function pulseBus(color) {
     const node = busNode(color);
@@ -26,15 +70,33 @@
 
   const coreAutoWaiting = window.autoWaiting;
   window.autoWaiting = function() {
-    if (state && state.busTransition) return;
+    if (state && (state.busTransition || state.paused)) return;
     return coreAutoWaiting();
   };
 
   const coreTapPassenger = window.tapPassenger;
   window.tapPassenger = function(...args) {
-    if (state && state.busTransition) return;
-    return coreTapPassenger(...args);
+    if (state && (state.busTransition || state.paused)) return;
+    const before = state ? state.moves : null;
+    const out = coreTapPassenger(...args);
+    if (state && before !== state.moves) {
+      const moves = document.getElementById('movesLabel');
+      moves.classList.remove('move-tick');
+      void moves.offsetWidth;
+      moves.classList.add('move-tick');
+      setTimeout(() => moves.classList.remove('move-tick'), 260);
+    }
+    return out;
   };
+
+  ['useShuffle','useExtraSlot','useRefresh'].forEach(name => {
+    const core = window[name];
+    window[name] = function(...args) {
+      if (state && (state.busTransition || state.paused)) return;
+      buzz(10);
+      return core(...args);
+    };
+  });
 
   window.busFull = function(color) {
     if (!state || state.busTransition) return;
@@ -83,11 +145,20 @@
       badge.remove();
       state.busTransition = false;
       stage.classList.remove('bus-transition');
-      if (!state.locked) coreAutoWaiting();
+      if (!state.locked && !state.paused) coreAutoWaiting();
       render();
       toast('NEW ' + color.toUpperCase() + ' BUS ARRIVED');
       buzz(18);
     }, 1640);
+  };
+
+  const coreLose = window.lose;
+  window.lose = function() {
+    if (stage && stage.animate) stage.animate([
+      {transform:'translateX(0)'},{transform:'translateX(-5px)'},{transform:'translateX(5px)'},{transform:'translateX(-3px)'},{transform:'translateX(0)'}
+    ],{duration:280,easing:'ease-out'});
+    buzz([35,35,70]);
+    return coreLose();
   };
 
   const coreCheckWin = window.checkWin;
