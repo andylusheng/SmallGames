@@ -1,0 +1,29 @@
+.bus-defs{position:absolute;width:0;height:0;overflow:hidden}
+.bus-layer{position:absolute;inset:0;z-index:12;pointer-events:none}
+.bus-sprite{position:absolute;width:21.5%;aspect-ratio:116/104;transform:translate(-50%,-50%);transform-origin:50% 72%;filter:drop-shadow(0 7px 5px rgba(28,32,54,.34));will-change:transform,opacity}
+.bus-sprite svg{display:block;width:100%;height:100%;overflow:visible}
+.bus-sprite.purple{left:20.7%;top:39.4%;--bus-main:#8747e9;--bus-light:#bc7cff;--bus-dark:#532395;--bus-mid:#6e35c6}
+.bus-sprite.yellow{left:43.5%;top:39.4%;--bus-main:#f4b31e;--bus-light:#ffd765;--bus-dark:#a86a00;--bus-mid:#d89108}
+.bus-sprite.blue{left:62%;top:39.4%;--bus-main:#198fe3;--bus-light:#66c8ff;--bus-dark:#075b9d;--bus-mid:#0c76c8}
+.bus-sprite.green{left:82%;top:39.4%;--bus-main:#36bd3e;--bus-light:#79e76d;--bus-dark:#1b7725;--bus-mid:#269d30}
+.bus-sprite.board-pulse{animation:busBoardPulse .28s cubic-bezier(.2,.8,.25,1)}
+.bus-sprite.full-celebrate{animation:busFullPulse .42s cubic-bezier(.15,.85,.2,1)}
+.bus-sprite.depart{animation:busDepart .62s cubic-bezier(.5,.05,.72,.35) forwards}
+.bus-sprite.arrive{animation:busArrive .58s cubic-bezier(.18,.82,.22,1) forwards}
+@keyframes busBoardPulse{0%{transform:translate(-50%,-50%) scale(1)}45%{transform:translate(-50%,-47%) scale(1.045,.965)}100%{transform:translate(-50%,-50%) scale(1)}}
+@keyframes busFullPulse{0%{transform:translate(-50%,-50%) scale(1)}35%{transform:translate(-50%,-53%) scale(1.09)}70%{transform:translate(-50%,-48%) scale(.98)}100%{transform:translate(-50%,-50%) scale(1)}}
+@keyframes busDepart{0%{transform:translate(-50%,-50%) scale(1);opacity:1}18%{transform:translate(-50%,-46%) scale(1.04)}100%{transform:translate(-50%,-118%) scale(.73);opacity:0}}
+@keyframes busArrive{0%{transform:translate(-50%,-118%) scale(.73);opacity:0}68%{transform:translate(-50%,-46%) scale(1.035);opacity:1}100%{transform:translate(-50%,-50%) scale(1);opacity:1}}
+.bus-status{position:absolute;z-index:34;transform:translate(-50%,-50%) scale(.65);padding:5px 11px;border-radius:999px;color:#734200;font-size:clamp(9px,1.8vh,13px);font-weight:1000;letter-spacing:.03em;background:linear-gradient(#fff8ae,#ffd13b);border:2px solid #fff;box-shadow:0 4px 0 #b27600,0 8px 18px rgba(0,0,0,.26);pointer-events:none;animation:statusPop .7s ease-out forwards}
+@keyframes statusPop{0%{opacity:0;transform:translate(-50%,-20%) scale(.55)}24%{opacity:1;transform:translate(-50%,-70%) scale(1.1)}76%{opacity:1}100%{opacity:0;transform:translate(-50%,-115%) scale(.96)}}
+.stage.bus-transition .front-hit,.stage.bus-transition .tool-hit{pointer-events:none}
+.stage.bus-transition .route-dash{animation-play-state:paused;opacity:.55}
+.person.front{transition:transform .16s ease,filter .16s ease}
+.person.front::before{content:'';position:absolute;left:50%;bottom:-8%;width:92%;height:18%;transform:translateX(-50%);border-radius:50%;background:rgba(255,255,255,.22);filter:blur(4px);opacity:0;transition:opacity .15s ease}
+.person.front:hover::before{opacity:1}
+.waiting-passenger{position:absolute;z-index:25;width:5.1%;aspect-ratio:38/56;transform:translate(-50%,-54%) scale(.76);filter:drop-shadow(0 3px 2px rgba(40,30,20,.28));pointer-events:none}
+.waiting-passenger img{width:100%;height:100%;object-fit:contain;display:block}
+.waiting-passenger.gray img{filter:grayscale(1) brightness(.82) saturate(.55)}
+.waiting-passenger.vip::after{content:'VIP';position:absolute;right:-28%;top:28%;padding:0 3px;border-radius:5px;background:#ffd83c;color:#754600;font-size:6px;font-weight:1000;border:1px solid #a46800}
+.stage::after{content:'';position:absolute;inset:0;z-index:80;pointer-events:none;border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 -28px 50px rgba(17,14,80,.08)}
+@media(min-width:900px){body{background:radial-gradient(circle at 50% 40%,#143263 0,#081a38 40%,#041027 78%)}.stage{height:min(calc(100dvh - 18px),720px);box-shadow:0 34px 90px rgba(0,0,0,.52),0 0 0 1px rgba(255,255,255,.14)}}
