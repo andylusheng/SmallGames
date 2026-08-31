@@ -8,12 +8,14 @@
 </head>
 <body>
 <div class="stage" id="stage">
-  <img class="art" id="art" alt="Bus Queue Sort game scene">
-  <img class="queue-floor" id="queueFloor" alt="" aria-hidden="true">
+  <img class="art" src="assets/background.webp" alt="Bus Queue Sort game scene">
+  <svg class="route-layer" id="routeSvg" viewBox="0 0 465 720" aria-hidden="true">
+    <path id="routeGlow" class="route-glow" d=""/>
+    <path id="routeDash" class="route-dash" d=""/>
+  </svg>
 
   <div class="level-mask" id="levelLabel">LEVEL 42</div>
   <div class="moves-mask" id="movesLabel">24</div>
-
   <div class="cap purple" id="cap-purple">4/12</div>
   <div class="cap yellow" id="cap-yellow">2/12</div>
   <div class="cap blue" id="cap-blue">1/12</div>
@@ -27,28 +29,12 @@
   <div class="tool-count shuffle-count" id="shuffleCount">3</div>
   <div class="tool-count slot-count" id="slotCount">2</div>
   <div class="tool-count refresh-count" id="refreshCount">2</div>
-
   <button class="tool-hit shuffle" onclick="useShuffle()" aria-label="Shuffle"></button>
   <button class="tool-hit slot" onclick="useExtraSlot()" aria-label="Extra slot"></button>
   <button class="tool-hit refresh" onclick="useRefresh()" aria-label="Refresh passenger"></button>
 
-  <div class="overlay" id="winOverlay">
-    <div class="modal">
-      <div class="ribbon">PERFECT!</div>
-      <div class="stars">★★★</div>
-      <h2>LEVEL CLEAR</h2>
-      <p id="winText">The station is clear.</p>
-      <button onclick="nextLevel()">NEXT LEVEL</button>
-    </div>
-  </div>
-  <div class="overlay" id="loseOverlay">
-    <div class="modal lose">
-      <div class="ribbon">TRY AGAIN</div>
-      <h2>PLATFORM FULL</h2>
-      <p>Waiting slots are full. Choose another queue order.</p>
-      <button onclick="restartLevel()">RESTART</button>
-    </div>
-  </div>
+  <div class="overlay" id="winOverlay"><div class="modal"><div class="ribbon">PERFECT!</div><div class="stars">★★★</div><h2>LEVEL CLEAR</h2><p id="winText">The station is clear.</p><button onclick="nextLevel()">NEXT LEVEL</button></div></div>
+  <div class="overlay" id="loseOverlay"><div class="modal lose"><div class="ribbon">TRY AGAIN</div><h2>PLATFORM FULL</h2><p>Waiting slots are full. Choose another queue order.</p><button onclick="restartLevel()">RESTART</button></div></div>
 </div>
 <script src="game.js"></script>
 </body>
