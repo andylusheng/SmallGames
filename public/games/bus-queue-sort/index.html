@@ -91,7 +91,7 @@
     el('deskShuffle').textContent=state.shuffleUses+' LEFT';
     el('deskSlot').textContent=state.slotUses+' LEFT';
     el('deskRefresh').textContent=state.refreshUses+' LEFT';
-    const need=currentNeed();
+    const need=typeof peekNeed==='function'?peekNeed():currentNeed();
     el('deskNeed').textContent=String(need).toUpperCase()+' BUS BOARDING';
     el('deskNeedDot').style.background=colors[need]||'#fff';
     el('deskNeedDot').style.boxShadow='0 0 18px '+(colors[need]||'#fff');
