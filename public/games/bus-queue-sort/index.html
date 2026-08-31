@@ -5,26 +5,141 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Bus Queue Sort — Play Free</title>
 <link rel="stylesheet" href="game.css">
+<style>
+.desktop-shell{width:100%;height:100%;display:grid;place-items:center}
+.desktop-panel{display:none}
+@media (min-width:900px) and (min-height:520px){
+  body{display:grid;place-items:center;padding:10px;overflow:hidden}
+  .desktop-shell{
+    width:min(1080px,calc(100vw - 20px));
+    height:min(660px,calc(100dvh - 20px));
+    display:grid;
+    grid-template-columns:minmax(360px,440px) minmax(300px,1fr);
+    gap:14px;
+    align-items:stretch;
+  }
+  .desktop-shell .stage{
+    width:auto;
+    height:100%;
+    max-height:100%;
+    aspect-ratio:2/3;
+    justify-self:end;
+    border-radius:22px;
+  }
+  .desktop-panel{
+    display:flex;
+    min-width:0;
+    flex-direction:column;
+    gap:12px;
+    padding:18px;
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:22px;
+    background:
+      radial-gradient(circle at 85% 0,rgba(80,130,255,.18),transparent 34%),
+      linear-gradient(180deg,#10254b,#091832 78%);
+    color:#fff;
+    box-shadow:0 28px 70px rgba(0,0,0,.32);
+    overflow:hidden;
+  }
+  .desktop-kicker{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#8ebcff;font-weight:800}
+  .desktop-title{margin:2px 0 0;font-size:clamp(24px,3vw,36px);line-height:1.05;font-weight:1000}
+  .desktop-copy{margin:0;color:#b8c7dc;font-size:13px;line-height:1.55}
+  .desktop-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .desktop-card{padding:12px;border-radius:15px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.055)}
+  .desktop-card small{display:block;color:#8294ac;font-size:9px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:4px}
+  .desktop-card strong{font-size:22px;line-height:1}
+  .desktop-rule{padding:14px;border-radius:16px;background:rgba(3,11,26,.52);border:1px solid rgba(255,255,255,.08)}
+  .desktop-rule-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+  .desktop-rule-head span:first-child{font-size:11px;font-weight:900;letter-spacing:.10em}
+  .desktop-need{display:inline-flex;align-items:center;gap:7px;color:#dfe9f6;font-size:12px;font-weight:800}
+  .need-dot{width:12px;height:12px;border-radius:50%;box-shadow:0 0 0 3px rgba(255,255,255,.10)}
+  .desktop-waiting{display:flex;gap:7px;flex-wrap:wrap}
+  .wait-slot{width:28px;height:28px;border-radius:9px;border:1px dashed #53657f;background:rgba(255,255,255,.035);display:grid;place-items:center}
+  .wait-slot i{width:14px;height:14px;border-radius:50%;display:block}
+  .desktop-tools{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:auto}
+  .desktop-tools button{min-width:0;height:58px;border:1px solid rgba(255,255,255,.14);border-radius:15px;color:#fff;font:inherit;font-size:10px;font-weight:900;letter-spacing:.04em;cursor:pointer;box-shadow:0 5px 0 rgba(0,0,0,.22)}
+  .desktop-tools button:nth-child(1){background:linear-gradient(#a24ef0,#6d24bd)}
+  .desktop-tools button:nth-child(2){background:linear-gradient(#42a8ff,#176bcf)}
+  .desktop-tools button:nth-child(3){background:linear-gradient(#59d742,#249c27)}
+  .desktop-tools button:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.22)}
+  .desktop-hint{font-size:11px;color:#71849d;line-height:1.45}
+}
+@media (max-width:899px){
+  .desktop-shell{display:block;width:100%;height:100%}
+}
+</style>
 </head>
 <body>
-<div class="stage" id="stage">
-  <img class="art" id="art" alt="">
-  <div class="level-mask" id="levelLabel">LEVEL 1</div>
-  <div class="moves-mask" id="movesLabel">21</div>
-  <div class="cap purple" id="cap-purple">4/12</div>
-  <div class="cap yellow" id="cap-yellow">2/12</div>
-  <div class="cap blue" id="cap-blue">1/12</div>
-  <div class="cap green" id="cap-green">3/12</div>
-  <div id="dynamic"></div>
-  <div class="combo" id="combo">PERFECT ×2</div>
-  <div class="toast" id="toast">Passenger boarded</div>
-  <div class="confetti" id="confetti"></div>
-  <div class="tool-hit shuffle" onclick="useShuffle()" aria-label="Shuffle"></div>
-  <div class="tool-hit slot" onclick="useExtraSlot()" aria-label="Extra slot"></div>
-  <div class="tool-hit refresh" onclick="useRefresh()" aria-label="Refresh bus"></div>
-  <div class="overlay" id="winOverlay"><div class="modal"><h2>LEVEL CLEAR!</h2><div class="stars">★★★</div><p id="winText">Perfect sorting.</p><button onclick="nextLevel()">NEXT LEVEL</button></div></div>
-  <div class="overlay" id="loseOverlay"><div class="modal"><h2>PLATFORM FULL</h2><p>Waiting slots are full. Try another queue order.</p><button onclick="restartLevel()">TRY AGAIN</button></div></div>
+<div class="desktop-shell">
+  <div class="stage" id="stage">
+    <img class="art" id="art" alt="">
+    <div class="level-mask" id="levelLabel">LEVEL 1</div>
+    <div class="moves-mask" id="movesLabel">21</div>
+    <div class="cap purple" id="cap-purple">4/12</div>
+    <div class="cap yellow" id="cap-yellow">2/12</div>
+    <div class="cap blue" id="cap-blue">1/12</div>
+    <div class="cap green" id="cap-green">3/12</div>
+    <div id="dynamic"></div>
+    <div class="combo" id="combo">PERFECT ×2</div>
+    <div class="toast" id="toast">Passenger boarded</div>
+    <div class="confetti" id="confetti"></div>
+    <div class="tool-hit shuffle" onclick="useShuffle()" aria-label="Shuffle"></div>
+    <div class="tool-hit slot" onclick="useExtraSlot()" aria-label="Extra slot"></div>
+    <div class="tool-hit refresh" onclick="useRefresh()" aria-label="Refresh bus"></div>
+    <div class="overlay" id="winOverlay"><div class="modal"><h2>LEVEL CLEAR!</h2><div class="stars">★★★</div><p id="winText">Perfect sorting.</p><button onclick="nextLevel()">NEXT LEVEL</button></div></div>
+    <div class="overlay" id="loseOverlay"><div class="modal"><h2>PLATFORM FULL</h2><p>Waiting slots are full. Try another queue order.</p><button onclick="restartLevel()">TRY AGAIN</button></div></div>
+  </div>
+
+  <aside class="desktop-panel" aria-label="Desktop game controls">
+    <div class="desktop-kicker">Station Control</div>
+    <h2 class="desktop-title">Bus Queue Sort</h2>
+    <p class="desktop-copy">Clear the platform by sending the front passenger to the matching bus. Wrong colors use limited waiting slots.</p>
+
+    <div class="desktop-stats">
+      <div class="desktop-card"><small>Level</small><strong id="deskLevel">1</strong></div>
+      <div class="desktop-card"><small>Moves left</small><strong id="deskMoves">21</strong></div>
+      <div class="desktop-card"><small>Boarded</small><strong id="deskBoarded">0</strong></div>
+      <div class="desktop-card"><small>Waiting</small><strong id="deskWaitingCount">0 / 5</strong></div>
+    </div>
+
+    <div class="desktop-rule">
+      <div class="desktop-rule-head">
+        <span>NEXT BUS COLOR</span>
+        <span class="desktop-need"><i class="need-dot" id="deskNeedDot"></i><b id="deskNeed">PURPLE</b></span>
+      </div>
+      <div class="desktop-waiting" id="deskWaiting"></div>
+    </div>
+
+    <div class="desktop-tools">
+      <button onclick="useShuffle()">⇆<br>SHUFFLE</button>
+      <button onclick="useExtraSlot()">＋<br>EXTRA SLOT</button>
+      <button onclick="useRefresh()">↻<br>REFRESH</button>
+    </div>
+    <div class="desktop-hint">Desktop mode keeps the full portrait playfield intact while moving status and controls into a native wide-screen control panel. Mobile keeps the original touch-first layout.</div>
+  </aside>
 </div>
 <script src="game.js"></script>
+<script>
+(function syncDesktopPanel(){
+  const colors={purple:'#8b49e9',yellow:'#f4b216',blue:'#178fe3',green:'#36bc3d'};
+  function paint(){
+    if(typeof state==='undefined'||!state){requestAnimationFrame(paint);return;}
+    const el=id=>document.getElementById(id);
+    el('deskLevel').textContent=state.level;
+    el('deskMoves').textContent=state.moves;
+    el('deskBoarded').textContent=state.boarded+' / '+state.target;
+    el('deskWaitingCount').textContent=state.waiting.length+' / '+state.waitLimit;
+    const need=currentNeed();
+    el('deskNeed').textContent=String(need).toUpperCase();
+    el('deskNeedDot').style.background=colors[need]||'#fff';
+    el('deskWaiting').innerHTML=Array.from({length:state.waitLimit},(_,i)=>{
+      const item=state.waiting[i];
+      return '<span class="wait-slot">'+(item?'<i style="background:'+colors[item.c]+'"></i>':'')+'</span>';
+    }).join('');
+    requestAnimationFrame(paint);
+  }
+  requestAnimationFrame(paint);
+})();
+</script>
 </body>
 </html>
