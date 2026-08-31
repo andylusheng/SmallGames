@@ -7,40 +7,49 @@
 <link rel="stylesheet" href="game.css">
 </head>
 <body>
-<main class="stage" id="stage" aria-label="Bus Queue Sort">
-  <img class="art" id="art" alt="Bus Queue Sort">
-  <div id="dynamic" class="dynamic"></div>
-  <div id="runtimeHud" class="runtime-hud" aria-hidden="true">
-    <div id="movesValue" class="moves-value">24</div>
-    <div id="capPurple" class="cap-overlay purple">12/12</div>
-    <div id="capYellow" class="cap-overlay yellow">8/12</div>
-    <div id="capBlue" class="cap-overlay blue">6/12</div>
-    <div id="capGreen" class="cap-overlay green">10/12</div>
-  </div>
+<div class="stage" id="stage">
+  <img class="art" id="art" alt="Bus Queue Sort game scene">
+  <img class="queue-floor" id="queueFloor" alt="" aria-hidden="true">
+
+  <div class="level-mask" id="levelLabel">LEVEL 42</div>
+  <div class="moves-mask" id="movesLabel">24</div>
+
+  <div class="cap purple" id="cap-purple">4/12</div>
+  <div class="cap yellow" id="cap-yellow">2/12</div>
+  <div class="cap blue" id="cap-blue">1/12</div>
+  <div class="cap green" id="cap-green">3/12</div>
+
+  <div id="dynamic"></div>
   <div class="combo" id="combo">COMBO ×2</div>
-  <div class="toast" id="toast"></div>
+  <div class="toast" id="toast">Passenger boarded</div>
   <div class="confetti" id="confetti"></div>
-  <button class="tool-hit shuffle" id="shuffleHit" aria-label="Shuffle"></button>
-  <button class="tool-hit slot" id="slotHit" aria-label="Extra slot"></button>
-  <button class="tool-hit refresh" id="refreshHit" aria-label="Refresh passenger"></button>
+
+  <div class="tool-count shuffle-count" id="shuffleCount">3</div>
+  <div class="tool-count slot-count" id="slotCount">2</div>
+  <div class="tool-count refresh-count" id="refreshCount">2</div>
+
+  <button class="tool-hit shuffle" onclick="useShuffle()" aria-label="Shuffle"></button>
+  <button class="tool-hit slot" onclick="useExtraSlot()" aria-label="Extra slot"></button>
+  <button class="tool-hit refresh" onclick="useRefresh()" aria-label="Refresh passenger"></button>
+
   <div class="overlay" id="winOverlay">
-    <div class="result-card">
-      <div class="result-ribbon">太棒了！</div>
-      <div class="result-stars">★★★</div>
-      <strong>关卡完成</strong>
-      <p id="winText">乘客已顺利上车</p>
-      <button id="nextButton">下一关 →</button>
+    <div class="modal">
+      <div class="ribbon">PERFECT!</div>
+      <div class="stars">★★★</div>
+      <h2>LEVEL CLEAR</h2>
+      <p id="winText">The station is clear.</p>
+      <button onclick="nextLevel()">NEXT LEVEL</button>
     </div>
   </div>
   <div class="overlay" id="loseOverlay">
-    <div class="result-card fail">
-      <div class="result-ribbon">站台已满</div>
-      <strong>换个顺序试试</strong>
-      <p>候车位已用完。</p>
-      <button id="retryButton">重新挑战</button>
+    <div class="modal lose">
+      <div class="ribbon">TRY AGAIN</div>
+      <h2>PLATFORM FULL</h2>
+      <p>Waiting slots are full. Choose another queue order.</p>
+      <button onclick="restartLevel()">RESTART</button>
     </div>
   </div>
-</main>
+</div>
 <script src="game.js"></script>
 </body>
 </html>
