@@ -36,19 +36,6 @@
     return coreTapPassenger(...args);
   };
 
-  window.renderWaiting = function() {
-    state.waiting.forEach((p, i) => {
-      const slot = waitSlots[i];
-      if (!slot) return;
-      const d = document.createElement('div');
-      d.className = 'waiting-passenger' + (p.type === 'vip' ? ' vip' : '') + (p.type === 'gray' ? ' gray' : '');
-      d.style.left = slot[0] / W * 100 + '%';
-      d.style.top = slot[1] / H * 100 + '%';
-      d.innerHTML = `<img src="${spriteFor(p.type)}" alt="">`;
-      dynamic.appendChild(d);
-    });
-  };
-
   window.busFull = function(color) {
     if (!state || state.busTransition) return;
     state.busTransition = true;
@@ -96,7 +83,7 @@
       badge.remove();
       state.busTransition = false;
       stage.classList.remove('bus-transition');
-      coreAutoWaiting();
+      if (!state.locked) coreAutoWaiting();
       render();
       toast('NEW ' + color.toUpperCase() + ' BUS ARRIVED');
       buzz(18);
