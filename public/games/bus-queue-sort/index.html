@@ -5,10 +5,46 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Bus Queue Sort — Play Free</title>
 <link rel="stylesheet" href="game.css">
+<link rel="stylesheet" href="enhancement.css">
 </head>
 <body>
 <div class="stage" id="stage">
   <img class="art" src="assets/background.webp" alt="Bus Queue Sort game scene">
+
+  <svg class="bus-defs" aria-hidden="true">
+    <defs>
+      <linearGradient id="busGlass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9fbff"/><stop offset=".48" stop-color="#9cddfa"/><stop offset="1" stop-color="#55aee0"/></linearGradient>
+      <linearGradient id="tire" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#34465b"/><stop offset="1" stop-color="#101a27"/></linearGradient>
+      <radialGradient id="lamp" cx="36%" cy="28%" r="70%"><stop stop-color="#fffce0"/><stop offset=".5" stop-color="#fff0a5"/><stop offset="1" stop-color="#efb834"/></radialGradient>
+      <symbol id="bus-shape" viewBox="0 0 116 104">
+        <ellipse cx="58" cy="94" rx="45" ry="8" fill="#17233b" opacity=".28"/>
+        <path d="M18 20Q22 8 38 5h40q16 3 20 15l7 54q2 13-12 17H23Q9 87 11 74z" fill="var(--bus-dark)" stroke="#f4f7ff" stroke-width="2.2"/>
+        <path d="M20 22Q24 11 39 9h38q15 2 19 13l5 42H15z" fill="var(--bus-main)"/>
+        <path d="M22 23Q27 13 40 12h36q13 1 18 11l2 4H20z" fill="var(--bus-light)" opacity=".82"/>
+        <rect x="24" y="22" width="68" height="31" rx="8" fill="url(#busGlass)" stroke="#eefcff" stroke-width="2.2"/>
+        <path d="M46 24v27M70 24v27" stroke="#eafbff" stroke-width="2" opacity=".86"/>
+        <path d="M29 27Q57 18 87 27" fill="none" stroke="#fff" stroke-width="3.8" stroke-linecap="round" opacity=".34"/>
+        <path d="M17 62h82l2 13q1 8-9 11H24q-10-3-9-11z" fill="var(--bus-mid)"/>
+        <rect x="23" y="61" width="70" height="8" rx="4" fill="var(--bus-light)" opacity=".55"/>
+        <rect x="42" y="72" width="32" height="6" rx="3" fill="#223449" opacity=".42"/>
+        <circle cx="26" cy="73" r="7" fill="url(#lamp)" stroke="#fff7bf" stroke-width="1.5"/>
+        <circle cx="90" cy="73" r="7" fill="url(#lamp)" stroke="#fff7bf" stroke-width="1.5"/>
+        <rect x="25" y="82" width="66" height="7" rx="3.5" fill="#d9e7f5" opacity=".94"/>
+        <circle cx="30" cy="89" r="11" fill="url(#tire)" stroke="#08111e" stroke-width="2"/><circle cx="86" cy="89" r="11" fill="url(#tire)" stroke="#08111e" stroke-width="2"/>
+        <circle cx="30" cy="89" r="4.5" fill="#70879e"/><circle cx="86" cy="89" r="4.5" fill="#70879e"/>
+        <path d="M17 40h-6q-4 1-3 7l2 9h6M99 40h6q4 1 3 7l-2 9h-6" fill="var(--bus-dark)" stroke="#f0f5ff" stroke-width="1.5"/>
+        <path d="M19 57h78" stroke="#fff" stroke-width="1.6" opacity=".3"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <div class="bus-layer" aria-hidden="true">
+    <div class="bus-sprite purple" id="bus-purple"><svg viewBox="0 0 116 104"><use href="#bus-shape"/></svg></div>
+    <div class="bus-sprite yellow" id="bus-yellow"><svg viewBox="0 0 116 104"><use href="#bus-shape"/></svg></div>
+    <div class="bus-sprite blue" id="bus-blue"><svg viewBox="0 0 116 104"><use href="#bus-shape"/></svg></div>
+    <div class="bus-sprite green" id="bus-green"><svg viewBox="0 0 116 104"><use href="#bus-shape"/></svg></div>
+  </div>
+
   <svg class="route-layer" id="routeSvg" viewBox="0 0 465 720" aria-hidden="true">
     <path id="routeGlow" class="route-glow" d=""/>
     <path id="routeDash" class="route-dash" d=""/>
@@ -37,5 +73,6 @@
   <div class="overlay" id="loseOverlay"><div class="modal lose"><div class="ribbon">TRY AGAIN</div><h2>PLATFORM FULL</h2><p>Waiting slots are full. Choose another queue order.</p><button onclick="restartLevel()">RESTART</button></div></div>
 </div>
 <script src="game.js"></script>
+<script src="enhancement.js"></script>
 </body>
 </html>
