@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>水果对对碰 · 产品原型 v0.4（质感·消除感·连线）</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{font-family:"Segoe UI Rounded","SF Pro Rounded","PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:#0b0e1a;color:#fff;padding:30px 18px 60px;min-height:100vh}
+
+  .doc-head{text-align:center;margin-bottom:28px}
+  .doc-head h1{font-size:28px;font-weight:1000;letter-spacing:-.5px;background:linear-gradient(180deg,#fff,#ffd9a8);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .doc-head p{font-size:13px;color:#8b95b8;margin-top:6px}
+  .doc-head p b{color:#ffd9a8}
+
+  .section-label{font-size:12px;font-weight:800;letter-spacing:2px;color:#6b7599;text-transform:uppercase;margin:28px 0 12px;padding-left:10px;border-left:3px solid #ff9a3d}
+  .row{display:flex;flex-wrap:wrap;gap:26px;justify-content:center;align-items:flex-start}
+
+  :root{
+    --bg1:#1a1140;--bg2:#0f1a3a;
+    --card:rgba(255,255,255,.06);--card-border:rgba(255,255,255,.1);
+    --board-bg:linear-gradient(160deg,#22304d,#151d30);
+    --gold:#ffd93d;--orange:#ff9a3d;--red:#ff4d6d;--teal:#4ecdc4;
+  }
+
+  /* ===== WEB 宽屏 ===== */
+  .web{width:940px;height:600px;border-radius:22px;overflow:hidden;position:relative;background:linear-gradient(135deg,var(--bg1),var(--bg2));box-shadow:0 30px 70px rgba(0,0,0,.6),inset 0 1px rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1)}
+  .web::before{content:"";position:absolute;top:-100px;left:-80px;width:400px;height:400px;background:radial-gradient(circle,rgba(255,154,61,.18),transparent 70%);pointer-events:none}
+  .web::after{content:"";position:absolute;bottom:-120px;right:-60px;width:420px;height:420px;background:radial-gradient(circle,rgba(78,205,196,.14),transparent 70%);pointer-events:none}
+  .web-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column}
+
+  .web-top{height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;border-bottom:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.18);backdrop-filter:blur(10px)}
+  .web-logo{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:1000}
+  .web-logo .fruits{font-size:26px;filter:drop-shadow(0 3px 6px rgba(0,0,0,.4))}
+  .web-logo b{background:linear-gradient(180deg,#fff,#ffd9a8);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .web-logo span{font-size:11px;color:#8b95b8;font-weight:700;letter-spacing:2px;margin-left:4px}
+  .web-hud{display:flex;align-items:center;gap:14px}
+  .hud-box{background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:7px 14px;display:flex;align-items:center;gap:8px;backdrop-filter:blur(8px);box-shadow:inset 0 1px rgba(255,255,255,.06)}
+  .hud-box .lb{font-size:9px;color:#8b95b8;font-weight:800;letter-spacing:1px;text-transform:uppercase}
+  .hud-box .vl{font-size:18px;font-weight:1000;color:#fff;font-variant-numeric:tabular-nums}
+  .hud-box .ic{font-size:16px}
+  .timer-circle{width:44px;height:44px;border-radius:50%;background:conic-gradient(var(--teal) 0% 72%,rgba(255,255,255,.12) 72%);display:grid;place-items:center;position:relative;box-shadow:0 4px 14px rgba(78,205,196,.3),inset 0 2px rgba(255,255,255,.1)}
+  .timer-circle::before{content:"";position:absolute;inset:4px;border-radius:50%;background:#1a2332;box-shadow:inset 0 2px 4px rgba(0,0,0,.5)}
+  .timer-circle span{position:relative;z-index:2;font-size:13px;font-weight:1000;color:var(--teal);font-variant-numeric:tabular-nums}
+  .stars-mini{display:flex;gap:3px}
+  .stars-mini .s{font-size:16px;filter:grayscale(1) opacity(.3)}
+  .stars-mini .s.on{filter:none;filter:drop-shadow(0 0 4px rgba(255,217,61,.6))}
+
+  .web-body{flex:1;display:flex;align-items:center;justify-content:center;gap:36px;padding:24px 28px}
+
+  /* ===== 棋盘（升级质感） ===== */
+  .web-board-wrap{background:var(--board-bg);border-radius:24px;padding:22px;box-shadow:inset 0 4px 20px rgba(0,0,0,.55),inset 0 1px rgba(255,255,255,.06),0 10px 30px rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.08);position:relative}
+  .web-board-wrap::after{content:"";position:absolute;inset:0;border-radius:24px;background:linear-gradient(135deg,rgba(255,255,255,.08),transparent 40%);pointer-events:none}
+  .web-board{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;position:relative}
+  .web-cell{width:74px;height:74px;border-radius:14px;display:grid;place-items:center;position:relative}
+  .web-cell.empty{background:rgba(0,0,0,.3);box-shadow:inset 0 3px 8px rgba(0,0,0,.6),inset 0 -1px rgba(255,255,255,.03)}
+
+  /* 水果砖——高质感凸起 */
+  .tile{width:100%;height:100%;border-radius:14px;display:grid;place-items:center;cursor:pointer;position:relative;
+    background:linear-gradient(180deg,#fffdf7 0%,#f5e8cd 45%,#e8d4a8 100%);
+    box-shadow:0 5px 0 #b8945e,0 9px 16px rgba(0,0,0,.4),inset 0 2px rgba(255,255,255,.95),inset 0 -4px rgba(0,0,0,.1),0 0 0 1px rgba(255,255,255,.4);
+    border:1px solid rgba(255,255,255,.6);
+    transition:transform .12s,box-shadow .12s}
+  .tile::before{content:"";position:absolute;top:6%;left:10%;width:50%;height:30%;border-radius:50%;background:linear-gradient(180deg,rgba(255,255,255,.7),transparent);pointer-events:none}
+  .tile .fr{font-size:42px;line-height:1;filter:drop-shadow(0 3px 4px rgba(0,0,0,.3));position:relative;z-index:2}
+  .tile:hover{transform:translateY(-2px)}
+  .tile:active{transform:translateY(3px);box-shadow:0 1px 0 #b8945e,0 2px 6px rgba(0,0,0,.3),inset 0 2px rgba(255,255,255,.9)}
+  .tile.selected{transform:translateY(-4px) scale(1.06);box-shadow:0 0 0 3px var(--gold),0 0 28px 8px rgba(255,217,61,.65),0 8px 18px rgba(0,0,0,.4);border-color:var(--gold);z-index:5}
+  .tile.selected::after{content:"";position:absolute;inset:-3px;border-radius:15px;border:2px solid rgba(255,255,255,.6);animation:selRing 1s ease-in-out infinite;pointer-events:none}
+  @keyframes selRing{0%,100%{opacity:.6;transform:scale(1)}50%{opacity:1;transform:scale(1.04)}}
+  .tile.hint{animation:hintG .8s ease-in-out infinite}
+  @keyframes hintG{0%,100%{box-shadow:0 5px 0 #b8945e,0 9px 16px rgba(0,0,0,.4),inset 0 2px rgba(255,255,255,.95)}50%{box-shadow:0 0 0 3px var(--teal),0 0 24px 6px rgba(78,205,196,.65),0 9px 16px rgba(0,0,0,.4)}}
+
+  /* ===== 配对连线 ===== */
+  .pair-line{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:4;overflow:visible}
+  .pair-line path{fill:none;stroke:url(#lineGrad);stroke-width:4;stroke-linecap:round;filter:drop-shadow(0 0 6px rgba(255,217,61,.9)) drop-shadow(0 0 12px rgba(255,154,61,.5));stroke-dasharray:12 8;animation:lineFlow .6s linear infinite}
+  @keyframes lineFlow{to{stroke-dashoffset:-40}}
+  .pair-line .dot{fill:#fff;filter:drop-shadow(0 0 4px #fff)}
+
+  /* ===== 消除爆裂特效 ===== */
+  .burst{position:absolute;top:50%;left:50%;width:0;height:0;z-index:6;pointer-events:none}
+  .burst .flash{position:absolute;top:-40px;left:-40px;width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.95) 0%,rgba(255,217,61,.6) 30%,transparent 70%);animation:flashOut .5s ease-out forwards}
+  @keyframes flashOut{0%{transform:scale(.3);opacity:1}100%{transform:scale(2);opacity:0}}
+  .burst .p{position:absolute;width:10px;height:10px;border-radius:50%;animation:pFly .7s cubic-bezier(.2,.7,.3,1) forwards}
+  @keyframes pFly{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(.2) rotate(var(--rot));opacity:0}}
+  .burst .ring{position:absolute;top:-24px;left:-24px;width:48px;height:48px;border-radius:50%;border:3px solid rgba(255,255,255,.8);animation:ringOut .5s ease-out forwards}
+  @keyframes ringOut{0%{transform:scale(.4);opacity:1}100%{transform:scale(2.2);opacity:0}}
+  .score-float{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:18px;font-weight:1000;color:var(--gold);text-shadow:0 2px 0 #b8540a,0 0 12px rgba(255,217,61,.7);z-index:7;animation:sFloat 1s ease-out forwards;white-space:nowrap}
+  @keyframes sFloat{0%{opacity:0;transform:translate(-50%,8px) scale(.6)}20%{opacity:1;transform:translate(-50%,-4px) scale(1.2)}100%{opacity:0;transform:translate(-50%,-36px) scale(1)}}
+
+  /* WEB 右侧栏 */
+  .web-side{width:230px;display:flex;flex-direction:column;gap:14px}
+  .combo-card{background:linear-gradient(135deg,rgba(255,77,109,.18),rgba(255,154,61,.12));border:1px solid rgba(255,77,109,.35);border-radius:18px;padding:16px;text-align:center;position:relative;overflow:hidden}
+  .combo-card::before{content:"";position:absolute;top:-30px;right:-20px;width:80px;height:80px;background:radial-gradient(circle,rgba(255,217,61,.3),transparent);border-radius:50%}
+  .combo-card .lb{font-size:10px;color:#ffb3c0;font-weight:800;letter-spacing:2px}
+  .combo-card .big{font-size:46px;font-weight:1000;background:linear-gradient(180deg,#fff,#ff8fa3);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1.1;margin-top:2px;filter:drop-shadow(0 3px 8px rgba(255,77,109,.5));animation:comboPop .5s ease-out}
+  @keyframes comboPop{0%{transform:scale(.4)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+  .combo-card .sub{font-size:11px;color:#ffd0d8;margin-top:2px}
+  .side-tools{display:flex;flex-direction:column;gap:10px}
+  .tbtn{padding:13px 16px;border:none;border-radius:14px;background:linear-gradient(180deg,#fff,#ece4f8);color:#4a3a6a;font-weight:900;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:14px;box-shadow:0 4px 0 #b89fd8,0 6px 14px rgba(0,0,0,.3),inset 0 1px #fff,inset 0 -2px rgba(0,0,0,.06);border:1px solid rgba(255,255,255,.7);position:relative;transition:transform .1s}
+  .tbtn:active{transform:translateY(3px);box-shadow:0 1px 0 #b89fd8,0 2px 5px rgba(0,0,0,.3)}
+  .tbtn .ic{font-size:20px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.2))}
+  .tbtn .cnt{margin-left:auto;background:var(--red);color:#fff;font-size:11px;font-weight:1000;border-radius:999px;min-width:22px;height:22px;display:grid;place-items:center;padding:0 6px;box-shadow:0 2px 5px rgba(255,77,109,.5),inset 0 1px rgba(255,255,255,.3)}
+  .side-tip{background:var(--card);border:1px solid var(--card-border);border-radius:14px;padding:12px 14px;font-size:11.5px;color:#aeb8d8;line-height:1.7;backdrop-filter:blur(6px)}
+  .side-tip b{color:#ffd9a8}
+
+  /* WEB 开始页 */
+  .web-start{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;position:relative;z-index:2}
+  .start-fruits{font-size:64px;letter-spacing:-6px;filter:drop-shadow(0 8px 16px rgba(0,0,0,.4));animation:bob 3s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  .web-start h2{font-size:56px;font-weight:1000;line-height:1;letter-spacing:-2px;background:linear-gradient(180deg,#fff 0%,#ffd9a8 55%,#ff9a3d 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 5px 0 rgba(180,80,30,.4)) drop-shadow(0 10px 24px rgba(255,140,60,.35))}
+  .web-start .en{font-size:14px;font-weight:800;letter-spacing:5px;color:#b8a4d8;margin-top:-8px}
+  .start-rules{display:flex;gap:14px;margin-top:6px}
+  .sr{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px 18px;display:flex;align-items:center;gap:10px;backdrop-filter:blur(6px);box-shadow:inset 0 1px rgba(255,255,255,.06)}
+  .sr .ic{font-size:24px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.3))}
+  .sr b{display:block;font-size:13px;color:#fff}
+  .sr span{font-size:10.5px;color:#8b95b8}
+  .btn-big{padding:18px 56px;border:none;border-radius:18px;background:linear-gradient(180deg,var(--gold) 0%,var(--orange) 55%,#f56b2a 100%);color:#5a2000;font-size:20px;font-weight:1000;letter-spacing:3px;cursor:pointer;box-shadow:0 10px 28px rgba(245,107,42,.5),inset 0 2px rgba(255,255,255,.7),inset 0 -4px rgba(0,0,0,.15);border:2px solid rgba(255,255,255,.6);text-shadow:0 1px rgba(255,255,255,.4);position:relative;overflow:hidden}
+  .btn-big::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.6),transparent);transform:skewX(-20deg);animation:shine 2.8s ease-in-out infinite}
+  @keyframes shine{0%{left:-60%}60%,100%{left:130%}}
+  .start-foot{font-size:12px;color:#6b7599}
+  .start-foot b{color:var(--gold)}
+
+  /* ===== 移动端 ===== */
+  .phone{width:300px;background:#0d0620;border-radius:36px;border:3px solid #2d2450;box-shadow:0 26px 60px rgba(0,0,0,.6),inset 0 2px rgba(255,255,255,.08);padding:9px;position:relative}
+  .phone::before{content:"";position:absolute;top:9px;left:50%;transform:translateX(-50%);width:100px;height:22px;background:#0d0620;border-radius:0 0 12px 12px;z-index:20}
+  .pscreen{border-radius:28px;overflow:hidden;position:relative;height:600px;margin-top:12px;background:linear-gradient(160deg,var(--bg1),var(--bg2))}
+  .pscreen::before{content:"";position:absolute;top:-60px;right:-40px;width:260px;height:260px;background:radial-gradient(circle,rgba(255,154,61,.16),transparent 70%);pointer-events:none}
+  .ptag{position:absolute;top:4px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.5);backdrop-filter:blur(6px);color:#ffd9a8;font-size:9px;font-weight:800;letter-spacing:1px;padding:3px 10px;border-radius:999px;z-index:30;border:1px solid rgba(255,217,168,.25)}
+
+  .p-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;padding:26px 12px 12px;gap:8px}
+  .p-top{display:flex;align-items:center;justify-content:space-between;gap:5px}
+  .p-chip{background:var(--card);border:1px solid var(--card-border);border-radius:11px;padding:5px 9px;display:flex;align-items:center;gap:5px;backdrop-filter:blur(6px);box-shadow:inset 0 1px rgba(255,255,255,.05)}
+  .p-chip .ic{font-size:14px}
+  .p-chip .vl{font-size:10px;color:#8b95b8;font-weight:800;letter-spacing:.5px;line-height:1}
+  .p-chip .vr{font-size:15px;color:#fff;font-weight:1000;line-height:1;font-variant-numeric:tabular-nums}
+  .p-timer{width:40px;height:40px;border-radius:50%;background:conic-gradient(var(--teal) 0% 72%,rgba(255,255,255,.12) 72%);display:grid;place-items:center;position:relative;box-shadow:0 3px 10px rgba(78,205,196,.3)}
+  .p-timer::before{content:"";position:absolute;inset:4px;border-radius:50%;background:#1a2332;box-shadow:inset 0 2px 3px rgba(0,0,0,.5)}
+  .p-timer span{position:relative;z-index:2;font-size:12px;font-weight:1000;color:var(--teal)}
+  .p-stars{display:flex;gap:2px;justify-content:center;background:var(--card);border:1px solid var(--card-border);border-radius:999px;padding:3px 10px}
+  .p-stars .s{font-size:14px;filter:grayscale(1) opacity(.3)}
+  .p-stars .s.on{filter:none;filter:drop-shadow(0 0 3px rgba(255,217,61,.5))}
+  .p-combo{text-align:center;font-size:18px;font-weight:1000;color:var(--red);text-shadow:0 2px 0 rgba(255,255,255,.3),0 0 10px rgba(255,77,109,.6);letter-spacing:1px;animation:comboPop .5s ease-out}
+
+  .p-board-wrap{flex:1;background:var(--board-bg);border-radius:18px;padding:12px;box-shadow:inset 0 3px 14px rgba(0,0,0,.55),inset 0 1px rgba(255,255,255,.05),0 6px 18px rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.07);position:relative}
+  .p-board{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;height:100%;position:relative}
+  .p-cell{aspect-ratio:1;border-radius:10px;display:grid;place-items:center;position:relative}
+  .p-cell.empty{background:rgba(0,0,0,.3);box-shadow:inset 0 2px 5px rgba(0,0,0,.55)}
+  .p-tile{width:100%;height:100%;border-radius:10px;display:grid;place-items:center;cursor:pointer;position:relative;background:linear-gradient(180deg,#fffdf7,#f0e0c0);box-shadow:0 3px 0 #b8945e,0 4px 8px rgba(0,0,0,.3),inset 0 1.5px rgba(255,255,255,.95),inset 0 -2px rgba(0,0,0,.08);border:1px solid rgba(255,255,255,.5);transition:transform .12s}
+  .p-tile::before{content:"";position:absolute;top:8%;left:12%;width:45%;height:25%;border-radius:50%;background:linear-gradient(180deg,rgba(255,255,255,.65),transparent);pointer-events:none}
+  .p-tile .fr{font-size:28px;line-height:1;filter:drop-shadow(0 2px 3px rgba(0,0,0,.3));position:relative;z-index:2}
+  .p-tile.selected{transform:scale(1.1);box-shadow:0 0 0 2.5px var(--gold),0 0 18px 4px rgba(255,217,61,.65),0 4px 10px rgba(0,0,0,.4);z-index:5}
+  .p-tools{display:flex;gap:8px;padding:0 2px}
+  .p-tbtn{flex:1;padding:10px 6px;border:none;border-radius:12px;background:linear-gradient(180deg,#fff,#ece4f8);color:#4a3a6a;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;font-size:12px;box-shadow:0 3px 0 #b89fd8,0 4px 8px rgba(0,0,0,.3),inset 0 1px #fff;border:1px solid rgba(255,255,255,.7);position:relative}
+  .p-tbtn .ic{font-size:16px}
+  .p-tbtn .cnt{position:absolute;top:-5px;right:-3px;background:var(--red);color:#fff;font-size:9px;font-weight:1000;border-radius:999px;min-width:16px;height:16px;display:grid;place-items:center;padding:0 4px;border:1.5px solid #fff}
+
+  /* 移动结算 */
+  .p-result{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:30px 18px;text-align:center;position:relative;z-index:2}
+  .p-result .emoji{font-size:52px;filter:drop-shadow(0 6px 12px rgba(0,0,0,.4));animation:bob 2.5s ease-in-out infinite}
+  .p-result h3{font-size:32px;font-weight:1000;background:linear-gradient(180deg,#fff,var(--gold) 60%,var(--orange));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 3px 0 rgba(180,80,30,.4))}
+  .p-bigstars{font-size:38px;letter-spacing:6px;filter:drop-shadow(0 3px 6px rgba(255,180,50,.5))}
+  .p-bigstars .off{filter:grayscale(1) opacity(.3)}
+  .p-rcards{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .p-rcard{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:9px 4px;box-shadow:inset 0 1px rgba(255,255,255,.06)}
+  .p-rcard small{display:block;font-size:8px;color:#8b95b8;font-weight:800;letter-spacing:1px}
+  .p-rcard b{display:block;font-size:17px;color:#fff;font-weight:1000;margin-top:1px}
+  .p-rbtns{display:flex;gap:8px;width:100%}
+  .p-rbtn{flex:1;padding:12px;border:none;border-radius:14px;font-size:13px;font-weight:900;cursor:pointer}
+  .p-rbtn.ghost{background:rgba(255,255,255,.1);color:#c8b8e0;border:1px solid rgba(255,255,255,.15)}
+  .p-rbtn.gold{background:linear-gradient(180deg,var(--gold),var(--orange) 60%,#f56b2a);color:#5a2000;box-shadow:0 4px 14px rgba(245,107,42,.4),inset 0 1px rgba(255,255,255,.6);border:1.5px solid rgba(255,255,255,.5)}
+  .p-record{background:linear-gradient(90deg,var(--red),var(--orange));color:#fff;font-size:10px;font-weight:900;padding:4px 12px;border-radius:999px;letter-spacing:1px;animation:pulseR 1.2s infinite}
+  @keyframes pulseR{50%{transform:scale(1.06)}}
+
+  /* 底部说明 */
+  .spec{max-width:940px;margin:36px auto 0;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:20px 24px}
+  .spec h3{font-size:15px;color:#ffd9a8;margin-bottom:10px}
+  .spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;font-size:12.5px;color:#b8b8d8;line-height:1.8}
+  .spec-grid b{color:#fff}
+</style>
+</head>
+<body>
+
+<!-- SVG 渐变定义（全局复用） -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fff"/>
+      <stop offset="50%" stop-color="#ffd93d"/>
+      <stop offset="100%" stop-color="#ff9a3d"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<div class="doc-head">
+  <h1>🍎 水果对对碰 · 产品原型 v0.4</h1>
+  <p>质感升级 · 配对发光连线 · 消除爆裂粒子 · Web + 移动双端</p>
+</div>
+
+<!-- ==================== WEB 端 ==================== -->
+<div class="section-label">🖥 Web 端（940×600）</div>
+<div class="row">
+
+  <!-- WEB 开始页 -->
+  <div class="web">
+    <div class="web-start">
+      <div class="start-fruits">🍎🍇🍊🍋🍉🍓</div>
+      <h2>水果对对碰</h2>
+      <div class="en">FRUIT MATCH PAIRS</div>
+      <div class="start-rules">
+        <div class="sr"><div class="ic">👆</div><div><b>点对消除</b><span>选一颗再点相同</span></div></div>
+        <div class="sr"><div class="ic">🔥</div><div><b>连击倍率</b><span>最高 ×5 得分</span></div></div>
+        <div class="sr"><div class="ic">⏰</div><div><b>限时清空</b><span>剩余时间换星级</span></div></div>
+      </div>
+      <button class="btn-big">▶ 开始游戏</button>
+      <div class="start-foot">🏆 最高分 <b>14,960</b>　·　🔊 音效已开　·　💾 进度自动保存</div>
+    </div>
+  </div>
+
+  <!-- WEB 游戏中（展示连线 + 消除特效） -->
+  <div class="web">
+    <div class="web-inner">
+      <div class="web-top">
+        <div class="web-logo"><span class="fruits">🍎🍇</span><b>水果对对碰</b><span>LV.3</span></div>
+        <div class="web-hud">
+          <div class="hud-box"><span class="ic">⭐</span><div><div class="lb">Score</div><div class="vl">1,490</div></div></div>
+          <div class="timer-circle"><span>72</span></div>
+          <div class="stars-mini"><span class="s on">⭐</span><span class="s on">⭐</span><span class="s">⭐</span></div>
+        </div>
+      </div>
+      <div class="web-body">
+        <div class="web-board-wrap">
+          <div class="web-board">
+            <!-- 配对连线 SVG：连接 (0,0)苹果 和 (2,1)苹果 -->
+            <svg class="pair-line" viewBox="0 0 504 504" preserveAspectRatio="none">
+              <path d="M37,37 C120,80 160,140 222,161" stroke="url(#lineGrad)" stroke-width="4" fill="none" stroke-linecap="round" style="filter:drop-shadow(0 0 6px rgba(255,217,61,.9))"/>
+              <circle cx="37" cy="37" r="5" fill="#fff" style="filter:drop-shadow(0 0 4px #fff)"/>
+              <circle cx="222" cy="161" r="5" fill="#fff" style="filter:drop-shadow(0 0 4px #fff)"/>
+            </svg>
+
+            <div class="web-cell"><div class="tile selected"><span class="fr">🍎</span></div></div>
+            <div class="web-cell"><div class="tile"><span class="fr">🍇</span></div></div>
+            <div class="web-cell empty"></div>
+            <div class="web-cell"><div class="tile"><span class="fr">🍊</span></div></div>
+            <div class="web-cell"><div class="tile"><span class="fr">🍋</span></div></div>
+            <div class="web-cell"><div class="tile"><span class="fr">🍉</span></div></div>
+
+            <div class="web-cell"><div class="tile"><span class="fr">🍉</span></div></div>
+            <div class="web-cell">
+              <!-- 正在消除爆裂的苹果 -->
+              <div class="tile" style="opacity:.3;transform:scale(.8)"><span class="fr">🍎</span></div>
+              <div class="burst">
+                <div class="flash"></div>
+                <div class="ring"></div>
+                <div class="p" style="--dx:-30px;--dy:-25px;--rot:120deg;background:#ff4d6d;animation-delay:0s"></div>
+                <div class="p" style="--dx:28px;--dy:-30px;--rot:-90deg;background:#ffd93d;animation-delay:.03s"></div>
+                <div class="p" style="--dx:35px;--dy:10px;--rot:60deg;background:#4ecdc4;animation-delay:.06s"></div>
+                <div class="p" style="--dx:-20px;--dy:28px;--rot:-150deg;background:#a78bfa;animation-delay:.02s"></div>
+                <div class="p" style="--dx:10px;--dy:35px;--rot:200deg;background:#ff9a3d;animation-delay:.05s"></div>
+                <div class="p" style="--dx:-35px;--dy:5px;--rot:-60deg;background:#34d399;animation-delay:.04s"></div>
+                <div class="p" style="--dx:22px;--dy:-18px;--rot:300deg;background:#f472b6;animation-delay:.07s"></div>
+                <div class="p" style="--dx:-12px;--dy:-32px;--rot:180deg;background:#60a5fa;animation-delay:.01s"></div>
+              </div>
+              <div class="score-float">+160 ×4</div>
+            </div>
+            <div class="web-cell"><div class="tile"><span class="fr">🍓</span></div></div>
+            <div class="web-cell empty"></div>
+            <div class="web-cell"><div class="tile"><span class="fr">🥝</span></div></div>
+
+            <div class="web-cell"><div class="tile"><span class="fr">🍋</span></div></div>
+            <div class="web-cell"><div class="tile"><span class="fr">🍊</span></div></div>
+            <div class="web-cell"><div class="tile"><span class="fr">🍇</span></div></div>
+            <div class="web-cell empty"></div>
+            <div class="web-cell"><div class="tile"><span class="fr">🍒</span></div></div>
+            <div class="web-cell"><div class="tile"><span class="fr">🍓</span></div></div>
+
+            <div class="web-cell empty"></div>
+            <div class="web-cell"><div class="tile"><span class="fr">🥝</span></div></div>
+            <div class="web-cell"><div class="tile hint"><span class="fr">🍒</span></div></div>
+            <div class="web-cell"><div class="tile"><span class="fr">🍎</span></div></div>
+            <div class="web-cell"><div class="tile"><span class="fr">🍇</span></div></div>
+            <div class="web-cell empty"></div>
+
+            <div class="web-cell"><div class="tile"><span class="fr">🍊</span></div></div>
+            <div class="web-cell empty"></div>
+            <div class="web-cell"><div class="tile"><span class="fr">🍋</span></div></div>
+            <div class="web-cell"><div class="tile"><span class="fr">🍉</span></div></div>
+            <div class="web-cell empty"></div>
+            <div class="web-cell"><div class="tile"><span class="fr">🍓</span></div></div>
+
+            <div class="web-cell"><div class="tile"><span class="fr">🍒</span></div></div>
+            <div class="web-cell"><div class="tile"><span class="fr">🥝</span></div></div>
+            <div class="web-cell empty"></div>
+            <div class="web-cell"><div class="tile"><span class="fr">🍊</span></div></div>
+            <div class="web-cell"><div class="tile"><span class="fr">🍎</span></div></div>
+            <div class="web-cell"><div class="tile"><span class="fr">🍇</span></div></div>
+          </div>
+        </div>
+        <div class="web-side">
+          <div class="combo-card">
+            <div class="lb">COMBO</div>
+            <div class="big">×4</div>
+            <div class="sub">连续消除 · 倍率得分</div>
+          </div>
+          <div class="side-tools">
+            <button class="tbtn"><span class="ic">🔍</span>提示（高亮一对）<span class="cnt">2</span></button>
+            <button class="tbtn"><span class="ic">⏰</span>加时 +15 秒<span class="cnt">2</span></button>
+          </div>
+          <div class="side-tip">
+            <b>配对连线：</b>选中后点同款，两颗水果间出现金白发光连线（流动虚线），随后爆裂消除。<br>
+            <b>消除反馈：</b>白光闪光 + 扩散环 + 8 向彩色粒子 + 飘分，combo 越高粒子越密。
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== 移动端 ==================== -->
+<div class="section-label">📱 移动端（390px 优先）</div>
+<div class="row">
+
+  <!-- 移动游戏中（展示连线 + 消除） -->
+  <div class="phone">
+    <div class="pscreen">
+      <div class="ptag">GAMEPLAY</div>
+      <div class="p-inner">
+        <div class="p-top">
+          <div class="p-chip"><span class="ic">🏝</span><div><div class="vl">LV</div><div class="vr">3</div></div></div>
+          <div class="p-chip"><span class="ic">⭐</span><div><div class="vl">SCORE</div><div class="vr">1,490</div></div></div>
+          <div class="p-timer"><span>72</span></div>
+        </div>
+        <div class="p-stars"><span class="s on">⭐</span><span class="s on">⭐</span><span class="s">⭐</span></div>
+        <div class="p-combo">🔥 COMBO ×4!</div>
+        <div class="p-board-wrap">
+          <div class="p-board">
+            <svg class="pair-line" viewBox="0 0 252 252" preserveAspectRatio="none" style="overflow:visible">
+              <path d="M18,18 C60,40 80,70 111,80" stroke="url(#lineGrad)" stroke-width="3" fill="none" stroke-linecap="round" style="filter:drop-shadow(0 0 5px rgba(255,217,61,.9))"/>
+              <circle cx="18" cy="18" r="4" fill="#fff"/>
+              <circle cx="111" cy="80" r="4" fill="#fff"/>
+            </svg>
+
+            <div class="p-cell"><div class="p-tile selected"><span class="fr">🍎</span></div></div>
+            <div class="p-cell"><div class="p-tile"><span class="fr">🍇</span></div></div>
+            <div class="p-cell empty"></div>
+            <div class="p-cell"><div class="p-tile"><span class="fr">🍊</span></div></div>
+            <div class="p-cell"><div class="p-tile"><span class="fr">🍋</span></div></div>
+            <div class="p-cell"><div class="p-tile"><span class="fr">🍉</span></div></div>
+
+            <div class="p-cell"><div class="p-tile"><span class="fr">🍉</span></div></div>
+            <div class="p-cell">
+              <div class="p-tile" style="opacity:.3;transform:scale(.75)"><span class="fr">🍎</span></div>
+              <div class="burst" style="transform:scale(.7)">
+                <div class="flash"></div>
+                <div class="ring"></div>
+                <div class="p" style="--dx:-22px;--dy:-18px;--rot:120deg;background:#ff4d6d"></div>
+                <div class="p" style="--dx:20px;--dy:-22px;--rot:-90deg;background:#ffd93d"></div>
+                <div class="p" style="--dx:25px;--dy:8px;--rot:60deg;background:#4ecdc4"></div>
+                <div class="p" style="--dx:-15px;--dy:20px;--rot:-150deg;background:#a78bfa"></div>
+                <div class="p" style="--dx:8px;--dy:25px;--rot:200deg;background:#ff9a3d"></div>
+                <div class="p" style="--dx:-25px;--dy:4px;--rot:-60deg;background:#34d399"></div>
+              </div>
+              <div class="score-float" style="font-size:14px">+160</div>
+            </div>
+            <div class="p-cell"><div class="p-tile"><span class="fr">🍓</span></div></div>
+            <div class="p-cell empty"></div>
+            <div class="p-cell"><div class="p-tile"><span class="fr">🥝</span></div></div>
+
+            <div class="p-cell"><div class="p-tile"><span class="fr">🍋</span></div></div>
+            <div class="p-cell"><div class="p-tile"><span class="fr">🍊</span></div></div>
+            <div class="p-cell"><div class="p-tile"><span class="fr">🍇</span></div></div>
+            <div class="p-cell empty"></div>
+            <div class="p-cell"><div class="p-tile"><span class="fr">🍒</span></div></div>
+            <div class="p-cell"><div class="p-tile"><span class="fr">🍓</span></div></div>
+
+            <div class="p-cell empty"></div>
+            <div class="p-cell"><div class="p-tile"><span class="fr">🥝</span></div></div>
+            <div class="p-cell"><div class="p-tile hint"><span class="fr">🍒</span></div></div>
+            <div class="p-cell"><div class="p-tile"><span class="fr">🍎</span></div></div>
+            <div class="p-cell"><div class="p-tile"><span class="fr">🍇</span></div></div>
+            <div class="p-cell empty"></div>
+
+            <div class="p-cell"><div class="p-tile"><span class="fr">🍊</span></div></div>
+            <div class="p-cell empty"></div>
+            <div class="p-cell"><div class="p-tile"><span class="fr">🍋</span></div></div>
+            <div class="p-cell"><div class="p-tile"><span class="fr">🍉</span></div></div>
+            <div class="p-cell empty"></div>
+            <div class="p-cell"><div class="p-tile"><span class="fr">🍓</span></div></div>
+
+            <div class="p-cell"><div class="p-tile"><span class="fr">🍒</span></div></div>
+            <div class="p-cell"><div class="p-tile"><span class="fr">🥝</span></div></div>
+            <div class="p-cell empty"></div>
+            <div class="p-cell"><div class="p-tile"><span class="fr">🍊</span></div></div>
+            <div class="p-cell"><div class="p-tile"><span class="fr">🍎</span></div></div>
+            <div class="p-cell"><div class="p-tile"><span class="fr">🍇</span></div></div>
+          </div>
+        </div>
+        <div class="p-tools">
+          <button class="p-tbtn"><span class="ic">🔍</span>提示<span class="cnt">2</span></button>
+          <button class="p-tbtn"><span class="ic">⏰</span>加时<span class="cnt">2</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 移动胜利 -->
+  <div class="phone">
+    <div class="pscreen" style="background:linear-gradient(160deg,#3a2a5a,#1a1140)">
+      <div class="ptag">LEVEL CLEAR</div>
+      <div class="p-result">
+        <div class="emoji">🎉</div>
+        <h3>过关！</h3>
+        <div class="p-bigstars">⭐⭐<span class="off">⭐</span></div>
+        <div class="p-rcards">
+          <div class="p-rcard"><small>SCORE</small><b>2,480</b></div>
+          <div class="p-rcard"><small>COMBO</small><b>×5</b></div>
+          <div class="p-rcard"><small>剩余时间</small><b>0:42</b></div>
+          <div class="p-rcard"><small>消除</small><b>18/18</b></div>
+        </div>
+        <div class="p-record">🏆 新纪录 14,960</div>
+        <div class="p-rbtns">
+          <button class="p-rbtn ghost">🔄 重玩</button>
+          <button class="p-rbtn gold">下一关 ▶</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 移动失败 -->
+  <div class="phone">
+    <div class="pscreen" style="background:linear-gradient(160deg,#2a2a4a,#151530);filter:saturate(.65)">
+      <div class="ptag">TIME'S UP</div>
+      <div class="p-result">
+        <div class="emoji">⏳</div>
+        <h3 style="background:linear-gradient(180deg,#fff,#ffb3b3);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 3px 0 rgba(120,30,30,.4))">时间到</h3>
+        <div style="font-size:13px;color:#c8b8e0;line-height:1.6;background:rgba(255,255,255,.08);padding:8px 14px;border-radius:12px">还差 <b style="color:var(--gold)">4 对</b> 就清空了<br>再试一次冲击三星！</div>
+        <div class="p-rcards">
+          <div class="p-rcard"><small>SCORE</small><b>980</b></div>
+          <div class="p-rcard"><small>已消除</small><b>14/18</b></div>
+          <div class="p-rcard"><small>COMBO</small><b>×3</b></div>
+          <div class="p-rcard"><small>用时</small><b>1:30</b></div>
+        </div>
+        <div class="p-rbtns">
+          <button class="p-rbtn ghost">🏠 返回</button>
+          <button class="p-rbtn gold">↻ 再来一次</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="spec">
+  <h3>🎨 v0.4 细节优化说明</h3>
+  <div class="spec-grid">
+    <div><b>配对连线</b>：选中第一颗后点同款，两颗之间出现金白渐变发光连线（流动虚线动画），两端有白色光点，连线停留 ~200ms 后触发消除。这是对对碰的核心识别反馈。</div>
+    <div><b>消除爆裂感</b>：白光闪光（径向渐变扩散）+ 白色扩散环 + 8 向彩色粒子飞散（带旋转淡出）+ 金色飘分上升（+160 ×4），combo 越高粒子数量和速度递增。</div>
+    <div><b>水果砖质感</b>：多层渐变（亮顶→主色→暗底）+ 顶部椭圆高光 + 底部投影边（0 5px 0 #b8945e）+ 内阴影 + 半透明白边，呈现真实凸起瓷砖感；按压时下移 3px。</div>
+    <div><b>选中态</b>：金色外发光 + 缩放 1.06 + 上浮 + 双层呼吸光环（::after 动画），明确告知"已选中，等待配对"。</div>
+    <div><b>棋盘台面</b>：深色微渐变 + 内阴影（顶部凹陷感）+ 顶部微妙高光层（::after），空格做深凹陷（内阴影），与凸起水果砖形成凹凸对比。</div>
+    <div><b>COMBO 反馈</b>：侧栏大数字弹出动画（comboPop），红金渐变文字 + 发光；移动端顶部 COMBO 条同步弹跳。</div>
+    <div><b>HUD 质感</b>：玻璃拟态卡片（backdrop-blur + 内高光 + 细边框），倒计时圆环带内阴影，星级点亮时带金色发光。</div>
+    <div><b>双端一致</b>：Web 与移动端共用同一套视觉语言、动画时序、特效参数；仅布局随宽度自适应（Web 右侧栏 / 移动底部栏）。</div>
+  </div>
+</div>
+
+</body>
+</html>

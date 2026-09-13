@@ -18,6 +18,7 @@ import { CATALOG_SPORTS_STRATEGY_GAME_PROFILES } from "@/data/game-profiles/cata
 import { FLAGSHIP_NINE_PROFILES } from "@/data/game-profiles/flagship-nine";
 import { SEARCH_TOP20_GAME_PROFILES } from "@/data/game-profiles/search-top20";
 import { COLOR_PUZZLE_GAME_PROFILES } from "@/data/game-profiles/color-puzzle";
+import { MATCH_PAIRS_GAME_PROFILES } from "@/data/game-profiles/match-pairs";
 
 export type SupportedLocale = "en" | "zh";
 
@@ -104,6 +105,7 @@ const RAW_GAME_PROFILES: Record<string, GameSeoProfile> = {
   ...FLAGSHIP_NINE_PROFILES,
   ...SEARCH_TOP20_GAME_PROFILES,
   ...COLOR_PUZZLE_GAME_PROFILES,
+  ...MATCH_PAIRS_GAME_PROFILES,
 };
 
 export const TOPIC_GAME_SLUGS = Array.from(new Set(Object.values(GAMEPLAY_TOPIC_MEMBERS).flat()));
@@ -111,7 +113,7 @@ export const INVENTORY_GAME_SLUGS = [
   ...(localGamesData as { slug: string }[]).map((game) => game.slug),
   ...(searchTop20GamesData as { slug: string }[]).map((game) => game.slug),
 ];
-const EXPECTED_PRODUCTION_GAMES = 124;
+const EXPECTED_PRODUCTION_GAMES = 125;
 
 function hasText(value: string | undefined): boolean {
   return Boolean(value?.trim());

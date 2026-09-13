@@ -16,8 +16,16 @@ export default function GamePlayer({ gameUrl, title, slug }: GamePlayerProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [hasStarted, setHasStarted] = useState(false);
+  const [hasStarted, setHasStarted] = useState(true);
   const [hasGameInput, setHasGameInput] = useState(false);
+
+  // 页面加载即直接开始游戏，触发 game_start 埋点
+  useEffect(() => {
+    trackEvent("game_start", { game_slug: slug });
+    // 保险：3秒后强制结束 loading（防止 iframe onLoad 时序问题）
+    const failSafe = window.setTimeout(() => setIsLoading(false), 3000);
+    return () => window.clearTimeout(failSafe);
+  }, [slug]);
 
   useEffect(() => {
     if (!hasStarted || isLoading || !hasGameInput) return;
@@ -39,6 +47,7 @@ export default function GamePlayer({ gameUrl, title, slug }: GamePlayerProps) {
 
       if (data.type === "runtime_ready") {
         trackEvent("game_runtime_ready", { game_slug: slug });
+        setIsLoading(false);
       } else if (data.type === "first_input") {
         setHasGameInput(true);
         trackEvent("gameplay_begin", { game_slug: slug });
@@ -92,7 +101,7 @@ export default function GamePlayer({ gameUrl, title, slug }: GamePlayerProps) {
 
   return (
     <div ref={containerRef} className="relative w-full overflow-hidden rounded-xl border border-white/10 bg-black">
-      <div className="relative h-[calc(100svh-7rem)] min-h-[520px] max-h-[720px] w-full md:h-[clamp(420px,65vh,680px)] md:min-h-0">
+      <div className="relative h-[calc(100svh-6rem)] min-h-[520px] max-h-[820px] w-full md:h-[clamp(480px,78vh,820px)] md:min-h-0">
         {!hasStarted && (
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-gradient-to-br from-primary/30 to-dark">
             <button
