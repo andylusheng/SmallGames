@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1f3a"/>
+      <stop offset="100%" style="stop-color:#0d1124"/>
+    </linearGradient>
+    <linearGradient id="tile" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f5f0e1"/>
+      <stop offset="100%" style="stop-color:#e0d8c0"/>
+    </linearGradient>
+    <linearGradient id="title" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ff9a3d"/>
+      <stop offset="100%" style="stop-color:#ffd166"/>
+    </linearGradient>
+    <radialGradient id="glow1" cx="20%" cy="20%" r="50%">
+      <stop offset="0%" style="stop-color:#ff9a3d;stop-opacity:.2"/>
+      <stop offset="100%" style="stop-color:#ff9a3d;stop-opacity:0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="80%" cy="80%" r="50%">
+      <stop offset="0%" style="stop-color:#4ecdc4;stop-opacity:.15"/>
+      <stop offset="100%" style="stop-color:#4ecdc4;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bg)"/>
+  <rect width="400" height="300" fill="url(#glow1)"/>
+  <rect width="400" height="300" fill="url(#glow2)"/>
+  <!-- 标题 -->
+  <text x="200" y="42" text-anchor="middle" font-family="Arial,sans-serif" font-size="22" font-weight="900" fill="url(#title)">水果消消乐</text>
+  <text x="200" y="60" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#8892b0" letter-spacing="3">FRUIT MATCH 3</text>
+  <!-- 棋盘 6x6 -->
+  <g transform="translate(100,75)">
+    <rect x="0" y="0" width="200" height="200" rx="12" fill="rgba(0,0,0,.3)" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+    <!-- 6x6 格子，部分水果 -->
+    <!-- row 0 -->
+    <rect x="8" y="8" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="22" y="29" text-anchor="middle" font-size="18">🍎</text>
+    <rect x="40" y="8" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="54" y="29" text-anchor="middle" font-size="18">🍇</text>
+    <rect x="72" y="8" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="86" y="29" text-anchor="middle" font-size="18">🍊</text>
+    <rect x="104" y="8" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="118" y="29" text-anchor="middle" font-size="18">🍋</text>
+    <rect x="136" y="8" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="150" y="29" text-anchor="middle" font-size="18">🍉</text>
+    <rect x="168" y="8" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="182" y="29" text-anchor="middle" font-size="18">🍓</text>
+    <!-- row 1 -->
+    <rect x="8" y="40" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="22" y="61" text-anchor="middle" font-size="18">🍇</text>
+    <rect x="40" y="40" width="28" height="28" rx="6" fill="url(#tile)" stroke="#ffd166" stroke-width="2"/>
+    <text x="54" y="61" text-anchor="middle" font-size="18">🍊</text>
+    <rect x="72" y="40" width="28" height="28" rx="6" fill="url(#tile)" stroke="#ffd166" stroke-width="2"/>
+    <text x="86" y="61" text-anchor="middle" font-size="18">🍊</text>
+    <rect x="104" y="40" width="28" height="28" rx="6" fill="url(#tile)" stroke="#ffd166" stroke-width="2"/>
+    <text x="118" y="61" text-anchor="middle" font-size="18">🍊</text>
+    <rect x="136" y="40" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="150" y="61" text-anchor="middle" font-size="18">🍎</text>
+    <rect x="168" y="40" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="182" y="61" text-anchor="middle" font-size="18">🍋</text>
+    <!-- row 2 -->
+    <rect x="8" y="72" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="22" y="93" text-anchor="middle" font-size="18">🍊</text>
+    <rect x="40" y="72" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="54" y="93" text-anchor="middle" font-size="18">🍋</text>
+    <rect x="72" y="72" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="86" y="93" text-anchor="middle" font-size="18">🍉</text>
+    <rect x="104" y="72" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="118" y="93" text-anchor="middle" font-size="18">🍓</text>
+    <rect x="136" y="72" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="150" y="93" text-anchor="middle" font-size="18">🍇</text>
+    <rect x="168" y="72" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="182" y="93" text-anchor="middle" font-size="18">🍎</text>
+    <!-- row 3 -->
+    <rect x="8" y="104" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="22" y="125" text-anchor="middle" font-size="18">🍋</text>
+    <rect x="40" y="104" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="54" y="125" text-anchor="middle" font-size="18">🍉</text>
+    <rect x="72" y="104" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="86" y="125" text-anchor="middle" font-size="18">🍎</text>
+    <rect x="104" y="104" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="118" y="125" text-anchor="middle" font-size="18">🍇</text>
+    <rect x="136" y="104" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="150" y="125" text-anchor="middle" font-size="18">🍊</text>
+    <rect x="168" y="104" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="182" y="125" text-anchor="middle" font-size="18">🍓</text>
+    <!-- row 4 -->
+    <rect x="8" y="136" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="22" y="157" text-anchor="middle" font-size="18">🍉</text>
+    <rect x="40" y="136" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="54" y="157" text-anchor="middle" font-size="18">🍓</text>
+    <rect x="72" y="136" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="86" y="157" text-anchor="middle" font-size="18">🍇</text>
+    <rect x="104" y="136" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="118" y="157" text-anchor="middle" font-size="18">🍊</text>
+    <rect x="136" y="136" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="150" y="157" text-anchor="middle" font-size="18">🍋</text>
+    <rect x="168" y="136" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="182" y="157" text-anchor="middle" font-size="18">🍇</text>
+    <!-- row 5 -->
+    <rect x="8" y="168" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="22" y="189" text-anchor="middle" font-size="18">🍓</text>
+    <rect x="40" y="168" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="54" y="189" text-anchor="middle" font-size="18">🍎</text>
+    <rect x="72" y="168" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="86" y="189" text-anchor="middle" font-size="18">🍋</text>
+    <rect x="104" y="168" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="118" y="189" text-anchor="middle" font-size="18">🍉</text>
+    <rect x="136" y="168" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="150" y="189" text-anchor="middle" font-size="18">🍓</text>
+    <rect x="168" y="168" width="28" height="28" rx="6" fill="url(#tile)"/>
+    <text x="182" y="189" text-anchor="middle" font-size="18">🍊</text>
+    <!-- 消除特效：3连高亮 -->
+    <rect x="36" y="36" width="96" height="36" rx="8" fill="none" stroke="#ffd166" stroke-width="2" stroke-dasharray="4,3" opacity=".7"/>
+    <!-- 粒子 -->
+    <circle cx="84" cy="54" r="3" fill="#ffd166" opacity=".8"/>
+    <circle cx="70" cy="45" r="2" fill="#ff9a3d" opacity=".6"/>
+    <circle cx="100" cy="62" r="2.5" fill="#fff" opacity=".7"/>
+  </g>
+  <!-- 底部标签 -->
+  <text x="200" y="290" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#6b7394">MATCH 3 · 60 LEVELS</text>
+</svg>

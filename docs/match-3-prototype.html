@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>水果消消乐 · 高保真原型 v0.1</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Segoe UI Rounded","SF Pro Rounded","PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:#0a0e1a;color:#fff;min-height:100vh;padding:40px 20px}
+h1{text-align:center;font-size:32px;margin-bottom:8px;background:linear-gradient(135deg,#ff9a3d,#ff6b6b,#4ecdc4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{text-align:center;color:#8892b0;font-size:14px;margin-bottom:40px}
+.section{margin-bottom:50px}
+.section-title{font-size:18px;font-weight:700;margin-bottom:16px;color:#ffd166;display:flex;align-items:center;gap:10px}
+.section-title::before{content:"";width:4px;height:20px;background:linear-gradient(180deg,#ff9a3d,#ff6b6b);border-radius:2px}
+.dual{display:flex;gap:30px;flex-wrap:wrap;justify-content:center}
+.frame{background:linear-gradient(160deg,#1a1f3a,#0d1124);border-radius:20px;padding:20px;border:1px solid rgba(255,255,255,.08);box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.frame-label{text-align:center;font-size:12px;color:#6b7394;margin-top:12px;letter-spacing:1px}
+
+/* ===== 游戏通用样式 ===== */
+:root{
+  --bg1:#1a1f3a;--bg2:#0d1124;
+  --tile-bg:linear-gradient(145deg,#f5f0e1,#e8e0c8);
+  --tile-border:rgba(0,0,0,.15);
+  --gold:#ffd166;--orange:#ff9a3d;--red:#ff6b6b;--teal:#4ecdc4;--purple:#a29bfe;
+}
+.game-bg{background:linear-gradient(160deg,var(--bg1),var(--bg2));border-radius:16px;position:relative;overflow:hidden}
+.game-bg::before{content:"";position:absolute;top:-60px;left:-40px;width:200px;height:200px;background:radial-gradient(circle,rgba(255,154,61,.12),transparent 70%);pointer-events:none}
+.game-bg::after{content:"";position:absolute;bottom:-60px;right:-30px;width:220px;height:220px;background:radial-gradient(circle,rgba(78,205,196,.1),transparent 70%);pointer-events:none}
+
+/* HUD */
+.hud{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;gap:8px;position:relative;z-index:2}
+.hud-item{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px 10px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.hud-item .icon{font-size:14px}
+.hud-item .val{color:var(--gold)}
+.moves-circle{width:44px;height:44px;border-radius:50%;background:conic-gradient(var(--teal) 0% 75%,rgba(255,255,255,.1) 75% 100%);display:flex;align-items:center;justify-content:center;position:relative}
+.moves-circle::before{content:"";position:absolute;inset:4px;border-radius:50%;background:#1a1f3a}
+.moves-circle span{position:relative;font-size:16px;font-weight:800;color:#fff}
+.stars{display:flex;gap:2px}
+.star{font-size:14px;filter:grayscale(1);opacity:.3}
+.star.on{filter:none;opacity:1}
+.pause-btn{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px}
+
+/* 目标条 */
+.goal-bar{display:flex;align-items:center;gap:10px;padding:0 12px 8px;position:relative;z-index:2}
+.goal-chip{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px}
+.goal-chip .fruit{font-size:16px}
+.goal-chip .prog{color:var(--gold)}
+.goal-chip.done{border-color:var(--teal);background:rgba(78,205,196,.1)}
+.goal-chip.done .prog{color:var(--teal)}
+
+/* 棋盘 */
+.board-wrap{padding:10px;position:relative;z-index:2}
+.board{display:grid;gap:4px;background:rgba(0,0,0,.25);border-radius:12px;padding:8px;box-shadow:inset 0 2px 10px rgba(0,0,0,.4)}
+.cell{aspect-ratio:1;border-radius:8px;background:var(--tile-bg);display:flex;align-items:center;justify-content:center;font-size:clamp(16px,3.5vw,26px);position:relative;box-shadow:0 2px 4px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.5);cursor:pointer;transition:transform .15s,box-shadow .15s;user-select:none}
+.cell:hover{transform:scale(1.05)}
+.cell.selected{box-shadow:0 0 0 3px var(--gold),0 0 20px rgba(255,209,102,.5);transform:scale(1.08);z-index:2}
+.cell.selected::after{content:"";position:absolute;inset:-5px;border-radius:12px;border:2px solid rgba(255,209,102,.4);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:.8;transform:scale(1.05)}}
+.cell.hint{animation:hintGlow 1s infinite}
+@keyframes hintGlow{0%,100%{box-shadow:0 0 0 2px var(--teal)}50%{box-shadow:0 0 16px rgba(78,205,196,.6)}}
+
+/* 特殊水果 */
+.cell.striped-h::before{content:"";position:absolute;inset:0;border-radius:8px;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,.5) 3px,rgba(255,255,255,.5) 5px);pointer-events:none}
+.cell.striped-v::before{content:"";position:absolute;inset:0;border-radius:8px;background:repeating-linear-gradient(90deg,transparent,transparent 3px,rgba(255,255,255,.5) 3px,rgba(255,255,255,.5) 5px);pointer-events:none}
+.cell.wrapped{box-shadow:0 0 0 2px var(--red),0 0 12px rgba(255,107,107,.4),0 2px 4px rgba(0,0,0,.2)}
+.cell.wrapped::after{content:"";position:absolute;inset:2px;border-radius:6px;border:2px solid rgba(255,107,107,.6);animation:pulse 1.2s infinite}
+.cell.rainbow{background:linear-gradient(135deg,#ff6b6b,#ffd166,#4ecdc4,#a29bfe,#ff6b6b);background-size:300% 300%;animation:rainbowShift 2s infinite}
+@keyframes rainbowShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.cell.ice::before{content:"";position:absolute;inset:0;border-radius:8px;background:rgba(173,216,230,.4);border:1px solid rgba(173,216,230,.6);pointer-events:none}
+.cell.chain::after{content:"🔗";position:absolute;top:-2px;right:-2px;font-size:10px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.5))}
+
+/* 消除特效 */
+.particle{position:absolute;width:6px;height:6px;border-radius:50%;pointer-events:none;z-index:10}
+.combo-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:32px;font-weight:900;color:var(--gold);text-shadow:0 0 20px rgba(255,209,102,.8),0 2px 4px rgba(0,0,0,.5);z-index:20;animation:comboPop .8s forwards;pointer-events:none}
+@keyframes comboPop{0%{transform:translate(-50%,-50%) scale(.5);opacity:0}30%{transform:translate(-50%,-50%) scale(1.2);opacity:1}100%{transform:translate(-50%,-80%) scale(1);opacity:0}}
+.score-float{position:absolute;font-size:14px;font-weight:800;color:var(--gold);text-shadow:0 1px 2px rgba(0,0,0,.5);z-index:15;animation:scoreFloat 1s forwards;pointer-events:none}
+@keyframes scoreFloat{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-40px);opacity:0}}
+
+/* 开始页 */
+.menu-screen{padding:30px 20px;text-align:center;position:relative;z-index:2}
+.menu-title{font-size:28px;font-weight:900;background:linear-gradient(135deg,#ff9a3d,#ffd166);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+.menu-sub{font-size:11px;color:#8892b0;letter-spacing:3px;margin-bottom:20px}
+.menu-fruits{font-size:30px;margin-bottom:16px;letter-spacing:4px}
+.rules{text-align:left;max-width:280px;margin:0 auto 20px}
+.rule{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 12px;margin-bottom:8px;font-size:12px}
+.rule .ri{font-size:18px;flex-shrink:0}
+.rule .rt{font-weight:700}
+.rule .rd{font-size:10px;color:#8892b0}
+.btn-primary{background:linear-gradient(135deg,#ff9a3d,#ff6b6b);border:none;border-radius:14px;padding:14px 40px;font-size:16px;font-weight:800;color:#fff;cursor:pointer;box-shadow:0 6px 20px rgba(255,107,107,.4);transition:transform .15s,box-shadow .15s}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(255,107,107,.5)}
+.btn-secondary{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px 24px;font-size:13px;font-weight:700;color:#ccc;cursor:pointer;margin-top:10px}
+.menu-stats{margin-top:16px;font-size:11px;color:#6b7394}
+.menu-stats span{color:var(--gold)}
+
+/* 结算页 */
+.result-screen{padding:30px 20px;text-align:center;position:relative;z-index:2}
+.result-title{font-size:24px;font-weight:900;margin-bottom:12px}
+.result-title.win{color:var(--gold)}
+.result-title.lose{color:var(--red)}
+.result-stars{font-size:36px;margin-bottom:16px;letter-spacing:8px}
+.result-stars .star{filter:grayscale(1);opacity:.2}
+.result-stars .star.on{filter:none;opacity:1;animation:starPop .5s backwards}
+@keyframes starPop{0%{transform:scale(0) rotate(-180deg)}100%{transform:scale(1) rotate(0)}}
+.result-stars .star.on:nth-child(2){animation-delay:.2s}
+.result-stars .star.on:nth-child(3){animation-delay:.4s}
+.result-score{font-size:14px;color:#8892b0;margin-bottom:4px}
+.result-score b{color:#fff;font-size:20px}
+.result-goals{margin:16px 0;text-align:left;max-width:260px;margin-left:auto;margin-right:auto}
+.result-goal{display:flex;align-items:center;gap:8px;font-size:12px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.result-goal .ok{color:var(--teal)}
+.result-goal .miss{color:var(--red)}
+
+/* 尺寸变体 */
+.web .game-bg{width:420px}
+.web .board{grid-template-columns:repeat(8,1fr)}
+.web .cell{font-size:24px}
+.mobile .game-bg{width:320px}
+.mobile .board{grid-template-columns:repeat(8,1fr)}
+.mobile .cell{font-size:18px}
+.mobile .hud-item{font-size:10px;padding:4px 8px}
+.mobile .moves-circle{width:38px;height:38px}
+.mobile .moves-circle span{font-size:14px}
+
+/* 特殊展示：小棋盘 */
+.board-6{grid-template-columns:repeat(6,1fr)!important}
+.board-6 .cell{font-size:22px}
+
+/* 标注 */
+.annot{position:absolute;background:rgba(255,107,107,.9);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;z-index:30}
+.annot-line{position:absolute;height:1px;background:rgba(255,107,107,.6);z-index:29}
+
+/* 特效层示意 */
+.fx-layer{position:absolute;inset:0;pointer-events:none;z-index:10;overflow:hidden}
+</style>
+</head>
+<body>
+
+<h1>🍎 水果消消乐 · 高保真原型 v0.1</h1>
+<p class="sub">Match-3 Game Prototype — 交换消除 · 连锁反应 · 特殊水果 · Web + 移动双端</p>
+
+<!-- ===== 1. 开始页 ===== -->
+<div class="section">
+  <div class="section-title">1. 开始页（Menu）</div>
+  <div class="dual">
+    <div class="frame web">
+      <div class="game-bg" style="height:480px">
+        <div class="menu-screen">
+          <div class="menu-fruits">🍎🍇🍊🍋🍉🍓</div>
+          <div class="menu-title">水果消消乐</div>
+          <div class="menu-sub">FRUIT MATCH 3</div>
+          <div class="rules">
+            <div class="rule"><div class="ri">🔄</div><div><div class="rt">交换消除</div><div class="rd">交换相邻水果，连成3个即消除</div></div></div>
+            <div class="rule"><div class="ri">⚡</div><div><div class="rt">连锁反应</div><div class="rd">下落后自动匹配，Combo 倍率最高 ×3</div></div></div>
+            <div class="rule"><div class="ri">🎁</div><div><div class="rt">特殊水果</div><div class="rd">4连条纹 · L/T包装 · 5连彩虹</div></div></div>
+          </div>
+          <button class="btn-primary">▶ 开始游戏</button>
+          <br><button class="btn-secondary">选择关卡</button>
+          <div class="menu-stats">总分 <span>0</span> · ⭐ <span>0/180</span></div>
+        </div>
+      </div>
+      <div class="frame-label">Web 宽屏 · 开始页</div>
+    </div>
+    <div class="frame mobile">
+      <div class="game-bg" style="height:560px">
+        <div class="menu-screen">
+          <div class="menu-fruits" style="font-size:24px">🍎🍇🍊🍋🍉🍓</div>
+          <div class="menu-title" style="font-size:22px">水果消消乐</div>
+          <div class="menu-sub">FRUIT MATCH 3</div>
+          <div class="rules" style="max-width:240px">
+            <div class="rule"><div class="ri">🔄</div><div><div class="rt">交换消除</div><div class="rd">相邻交换，3连消除</div></div></div>
+            <div class="rule"><div class="ri">⚡</div><div><div class="rt">连锁 Combo</div><div class="rd">下落自动匹配，倍率 ×3</div></div></div>
+            <div class="rule"><div class="ri">🎁</div><div><div class="rt">特殊水果</div><div class="rd">条纹/包装/彩虹</div></div></div>
+          </div>
+          <button class="btn-primary" style="padding:12px 32px;font-size:14px">▶ 开始游戏</button>
+          <br><button class="btn-secondary" style="font-size:12px">选择关卡</button>
+        </div>
+      </div>
+      <div class="frame-label">移动竖屏 · 开始页</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 2. 游戏中 - 基础 ===== -->
+<div class="section">
+  <div class="section-title">2. 游戏中 · 基础玩法（第 1 关 · 6×6 教学）</div>
+  <div class="dual">
+    <div class="frame web">
+      <div class="game-bg" style="height:480px">
+        <div class="hud">
+          <div class="hud-item"><span class="icon">🏝️</span> LV <span class="val">1</span></div>
+          <div class="goal-chip"><span class="fruit">⭐</span> 分数 <span class="prog">320/1000</span></div>
+          <div class="moves-circle"><span>28</span></div>
+          <div class="hud-item"><span class="icon">⭐</span> <span class="val">320</span></div>
+          <div class="pause-btn">⏸</div>
+        </div>
+        <div class="board-wrap">
+          <div class="board board-6" id="board1">
+            <!-- 6x6 棋盘，含一个选中状态 -->
+          </div>
+        </div>
+        <div class="fx-layer" id="fx1"></div>
+      </div>
+      <div class="frame-label">选中 🍎 → 交换相邻 🍇 → 形成 3 连消除</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 3. 特殊水果展示 ===== -->
+<div class="section">
+  <div class="section-title">3. 特殊水果（Special Fruits）</div>
+  <div class="dual">
+    <div class="frame web">
+      <div class="game-bg" style="height:480px">
+        <div class="hud">
+          <div class="hud-item"><span class="icon">🏝️</span> LV <span class="val">14</span></div>
+          <div class="goal-chip"><span class="fruit">🍇</span> <span class="prog">12/20</span></div>
+          <div class="goal-chip done"><span class="fruit">⭐</span> <span class="prog">5000✓</span></div>
+          <div class="moves-circle"><span>18</span></div>
+          <div class="pause-btn">⏸</div>
+        </div>
+        <div class="board-wrap">
+          <div class="board" id="board2">
+            <!-- 8x8 含特殊水果 -->
+          </div>
+        </div>
+      </div>
+      <div class="frame-label">8×8 棋盘 · 条纹(横/竖) · 包装 · 彩虹 · 冰块</div>
+    </div>
+    <div class="frame" style="width:280px">
+      <div style="padding:10px 0">
+        <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:12px">特殊水果图鉴</div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <div class="cell striped-h" style="width:44px;height:44px;font-size:22px;flex-shrink:0">🍇</div>
+          <div><div style="font-size:13px;font-weight:700">条纹水果</div><div style="font-size:11px;color:#8892b0">4 连合成 · 消除整行/列</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <div class="cell wrapped" style="width:44px;height:44px;font-size:22px;flex-shrink:0">🍊</div>
+          <div><div style="font-size:13px;font-weight:700">包装水果</div><div style="font-size:11px;color:#8892b0">L/T 形合成 · 3×3 爆炸</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <div class="cell rainbow" style="width:44px;height:44px;font-size:22px;flex-shrink:0">🍓</div>
+          <div><div style="font-size:13px;font-weight:700">彩虹水果</div><div style="font-size:11px;color:#8892b0">5 连合成 · 清屏同色</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <div class="cell ice" style="width:44px;height:44px;font-size:22px;flex-shrink:0">🍋</div>
+          <div><div style="font-size:13px;font-weight:700">冰块障碍</div><div style="font-size:11px;color:#8892b0">需消除 2 次破冰</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="cell chain" style="width:44px;height:44px;font-size:22px;flex-shrink:0">🍉</div>
+          <div><div style="font-size:13px;font-weight:700">锁链障碍</div><div style="font-size:11px;color:#8892b0">不可移动，消除解锁</div></div>
+        </div>
+      </div>
+      <div class="frame-label">特殊水果 & 障碍图鉴</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 4. 连锁消除特效 ===== -->
+<div class="section">
+  <div class="section-title">4. 连锁消除特效（Cascade & Combo）</div>
+  <div class="dual">
+    <div class="frame web">
+      <div class="game-bg" style="height:480px;position:relative">
+        <div class="hud">
+          <div class="hud-item"><span class="icon">🏝️</span> LV <span class="val">8</span></div>
+          <div class="goal-chip"><span class="fruit">⭐</span> <span class="prog">2,450/3,500</span></div>
+          <div class="moves-circle"><span>22</span></div>
+          <div class="hud-item"><span class="icon">🔥</span> <span class="val">Combo</span></div>
+          <div class="pause-btn">⏸</div>
+        </div>
+        <div class="board-wrap">
+          <div class="board board-6" id="board3">
+            <!-- 消除中的棋盘 -->
+          </div>
+        </div>
+        <div class="combo-text">COMBO ×2!</div>
+        <div class="fx-layer" id="fx3"></div>
+      </div>
+      <div class="frame-label">连锁第 2 批 · Combo ×2 倍率 · 粒子爆裂 + 分数飘字</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 5. 结算页 ===== -->
+<div class="section">
+  <div class="section-title">5. 结算页（Result）</div>
+  <div class="dual">
+    <div class="frame web">
+      <div class="game-bg" style="height:480px">
+        <div class="result-screen">
+          <div class="result-title win">🎉 关卡通过！</div>
+          <div class="result-stars">
+            <span class="star on">⭐</span>
+            <span class="star on">⭐</span>
+            <span class="star on">⭐</span>
+          </div>
+          <div class="result-score">得分 <b>4,820</b></div>
+          <div class="result-goals">
+            <div class="result-goal"><span class="ok">✓</span> 达到 3000 分 <span style="margin-left:auto;color:#8892b0">4,820</span></div>
+            <div class="result-goal"><span class="ok">✓</span> 消除 15 个 🍇 <span style="margin-left:auto;color:#8892b0">18</span></div>
+            <div class="result-goal"><span class="ok">✓</span> 剩余步数奖励 <span style="margin-left:auto;color:var(--gold)">+600</span></div>
+          </div>
+          <button class="btn-primary" style="padding:12px 32px;font-size:14px">下一关 →</button>
+          <br><button class="btn-secondary" style="font-size:12px">重玩本关</button>
+        </div>
+      </div>
+      <div class="frame-label">胜利 · 3 星 · 目标全完成</div>
+    </div>
+    <div class="frame web">
+      <div class="game-bg" style="height:480px">
+        <div class="result-screen">
+          <div class="result-title lose">😢 步数用完了</div>
+          <div class="result-stars">
+            <span class="star">⭐</span>
+            <span class="star">⭐</span>
+            <span class="star">⭐</span>
+          </div>
+          <div class="result-score">得分 <b>1,850</b></div>
+          <div class="result-goals">
+            <div class="result-goal"><span class="miss">✗</span> 达到 3000 分 <span style="margin-left:auto;color:#8892b0">1,850/3000</span></div>
+            <div class="result-goal"><span class="ok">✓</span> 消除 15 个 🍊 <span style="margin-left:auto;color:#8892b0">15</span></div>
+            <div class="result-goal" style="color:#6b7394"><span>💡</span> 试试合成特殊水果触发连锁</div>
+          </div>
+          <button class="btn-primary" style="padding:12px 32px;font-size:14px;background:linear-gradient(135deg,#4ecdc4,#44a08d)">🔄 再试一次</button>
+          <br><button class="btn-secondary" style="font-size:12px">返回菜单</button>
+        </div>
+      </div>
+      <div class="frame-label">失败 · 差 1150 分 · 提示合成特殊水果</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 6. 关卡选择 ===== -->
+<div class="section">
+  <div class="section-title">6. 关卡选择（Level Select）</div>
+  <div class="dual">
+    <div class="frame web">
+      <div class="game-bg" style="height:480px;padding:16px">
+        <div style="text-align:center;margin-bottom:12px">
+          <div style="font-size:18px;font-weight:800;color:var(--gold)">选择关卡</div>
+          <div style="font-size:11px;color:#8892b0">⭐ 总星数 42/180</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px">
+          <div style="aspect-ratio:1;border-radius:10px;background:linear-gradient(135deg,#ff9a3d,#ff6b6b);display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;cursor:pointer;box-shadow:0 4px 12px rgba(255,107,107,.3)">
+            <span style="font-size:18px">1</span><span style="font-size:10px">⭐⭐⭐</span>
+          </div>
+          <div style="aspect-ratio:1;border-radius:10px;background:linear-gradient(135deg,#ff9a3d,#ff6b6b);display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;cursor:pointer">
+            <span style="font-size:18px">2</span><span style="font-size:10px">⭐⭐☆</span>
+          </div>
+          <div style="aspect-ratio:1;border-radius:10px;background:linear-gradient(135deg,#ff9a3d,#ff6b6b);display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;cursor:pointer">
+            <span style="font-size:18px">3</span><span style="font-size:10px">⭐⭐⭐</span>
+          </div>
+          <div style="aspect-ratio:1;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;cursor:pointer">
+            <span style="font-size:18px;color:var(--gold)">4</span><span style="font-size:10px;color:#6b7394">当前</span>
+          </div>
+          <div style="aspect-ratio:1;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;color:#4a4e69;font-size:20px;cursor:not-allowed">🔒</div>
+          <div style="aspect-ratio:1;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;color:#4a4e69;font-size:20px">🔒</div>
+          <div style="aspect-ratio:1;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;color:#4a4e69;font-size:20px">🔒</div>
+          <div style="aspect-ratio:1;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;color:#4a4e69;font-size:20px">🔒</div>
+          <div style="aspect-ratio:1;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;color:#4a4e69;font-size:20px">🔒</div>
+          <div style="aspect-ratio:1;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;color:#4a4e69;font-size:20px">🔒</div>
+        </div>
+        <div style="text-align:center;margin-top:16px;font-size:11px;color:#6b7394">第 1 章 · 甜橙果园（1-10 关）</div>
+      </div>
+      <div class="frame-label">关卡选择 · 星级 · 锁定/当前/已通关</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// 生成棋盘
+const fruits=['🍎','🍇','🍊','🍋','🍉','🍓'];
+function makeBoard(id,rows,cols,special){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.innerHTML='';
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const cell=document.createElement('div');
+      cell.className='cell';
+      let f=fruits[Math.floor(Math.random()*fruits.length)];
+      // 确保一些匹配
+      if(c>=2 && el.children.length>=2){
+        const p1=el.children[el.children.length-1],p2=el.children[el.children.length-2];
+        if(p1.textContent===p2.textContent) f=p1.textContent==='🍎'?'🍇':'🍎';
+      }
+      cell.textContent=f;
+      if(special){
+        if(r===1&&c===2){cell.classList.add('striped-h');cell.textContent='🍇'}
+        if(r===2&&c===5){cell.classList.add('striped-v');cell.textContent='🍊'}
+        if(r===4&&c===1){cell.classList.add('wrapped');cell.textContent='🍓'}
+        if(r===5&&c===6){cell.classList.add('rainbow');cell.textContent='🍋'}
+        if(r===3&&c===3){cell.classList.add('ice');cell.textContent='🍉'}
+        if(r===6&&c===4){cell.classList.add('chain');cell.textContent='🍎'}
+      }
+      el.appendChild(cell);
+    }
+  }
+  // 选中状态
+  if(id==='board1'){
+    el.children[7].classList.add('selected');
+    el.children[8].classList.add('hint');
+  }
+}
+makeBoard('board1',6,6,false);
+makeBoard('board2',8,8,true);
+makeBoard('board3',6,6,false);
+
+// 消除特效粒子
+function spawnParticles(id,x,y,color){
+  const layer=document.getElementById(id);
+  if(!layer)return;
+  for(let i=0;i<12;i++){
+    const p=document.createElement('div');
+    p.className='particle';
+    p.style.left=x+'px';p.style.top=y+'px';
+    p.style.background=color;
+    const angle=(Math.PI*2*i)/12;
+    const dist=30+Math.random()*30;
+    p.style.setProperty('--dx',Math.cos(angle)*dist+'px');
+    p.style.setProperty('--dy',Math.sin(angle)*dist+'px');
+    p.style.animation=`particleFly .6s forwards`;
+    layer.appendChild(p);
+    setTimeout(()=>p.remove(),600);
+  }
+}
+// 粒子动画
+const style=document.createElement('style');
+style.textContent=`@keyframes particleFly{0%{transform:translate(0,0);opacity:1}100%{transform:translate(var(--dx),var(--dy));opacity:0}}`;
+document.head.appendChild(style);
+
+// board3 模拟消除中状态（部分格子空）
+setTimeout(()=>{
+  const b3=document.getElementById('board3');
+  if(b3){
+    [3,4,5,9,10,11].forEach(i=>{if(b3.children[i])b3.children[i].style.opacity='0.3'});
+    spawnParticles('fx3',120,160,'#ff6b6b');
+    spawnParticles('fx3',160,160,'#ffd166');
+    spawnParticles('fx3',200,160,'#4ecdc4');
+  }
+},500);
+</script>
+
+</body>
+</html>
