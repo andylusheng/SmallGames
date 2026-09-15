@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>连连看 - 高保真原型 V2（对标 Onet Master）</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Segoe UI Rounded","SF Pro Rounded","PingFang SC",system-ui,sans-serif;background:#0f1220;color:#fff;min-height:100vh;padding:40px 20px}
+h1{text-align:center;font-size:28px;margin-bottom:8px;background:linear-gradient(90deg,#ffd166,#ff9a3d);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{text-align:center;color:#8892b0;font-size:14px;margin-bottom:40px}
+.screens{display:flex;flex-wrap:wrap;gap:40px;justify-content:center;align-items:flex-start}
+.screen{width:390px;flex-shrink:0}
+.screen-label{text-align:center;font-size:13px;color:#8892b0;margin-bottom:10px;font-weight:600;letter-spacing:1px}
+.phone{width:390px;height:780px;border-radius:40px;overflow:hidden;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.5);border:3px solid #2a2f45}
+
+/* ===== 游戏背景（森林草地） ===== */
+.game-bg{position:absolute;inset:0;background:linear-gradient(180deg,#b8e986 0%,#7bc950 35%,#4a9e3a 70%,#2d6b22 100%);overflow:hidden}
+.game-bg::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(circle at 15% 20%,rgba(255,255,255,.35),transparent 18%),
+  radial-gradient(circle at 75% 15%,rgba(255,255,255,.25),transparent 22%),
+  radial-gradient(circle at 45% 65%,rgba(255,255,255,.2),transparent 20%),
+  radial-gradient(circle at 85% 55%,rgba(255,255,255,.3),transparent 16%),
+  radial-gradient(circle at 25% 80%,rgba(255,255,255,.22),transparent 20%)}
+.game-bg::after{content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 120px 80px at 5% 8%,rgba(20,60,20,.55),transparent 70%),
+    radial-gradient(ellipse 100px 70px at 95% 12%,rgba(20,60,20,.5),transparent 70%),
+    radial-gradient(ellipse 140px 90px at 2% 92%,rgba(20,60,20,.5),transparent 70%),
+    radial-gradient(ellipse 110px 80px at 98% 88%,rgba(20,60,20,.55),transparent 70%)}
+
+/* ===== 顶部 HUD ===== */
+.hud{position:absolute;top:0;left:0;right:0;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;z-index:10}
+.hud-left{display:flex;align-items:center;gap:8px}
+.btn-change{background:linear-gradient(180deg,#ffd54f,#ffb300);border:2px solid #e65100;border-radius:20px;padding:6px 16px;font-weight:900;font-size:13px;color:#5d4037;display:flex;align-items:center;gap:6px;box-shadow:0 3px 8px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.5)}
+.btn-change .play{background:#e65100;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px}
+.level-tag{background:rgba(0,0,0,.35);border-radius:20px;padding:6px 18px;font-weight:800;font-size:14px;color:#fff;letter-spacing:1px}
+.hud-right{display:flex;align-items:center;gap:8px}
+.hint-count{background:rgba(0,0,0,.35);border-radius:20px;padding:6px 12px;font-weight:900;font-size:16px;color:#fff;display:flex;align-items:center;gap:4px}
+.hint-icon{width:28px;height:28px;background:radial-gradient(circle at 35% 30%,#fff9c4,#ffd54f 50%,#f57f17);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 4px rgba(0,0,0,.3)}
+.settings-btn{width:36px;height:36px;background:radial-gradient(circle at 35% 30%,#fff9c4,#ffd54f 50%,#f57f17);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+
+/* ===== 棋盘 ===== */
+.board-area{position:absolute;top:70px;left:12px;right:12px;bottom:20px;display:flex;align-items:center;justify-content:center}
+.board{display:grid;grid-template-columns:repeat(10,1fr);gap:2px;width:100%;max-width:360px}
+.cell{aspect-ratio:1;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:2px;display:flex;align-items:center;justify-content:center;position:relative}
+.cell.empty{background:transparent;border-color:transparent}
+.cell svg{width:94%;height:94%;filter:drop-shadow(0 3px 5px rgba(0,0,0,.35))}
+
+/* ===== 底部道具 ===== */
+.tools{position:absolute;bottom:16px;left:0;right:0;display:flex;justify-content:center;gap:16px;z-index:10}
+.tool-btn{width:64px;height:64px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-weight:800;font-size:11px;color:#fff;border:2px solid rgba(255,255,255,.2);box-shadow:0 4px 10px rgba(0,0,0,.3)}
+.tool-btn.hint{background:linear-gradient(180deg,#42a5f5,#1976d2)}
+.tool-btn.shuffle{background:linear-gradient(180deg,#ab47bc,#7b1fa2)}
+.tool-btn .icon{font-size:22px}
+.tool-btn .count{font-size:10px;color:#ffd166}
+
+/* ===== 开始页 ===== */
+.menu-bg{position:absolute;inset:0;background:linear-gradient(180deg,#1a237e 0%,#4a148c 50%,#880e4f 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+.menu-bg::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(circle at 20% 30%,rgba(255,215,0,.15),transparent 40%),
+  radial-gradient(circle at 80% 70%,rgba(255,64,129,.2),transparent 40%)}
+.menu-title{font-size:42px;font-weight:900;text-align:center;line-height:1.1;margin-bottom:8px;position:relative;z-index:2;
+  background:linear-gradient(180deg,#fff9c4,#ffd54f 40%,#ff8f00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 4px 8px rgba(0,0,0,.4))}
+.menu-sub{font-size:16px;color:#fff;opacity:.8;margin-bottom:40px;position:relative;z-index:2}
+.menu-gems{display:flex;gap:12px;margin-bottom:40px;position:relative;z-index:2}
+.menu-gems svg{width:48px;height:48px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.4))}
+.btn-start{background:linear-gradient(180deg,#66bb6a,#2e7d32);border:3px solid #1b5e20;border-radius:28px;padding:14px 56px;font-size:20px;font-weight:900;color:#fff;box-shadow:0 6px 16px rgba(0,0,0,.4),inset 0 2px 0 rgba(255,255,255,.3);position:relative;z-index:2;cursor:pointer}
+.btn-start:active{transform:scale(.96)}
+.menu-levels{margin-top:24px;font-size:13px;color:#fff;opacity:.6;position:relative;z-index:2}
+
+/* ===== 结算页 ===== */
+.result-overlay{position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:20}
+.result-card{background:linear-gradient(180deg,#fff8e1,#ffe0b2);border-radius:24px;padding:32px 28px;width:300px;text-align:center;box-shadow:0 16px 48px rgba(0,0,0,.5);border:3px solid #ffb300}
+.result-title{font-size:28px;font-weight:900;color:#e65100;margin-bottom:8px}
+.result-stars{font-size:36px;margin:12px 0;letter-spacing:4px}
+.result-score{font-size:18px;color:#5d4037;font-weight:700;margin-bottom:6px}
+.result-time{font-size:14px;color:#8d6e63;margin-bottom:20px}
+.result-btns{display:flex;gap:10px;justify-content:center}
+.result-btn{padding:10px 20px;border-radius:14px;font-weight:800;font-size:14px;border:none;cursor:pointer;color:#fff}
+.result-btn.retry{background:linear-gradient(180deg,#42a5f5,#1976d2)}
+.result-btn.next{background:linear-gradient(180deg,#66bb6a,#2e7d32)}
+
+/* 连线示意 */
+.link-demo{position:absolute;pointer-events:none;z-index:5}
+</style>
+</head>
+<body>
+
+<h1>连连看 · 高保真原型 V2</h1>
+<p class="sub">对标 Poki Onet Master 视觉风格 · 森林草地 · 3D 宝石 · 透明格子</p>
+
+<div class="screens">
+
+<!-- 开始页 -->
+<div class="screen">
+  <div class="screen-label">开始页</div>
+  <div class="phone">
+    <div class="menu-bg">
+      <div class="menu-title">宝石<br>连连看</div>
+      <div class="menu-sub">Gem Link Connect</div>
+      <div class="menu-gems" id="menuGems"></div>
+      <button class="btn-start">开始游戏</button>
+      <div class="menu-levels">60 个关卡 · 8 种宝石 · 限时挑战</div>
+    </div>
+  </div>
+</div>
+
+<!-- 游戏中 -->
+<div class="screen">
+  <div class="screen-label">游戏中（对标 Onet Master）</div>
+  <div class="phone">
+    <div class="game-bg">
+      <div class="hud">
+        <div class="hud-left">
+          <div class="btn-change">换一批 <span class="play">▶</span></div>
+          <div class="level-tag">LEVEL 1</div>
+        </div>
+        <div class="hud-right">
+          <div class="hint-count">5 <span class="hint-icon">🔍</span></div>
+          <div class="settings-btn">⚙</div>
+        </div>
+      </div>
+      <div class="board-area">
+        <div class="board" id="protoBoard"></div>
+      </div>
+      <svg class="link-demo" style="top:70px;left:12px;right:12px;bottom:20px" viewBox="0 0 360 600" preserveAspectRatio="none">
+        <path d="M166,200 L166,140 L234,140 L234,200" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity=".95" filter="drop-shadow(0 0 8px rgba(255,255,255,.9))"/>
+      </svg>
+      <div class="tools">
+        <div class="tool-btn hint"><span class="icon">💡</span>提示<span class="count">×3</span></div>
+        <div class="tool-btn shuffle"><span class="icon">🔀</span>洗牌<span class="count">×2</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 结算页 -->
+<div class="screen">
+  <div class="screen-label">结算页</div>
+  <div class="phone">
+    <div class="game-bg">
+      <div class="board-area">
+        <div class="board" id="protoBoard2"></div>
+      </div>
+      <div class="result-overlay">
+        <div class="result-card">
+          <div class="result-title">🎉 过关！</div>
+          <div class="result-stars">⭐⭐⭐</div>
+          <div class="result-score">得分 2,450</div>
+          <div class="result-time">剩余时间 42秒 · 连击 ×8</div>
+          <div class="result-btns">
+            <button class="result-btn retry">重玩</button>
+            <button class="result-btn next">下一关</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+// 宝石 - 使用从 Onet Master 裁剪的真实宝石图片
+const GEM_IMAGES=['gems/ai/orange.png','gems/ai/purple_tri.png','gems/ai/purple_cyl.png','gems/ai/purple_mar.png','gems/ai/green_leaf.png','gems/ai/blue_drop.png','gems/ai/yellow_star.png','gems/ai/blue_circle.png'];
+function gemSVG(type){
+  return `<img src="${GEM_IMAGES[type%GEM_IMAGES.length]}" style="width:94%;height:94%;object-fit:contain;filter:drop-shadow(0 3px 5px rgba(0,0,0,.35))">`;
+}
+
+
+// 生成棋盘（10列 x 8行，部分空，对标 Onet Master 布局）
+function genBoard(id){
+  const board=document.getElementById(id);
+  const layout=[
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,1,0,2,2,3,1,4,4,0],
+    [0,5,0,6,3,7,5,1,4,0],
+    [0,2,0,0,0,0,0,0,6,0],
+    [0,7,0,0,0,0,0,0,3,0],
+    [0,4,0,5,2,6,3,7,5,0],
+    [0,6,0,5,1,4,7,2,3,0],
+    [0,0,0,0,0,0,0,0,0,0]
+  ];
+  for(let r=0;r<8;r++){
+    for(let c=0;c<10;c++){
+      const cell=document.createElement('div');
+      cell.className='cell'+(layout[r][c]===0?' empty':'');
+      if(layout[r][c]>0)cell.innerHTML=gemSVG(layout[r][c]-1);
+      board.appendChild(cell);
+    }
+  }
+}
+genBoard('protoBoard');
+genBoard('protoBoard2');
+// 开始页宝石展示
+const mg=document.getElementById('menuGems');
+[0,1,4,5].forEach(i=>{const d=document.createElement('div');d.innerHTML=gemSVG(i);mg.appendChild(d.firstChild)});
+</script>
+
+</body>
+</html>

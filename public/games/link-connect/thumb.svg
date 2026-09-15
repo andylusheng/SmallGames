@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1040"/>
+      <stop offset="50%" style="stop-color:#2d1b69"/>
+      <stop offset="100%" style="stop-color:#0f1a3d"/>
+    </linearGradient>
+    <linearGradient id="title" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#a78bfa"/>
+      <stop offset="35%" style="stop-color:#60a5fa"/>
+      <stop offset="70%" style="stop-color:#34d399"/>
+      <stop offset="100%" style="stop-color:#fbbf24"/>
+    </linearGradient>
+    <radialGradient id="glow1" cx="20%" cy="20%" r="50%">
+      <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:.25"/>
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="80%" cy="80%" r="50%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:.2"/>
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0"/>
+    </radialGradient>
+    <linearGradient id="gemPurple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#c084fc"/>
+      <stop offset="100%" style="stop-color:#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="gemOrange" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fcd34d"/>
+      <stop offset="100%" style="stop-color:#f97316"/>
+    </linearGradient>
+    <linearGradient id="gemGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6ee7b7"/>
+      <stop offset="100%" style="stop-color:#059669"/>
+    </linearGradient>
+    <linearGradient id="gemBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#93c5fd"/>
+      <stop offset="100%" style="stop-color:#2563eb"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bg)"/>
+  <rect width="400" height="300" fill="url(#glow1)"/>
+  <rect width="400" height="300" fill="url(#glow2)"/>
+  <!-- 标题 -->
+  <text x="200" y="42" text-anchor="middle" font-family="Arial,sans-serif" font-size="22" font-weight="900" fill="url(#title)">宝石连连看</text>
+  <text x="200" y="60" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#8892b0" letter-spacing="3">GEM LINK CONNECT</text>
+  <!-- 棋盘 4x4 -->
+  <g transform="translate(110,78)">
+    <rect x="0" y="0" width="180" height="180" rx="10" fill="rgba(0,0,0,.25)" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+    <!-- 格子背景 -->
+    <g opacity=".5">
+      <rect x="8" y="8" width="38" height="38" rx="5" fill="rgba(255,255,255,.05)"/>
+      <rect x="50" y="8" width="38" height="38" rx="5" fill="rgba(255,255,255,.03)"/>
+      <rect x="92" y="8" width="38" height="38" rx="5" fill="rgba(255,255,255,.05)"/>
+      <rect x="134" y="8" width="38" height="38" rx="5" fill="rgba(255,255,255,.03)"/>
+      <rect x="8" y="50" width="38" height="38" rx="5" fill="rgba(255,255,255,.03)"/>
+      <rect x="50" y="50" width="38" height="38" rx="5" fill="rgba(255,255,255,.05)"/>
+      <rect x="92" y="50" width="38" height="38" rx="5" fill="rgba(255,255,255,.03)"/>
+      <rect x="134" y="50" width="38" height="38" rx="5" fill="rgba(255,255,255,.05)"/>
+      <rect x="8" y="92" width="38" height="38" rx="5" fill="rgba(255,255,255,.05)"/>
+      <rect x="50" y="92" width="38" height="38" rx="5" fill="rgba(255,255,255,.03)"/>
+      <rect x="92" y="92" width="38" height="38" rx="5" fill="rgba(255,255,255,.05)"/>
+      <rect x="134" y="92" width="38" height="38" rx="5" fill="rgba(255,255,255,.03)"/>
+      <rect x="8" y="134" width="38" height="38" rx="5" fill="rgba(255,255,255,.03)"/>
+      <rect x="50" y="134" width="38" height="38" rx="5" fill="rgba(255,255,255,.05)"/>
+      <rect x="92" y="134" width="38" height="38" rx="5" fill="rgba(255,255,255,.03)"/>
+      <rect x="134" y="134" width="38" height="38" rx="5" fill="rgba(255,255,255,.05)"/>
+    </g>
+    <!-- 宝石 -->
+    <!-- row0: 紫 橙 绿 蓝 -->
+    <polygon points="27,16 38,27 27,38 16,27" fill="url(#gemPurple)" stroke="rgba(255,255,255,.4)" stroke-width="1"/>
+    <ellipse cx="69" cy="27" rx="11" ry="9" fill="url(#gemOrange)" stroke="rgba(255,255,255,.4)" stroke-width="1"/>
+    <polygon points="105,16 121,22 118,38 102,38 99,22" fill="url(#gemGreen)" stroke="rgba(255,255,255,.4)" stroke-width="1"/>
+    <circle cx="153" cy="27" r="10" fill="url(#gemBlue)" stroke="rgba(255,255,255,.4)" stroke-width="1"/>
+    <!-- row1: 橙 紫(选中) 蓝 绿 -->
+    <ellipse cx="27" cy="69" rx="11" ry="9" fill="url(#gemOrange)" stroke="rgba(255,255,255,.4)" stroke-width="1"/>
+    <polygon points="60,58 78,58 78,80 60,80" fill="url(#gemPurple)" stroke="#ffd166" stroke-width="2"/>
+    <circle cx="111" cy="69" r="10" fill="url(#gemBlue)" stroke="rgba(255,255,255,.4)" stroke-width="1"/>
+    <polygon points="147,58 163,64 160,80 144,80 141,64" fill="url(#gemGreen)" stroke="rgba(255,255,255,.4)" stroke-width="1"/>
+    <!-- row2: 绿 蓝 紫(选中) 橙 -->
+    <polygon points="21,100 37,106 34,122 18,122 15,106" fill="url(#gemGreen)" stroke="rgba(255,255,255,.4)" stroke-width="1"/>
+    <circle cx="69" cy="111" r="10" fill="url(#gemBlue)" stroke="rgba(255,255,255,.4)" stroke-width="1"/>
+    <polygon points="102,100 120,100 120,122 102,122" fill="url(#gemPurple)" stroke="#ffd166" stroke-width="2"/>
+    <ellipse cx="153" cy="111" rx="11" ry="9" fill="url(#gemOrange)" stroke="rgba(255,255,255,.4)" stroke-width="1"/>
+    <!-- row3: 蓝 绿 橙 紫 -->
+    <circle cx="27" cy="153" r="10" fill="url(#gemBlue)" stroke="rgba(255,255,255,.4)" stroke-width="1"/>
+    <polygon points="63,142 79,148 76,164 60,164 57,148" fill="url(#gemGreen)" stroke="rgba(255,255,255,.4)" stroke-width="1"/>
+    <ellipse cx="111" cy="153" rx="11" ry="9" fill="url(#gemOrange)" stroke="rgba(255,255,255,.4)" stroke-width="1"/>
+    <polygon points="142,142 164,142 164,164 142,164" fill="url(#gemPurple)" stroke="rgba(255,255,255,.4)" stroke-width="1"/>
+    <!-- 连线：两个选中的紫色宝石 -->
+    <path d="M 69 69 L 69 45 L 111 45 L 111 111" fill="none" stroke="#ffd166" stroke-width="2.5" stroke-linecap="round" opacity=".85" style="filter:drop-shadow(0 0 4px rgba(255,209,102,.6))"/>
+    <circle cx="69" cy="69" r="4" fill="#ffd166" opacity=".9"/>
+    <circle cx="111" cy="111" r="4" fill="#ffd166" opacity=".9"/>
+    <!-- 粒子 -->
+    <circle cx="90" cy="45" r="2.5" fill="#ffd166" opacity=".7"/>
+    <circle cx="80" cy="50" r="1.5" fill="#fff" opacity=".6"/>
+    <circle cx="100" cy="40" r="2" fill="#a78bfa" opacity=".5"/>
+  </g>
+  <!-- 底部标签 -->
+  <text x="200" y="290" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#6b7394">LINK CONNECT · 60 LEVELS</text>
+</svg>

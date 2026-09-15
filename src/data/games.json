@@ -6110,5 +6110,76 @@
         "a": "Absolutely. Fruit Match 3 is fully responsive and optimized for touch on iPhone, iPad, and Android devices."
       }
     ]
+  },
+  {
+    "id": "link-connect",
+    "title": "Gem Link Connect",
+    "slug": "link-connect",
+    "description": "Tap identical gems to connect them with paths of up to two turns in this classic onet-style puzzle. Clear all gems before time runs out, build combos, use hint and shuffle power-ups, and beat 60 levels.",
+    "category": "puzzle",
+    "thumbnail": "/games/link-connect/thumb.svg",
+    "gameUrl": "/games/link-connect/index.html",
+    "tags": [
+      "link connect",
+      "onet",
+      "puzzle",
+      "gem",
+      "matching",
+      "connect",
+      "casual"
+    ],
+    "featured": true,
+    "popular": false,
+    "dateAdded": "2026-09-15",
+    "plays": 0,
+    "rating": 4.8,
+    "instructions": "Tap a gem to select it, then tap another identical gem. Connect them with a path of at most two turns to clear both. Clear all gems before the timer runs out.",
+    "longDescription": "Gem Link Connect is a polished onet-style connection puzzle game. Tap two identical gems to connect them with a path of at most two turns — paths may travel through empty cells and around the outer perimeter channel, but cannot pass through other gems or rock obstacles. Clear all gems from the board before the countdown timer reaches zero to advance. Fast consecutive clears build combo multipliers up to x3 for bonus points. Each level provides Hint (×3) and Shuffle (×2) power-ups to help when you get stuck, and a dead-end detection automatically offers a shuffle when no valid connections remain. With 60 hand-tuned levels across 6 chapters, escalating board sizes from 4x4 to 8x10, up to 8 gem types, rock obstacles in later levels, star ratings, and auto-save progress, Gem Link Connect delivers classic connection puzzle gameplay with satisfying combo feel on both desktop and mobile.",
+    "features": [
+      "60 levels across 6 themed chapters with escalating difficulty",
+      "Classic onet-style connection gameplay with max 2-turn paths",
+      "Paths route through empty cells and around the outer perimeter channel",
+      "Combo multiplier up to x3 for fast consecutive clears",
+      "Hint power-up (×3 per level) highlights a connectable pair",
+      "Shuffle power-up (×2 per level) rearranges remaining gems",
+      "Automatic dead-end detection with shuffle prompt",
+      "Rock obstacles in later levels that block paths permanently",
+      "Time-limited levels with remaining-time bonus scoring",
+      "Star rating system (1-3 stars) based on time and hint usage",
+      "Progress auto-saved in localStorage",
+      "Synthesized WebAudio sound effects with mute toggle",
+      "Fully responsive for desktop and mobile browsers",
+      "100% free, no downloads, no sign-ups, no in-app purchases"
+    ],
+    "tips": [
+      "Clear gems near the center first to open routing paths through the middle",
+      "Build combos by clearing pairs quickly — the x3 multiplier boosts scores significantly",
+      "Save hints for when you truly cannot find a pair — they are limited to 3 per level",
+      "Use shuffle when the board feels stuck — it often opens new connection opportunities",
+      "Aim for 3-star ratings by finishing fast and using hints sparingly"
+    ],
+    "difficulty": "Easy to Medium",
+    "faq": [
+      {
+        "q": "How do I play Gem Link Connect?",
+        "a": "Tap a gem to select it, then tap another identical gem. If a valid path exists (at most two turns, not passing through other gems), both gems clear and you score points."
+      },
+      {
+        "q": "What is the maximum number of turns in a connection path?",
+        "a": "A valid path may contain at most two turns, meaning three straight line segments. Paths can go through empty cells and around the outer perimeter of the board."
+      },
+      {
+        "q": "What are the power-ups?",
+        "a": "Hint (×3 per level) highlights a pair of connectable gems. Shuffle (×2 per level) rearranges all remaining gems on the board. If no valid connection exists, a dead-end dialog offers an automatic shuffle."
+      },
+      {
+        "q": "Is Gem Link Connect free to play?",
+        "a": "Yes! Gem Link Connect is completely free with no downloads, sign-ups, ads, or in-app purchases. Play all 60 levels instantly in your browser."
+      },
+      {
+        "q": "Does it work on mobile?",
+        "a": "Absolutely. Gem Link Connect is fully responsive and optimized for touch on iPhone, iPad, and Android devices."
+      }
+    ]
   }
 ]

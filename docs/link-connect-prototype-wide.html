@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>连连看 - 宽屏 Web 端原型（对标 Onet Master）</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Segoe UI Rounded","SF Pro Rounded","PingFang SC",system-ui,sans-serif;background:#0f1220;color:#fff;min-height:100vh;padding:30px 20px}
+h1{text-align:center;font-size:26px;margin-bottom:6px;background:linear-gradient(90deg,#ffd166,#ff9a3d);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{text-align:center;color:#8892b0;font-size:13px;margin-bottom:24px}
+
+/* ===== 宽屏游戏容器 ===== */
+.game-frame{width:100%;max-width:1200px;margin:0 auto;border-radius:20px;overflow:hidden;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.5);aspect-ratio:16/9}
+
+/* ===== 游戏背景（森林草地） ===== */
+.game-bg{position:absolute;inset:0;background:linear-gradient(180deg,#b8e986 0%,#7bc950 35%,#4a9e3a 70%,#2d6b22 100%);overflow:hidden}
+.game-bg::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(circle at 10% 15%,rgba(255,255,255,.35),transparent 15%),
+  radial-gradient(circle at 80% 10%,rgba(255,255,255,.25),transparent 20%),
+  radial-gradient(circle at 50% 60%,rgba(255,255,255,.18),transparent 25%),
+  radial-gradient(circle at 90% 50%,rgba(255,255,255,.28),transparent 14%),
+  radial-gradient(circle at 20% 85%,rgba(255,255,255,.2),transparent 18%)}
+.game-bg::after{content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 180px 100px at 3% 5%,rgba(20,60,20,.5),transparent 70%),
+    radial-gradient(ellipse 150px 90px at 97% 8%,rgba(20,60,20,.45),transparent 70%),
+    radial-gradient(ellipse 200px 120px at 2% 95%,rgba(20,60,20,.5),transparent 70%),
+    radial-gradient(ellipse 160px 100px at 98% 92%,rgba(20,60,20,.5),transparent 70%)}
+
+/* 装饰树叶 */
+.leaf-deco{position:absolute;font-size:48px;opacity:.3;z-index:1}
+.leaf-deco.l1{top:5%;left:2%;transform:rotate(-20deg)}
+.leaf-deco.l2{top:8%;right:3%;transform:rotate(25deg)}
+.leaf-deco.l3{bottom:8%;left:4%;transform:rotate(15deg)}
+.leaf-deco.l4{bottom:5%;right:2%;transform:rotate(-15deg)}
+
+/* ===== 顶部 HUD（宽屏横排） ===== */
+.hud{position:absolute;top:0;left:0;right:0;padding:16px 32px;display:flex;align-items:center;justify-content:space-between;z-index:10}
+.hud-left{display:flex;align-items:center;gap:14px}
+.btn-change{background:linear-gradient(180deg,#ffd54f,#ffb300);border:2px solid #e65100;border-radius:24px;padding:8px 22px;font-weight:900;font-size:15px;color:#5d4037;display:flex;align-items:center;gap:8px;box-shadow:0 3px 8px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.5)}
+.btn-change .play{background:#e65100;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px}
+.level-tag{background:rgba(0,0,0,.35);border-radius:24px;padding:8px 28px;font-weight:800;font-size:18px;color:#fff;letter-spacing:1px}
+.hud-right{display:flex;align-items:center;gap:12px}
+.hint-count{background:rgba(0,0,0,.35);border-radius:24px;padding:8px 18px;font-weight:900;font-size:20px;color:#fff;display:flex;align-items:center;gap:6px}
+.hint-icon{width:32px;height:32px;background:radial-gradient(circle at 35% 30%,#fff9c4,#ffd54f 50%,#f57f17);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 4px rgba(0,0,0,.3)}
+.settings-btn{width:42px;height:42px;background:radial-gradient(circle at 35% 30%,#fff9c4,#ffd54f 50%,#f57f17);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+
+/* ===== 棋盘区域（宽屏居中） ===== */
+.board-area{position:absolute;top:80px;left:0;right:0;bottom:24px;display:flex;align-items:center;justify-content:center;gap:40px}
+.board{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;width:min(62%,720px)}
+.cell{aspect-ratio:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:3px;display:flex;align-items:center;justify-content:center;position:relative}
+.cell.empty{background:transparent;border-color:transparent}
+.cell img{width:98%;height:98%;object-fit:contain;filter:drop-shadow(0 3px 6px rgba(0,0,0,.4))}
+.cell.selected{background:rgba(255,215,0,.18);border-color:rgba(255,215,0,.6);box-shadow:0 0 12px rgba(255,215,0,.4)}
+
+/* 连线 SVG */
+.line-svg{position:absolute;inset:0;pointer-events:none;z-index:5}
+
+/* ===== 侧边道具栏（宽屏） ===== */
+.side-tools{display:flex;flex-direction:column;gap:16px;z-index:10}
+.tool-btn{width:72px;height:72px;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-weight:800;font-size:12px;color:#fff;border:2px solid rgba(255,255,255,.25);box-shadow:0 4px 12px rgba(0,0,0,.35)}
+.tool-btn.hint{background:linear-gradient(180deg,#42a5f5,#1976d2)}
+.tool-btn.shuffle{background:linear-gradient(180deg,#ab47bc,#7b1fa2)}
+.tool-btn .icon{font-size:26px}
+.tool-btn .count{font-size:11px;color:#ffd166;font-weight:900}
+
+/* ===== 左侧信息面板 ===== */
+.side-info{display:flex;flex-direction:column;gap:14px;z-index:10;min-width:120px}
+.info-card{background:rgba(0,0,0,.3);border-radius:14px;padding:12px 16px;text-align:center;border:1px solid rgba(255,255,255,.1)}
+.info-card .label{font-size:11px;color:rgba(255,255,255,.6);font-weight:600;letter-spacing:1px;margin-bottom:4px}
+.info-card .value{font-size:24px;font-weight:900;color:#fff}
+.info-card .value.gold{color:#ffd54f}
+.info-card .value.time{color:#69f0ae}
+.combo-badge{background:linear-gradient(135deg,#ff6b6b,#ee5a24);border-radius:14px;padding:10px;text-align:center;font-weight:900;font-size:16px;color:#fff;box-shadow:0 4px 12px rgba(238,90,36,.4);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+
+/* ===== 标签 ===== */
+.frame-label{text-align:center;font-size:12px;color:#8892b0;margin-top:10px;font-weight:600;letter-spacing:1px}
+
+/* ===== 第二屏：开始页（宽屏） ===== */
+.menu-bg{position:absolute;inset:0;background:linear-gradient(135deg,#1a237e 0%,#4a148c 50%,#880e4f 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+.menu-bg::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(circle at 15% 25%,rgba(255,215,0,.18),transparent 35%),
+  radial-gradient(circle at 85% 75%,rgba(255,64,129,.25),transparent 35%),
+  radial-gradient(circle at 50% 50%,rgba(103,58,183,.2),transparent 50%)}
+.menu-title{font-size:64px;font-weight:900;text-align:center;line-height:1.1;margin-bottom:12px;position:relative;z-index:2;
+  background:linear-gradient(180deg,#fff9c4,#ffd54f 40%,#ff8f00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 6px 12px rgba(0,0,0,.5))}
+.menu-sub{font-size:20px;color:#fff;opacity:.8;margin-bottom:48px;position:relative;z-index:2}
+.menu-gems{display:flex;gap:20px;margin-bottom:48px;position:relative;z-index:2}
+.menu-gems img{width:88px;height:88px;object-fit:contain;filter:drop-shadow(0 6px 12px rgba(0,0,0,.5))}
+.btn-start{background:linear-gradient(180deg,#66bb6a,#2e7d32);border:3px solid #1b5e20;border-radius:36px;padding:18px 80px;font-size:26px;font-weight:900;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,.5),inset 0 2px 0 rgba(255,255,255,.3);position:relative;z-index:2;cursor:pointer;letter-spacing:2px}
+.btn-start:active{transform:scale(.97)}
+.menu-levels{margin-top:32px;font-size:15px;color:#fff;opacity:.6;position:relative;z-index:2}
+
+/* ===== 结算页（宽屏） ===== */
+.result-overlay{position:absolute;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:20;backdrop-filter:blur(4px)}
+.result-card{background:linear-gradient(180deg,#fff8e1,#ffe0b2);border-radius:28px;padding:40px 48px;width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6);border:3px solid #ffb300}
+.result-title{font-size:36px;font-weight:900;color:#e65100;margin-bottom:10px}
+.result-stars{font-size:48px;margin:16px 0;letter-spacing:8px}
+.result-score{font-size:22px;color:#5d4037;font-weight:700;margin-bottom:8px}
+.result-time{font-size:16px;color:#8d6e63;margin-bottom:28px}
+.result-btns{display:flex;gap:14px;justify-content:center}
+.result-btn{padding:12px 32px;border-radius:24px;font-weight:800;font-size:16px;border:2px solid;cursor:pointer}
+.result-btn.retry{background:linear-gradient(180deg,#ef5350,#c62828);border-color:#b71c1c;color:#fff}
+.result-btn.next{background:linear-gradient(180deg,#66bb6a,#2e7d32);border-color:#1b5e20;color:#fff}
+
+/* 双屏布局 */
+.two-screens{display:flex;gap:30px;justify-content:center;align-items:flex-start;flex-wrap:wrap}
+.screen-wrap{flex:1;min-width:560px;max-width:700px}
+</style>
+</head>
+<body>
+
+<h1>连连看 · 宽屏 Web 端原型</h1>
+<p class="sub">对标 Onet Master · 16:9 宽屏布局 · AI 生成 3D 宝石</p>
+
+<div class="two-screens">
+
+  <!-- 第一屏：游戏中 -->
+  <div class="screen-wrap">
+    <div class="game-frame">
+      <div class="game-bg">
+        <div class="leaf-deco l1">🌿</div>
+        <div class="leaf-deco l2">🍃</div>
+        <div class="leaf-deco l3">🌱</div>
+        <div class="leaf-deco l4">🌿</div>
+      </div>
+      
+      <!-- 顶部 HUD -->
+      <div class="hud">
+        <div class="hud-left">
+          <div class="btn-change">CHANGE TILES <span class="play">▶</span></div>
+          <div class="level-tag">LEVEL 1</div>
+        </div>
+        <div class="hud-right">
+          <div class="hint-count"><span class="hint-icon">💡</span> 5</div>
+          <div class="settings-btn">⚙</div>
+        </div>
+      </div>
+      
+      <!-- 棋盘区域 -->
+      <div class="board-area">
+        <!-- 左侧信息 -->
+        <div class="side-info">
+          <div class="info-card">
+            <div class="label">SCORE</div>
+            <div class="value gold">2,400</div>
+          </div>
+          <div class="info-card">
+            <div class="label">TIME</div>
+            <div class="value time">1:45</div>
+          </div>
+          <div class="combo-badge">COMBO ×3</div>
+        </div>
+        
+        <!-- 棋盘 -->
+        <div class="board" id="board1"></div>
+        
+        <!-- 右侧道具 -->
+        <div class="side-tools">
+          <div class="tool-btn hint">
+            <span class="icon">💡</span>
+            <span>提示</span>
+            <span class="count">×3</span>
+          </div>
+          <div class="tool-btn shuffle">
+            <span class="icon">🔀</span>
+            <span>洗牌</span>
+            <span class="count">×2</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 连线效果 -->
+      <svg class="line-svg" viewBox="0 0 1200 675" preserveAspectRatio="none">
+        <path d="M 380,280 L 380,200 L 520,200 L 520,280" fill="none" stroke="#ffd54f" stroke-width="4" stroke-linecap="round" opacity="0.9" filter="drop-shadow(0 0 6px rgba(255,213,79,.8))"/>
+      </svg>
+    </div>
+    <p class="frame-label">游戏中 · 宽屏布局</p>
+  </div>
+
+  <!-- 第二屏：开始页 -->
+  <div class="screen-wrap">
+    <div class="game-frame">
+      <div class="menu-bg">
+        <div class="menu-title">GEM<br>LINK</div>
+        <div class="menu-sub">经典连连看 · 宝石消除</div>
+        <div class="menu-gems" id="menuGems"></div>
+        <button class="btn-start">START</button>
+        <div class="menu-levels">60 关卡 · 8 种宝石 · 限时挑战</div>
+      </div>
+    </div>
+    <p class="frame-label">开始页 · 宽屏布局</p>
+  </div>
+
+</div>
+
+<script>
+const GEM_IMAGES=['gems/ai/orange.png','gems/ai/purple_tri.png','gems/ai/purple_cyl.png','gems/ai/purple_mar.png','gems/ai/green_leaf.png','gems/ai/blue_drop.png','gems/ai/yellow_star.png','gems/ai/blue_circle.png'];
+
+function gemImg(type){
+  return `<img src="${GEM_IMAGES[type%GEM_IMAGES.length]}" alt="gem">`;
+}
+
+// 棋盘布局（10列 x 8行，部分空，对标 Onet Master）
+const layout=[
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,1,0,2,2,3,1,4,4,0],
+  [0,5,0,6,3,7,5,1,4,0],
+  [0,2,0,0,0,0,0,0,6,0],
+  [0,7,0,0,0,0,0,0,3,0],
+  [0,4,0,5,2,6,3,7,5,0],
+  [0,6,0,5,1,4,7,2,3,0],
+  [0,0,0,0,0,0,0,0,0,0]
+];
+
+function genBoard(id){
+  const board=document.getElementById(id);
+  board.innerHTML='';
+  for(let r=0;r<8;r++){
+    for(let c=0;c<10;c++){
+      const cell=document.createElement('div');
+      cell.className='cell'+(layout[r][c]===0?' empty':'');
+      if(layout[r][c]>0){
+        cell.innerHTML=gemImg(layout[r][c]-1);
+        if(r===1&&c===1) cell.classList.add('selected');
+      }
+      board.appendChild(cell);
+    }
+  }
+}
+
+genBoard('board1');
+
+// 开始页宝石
+const mg=document.getElementById('menuGems');
+[0,1,4,5,6,7].forEach(i=>{
+  const img=document.createElement('img');
+  img.src=GEM_IMAGES[i];
+  mg.appendChild(img);
+});
+</script>
+
+</body>
+</html>

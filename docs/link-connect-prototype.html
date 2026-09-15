@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>连连看 - 高保真原型</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#0f172a 100%);color:#fff;font-family:-apple-system,'Segoe UI',Roboto,sans-serif;min-height:100vh;display:flex;gap:28px;padding:32px;flex-wrap:wrap;justify-content:center;align-items:flex-start}
+.frame{background:rgba(30,41,59,.85);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:24px;width:380px;box-shadow:0 12px 40px rgba(0,0,0,.5)}
+.frame h3{text-align:center;margin-bottom:18px;color:#fbbf24;font-size:14px;letter-spacing:2px;text-transform:uppercase;opacity:.8}
+/* HUD */
+.hud{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;font-size:13px;gap:6px}
+.hud .badge{background:rgba(51,65,85,.8);padding:6px 12px;border-radius:10px;font-weight:600;display:flex;align-items:center;gap:4px}
+.hud .timer{color:#fbbf24;font-weight:bold;font-size:20px;min-width:60px;text-align:center}
+.hud .timer.low{color:#ef4444;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+/* 棋盘 */
+.board-wrap{position:relative;margin:0 auto;width:fit-content}
+/* 棋盘外围通道（连线绕行空间） */
+.board-outer{position:relative;margin:0 auto;width:fit-content;padding:38px;background:rgba(15,23,42,.4);border-radius:20px;border:1px dashed rgba(251,191,36,.15)}
+.board{display:grid;gap:5px;background:rgba(15,23,42,.6);padding:12px;border-radius:16px;border:1px solid rgba(255,255,255,.06);position:relative}
+.cell{aspect-ratio:1;border-radius:10px;background:linear-gradient(150deg,#f0e9d4,#d8cfb4);display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;box-shadow:0 3px 6px rgba(0,0,0,.35),inset 0 2px 0 rgba(255,255,255,.7),inset 0 -3px 6px rgba(0,0,0,.12),0 0 0 1px rgba(0,0,0,.08);position:relative;transition:transform .12s,box-shadow .12s;user-select:none}
+.cell:hover{transform:scale(1.06)}
+.cell.selected{box-shadow:0 0 0 3px #fbbf24,0 0 20px rgba(251,191,36,.7),inset 0 2px 0 rgba(255,255,255,.7);transform:scale(1.12);z-index:3}
+.cell.selected::after{content:"";position:absolute;inset:-4px;border-radius:12px;border:2px solid rgba(251,191,36,.4);animation:selPulse 1s infinite}
+@keyframes selPulse{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:.8;transform:scale(1.05)}}
+.cell.gone{visibility:hidden}
+.cell.hint{animation:hintGlow 1s infinite}
+@keyframes hintGlow{0%,100%{box-shadow:0 0 0 3px #3b82f6,0 0 16px rgba(59,130,246,.6)}50%{box-shadow:0 0 0 3px #60a5fa,0 0 28px rgba(59,130,246,.9)}}
+.cell .fr{filter:drop-shadow(0 2px 3px rgba(0,0,0,.35));display:inline-block;transform:translateY(-1px)}
+.cell .bonus{position:absolute;top:-2px;right:-2px;font-size:10px;filter:drop-shadow(0 0 4px rgba(251,191,36,.8))}
+/* 连线层 */
+.link-layer{position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:5}
+/* 按钮 */
+.btn-row{display:flex;gap:10px;margin-top:16px;justify-content:center}
+.btn{padding:10px 18px;border-radius:12px;border:none;cursor:pointer;font-size:13px;font-weight:700;transition:transform .12s,box-shadow .12s;display:flex;align-items:center;gap:5px}
+.btn:hover{transform:scale(1.05)}
+.btn:active{transform:scale(.97)}
+.btn.hint{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;box-shadow:0 4px 12px rgba(59,130,246,.4)}
+.btn.shuffle{background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff;box-shadow:0 4px 12px rgba(139,92,246,.4)}
+.btn.pause{background:rgba(71,85,105,.8);color:#fff}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+/* combo */
+.combo{text-align:center;color:#fbbf24;font-size:26px;font-weight:900;height:32px;margin-bottom:6px;text-shadow:0 0 16px rgba(251,191,36,.7);letter-spacing:1px}
+.combo.show{animation:comboPop .4s ease-out}
+@keyframes comboPop{0%{transform:scale(.5);opacity:0}60%{transform:scale(1.3)}100%{transform:scale(1);opacity:1}}
+/* 开始页 */
+.menu{text-align:center;padding:10px 0}
+.menu .icon-row{font-size:36px;margin-bottom:10px;letter-spacing:6px}
+.menu .title{font-size:38px;font-weight:900;background:linear-gradient(135deg,#fbbf24,#f59e0b,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;letter-spacing:2px}
+.menu .subtitle{color:#94a3b8;font-size:14px;margin-bottom:24px}
+.level-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:24px}
+.level-btn{aspect-ratio:1;border-radius:12px;background:linear-gradient(145deg,#334155,#1e293b);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:18px;font-weight:800;cursor:pointer;position:relative;transition:transform .12s;box-shadow:0 3px 8px rgba(0,0,0,.3)}
+.level-btn:hover{transform:scale(1.08)}
+.level-btn.locked{opacity:.35;cursor:not-allowed}
+.level-btn.locked::after{content:"🔒";position:absolute;font-size:14px}
+.level-btn .stars{position:absolute;bottom:3px;font-size:8px;letter-spacing:-1px}
+.level-btn.current{box-shadow:0 0 0 2px #fbbf24,0 0 16px rgba(251,191,36,.5)}
+.start-btn{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;padding:14px 48px;border-radius:14px;font-size:17px;font-weight:800;border:none;cursor:pointer;box-shadow:0 6px 20px rgba(245,158,11,.5);transition:transform .12s;letter-spacing:1px}
+.start-btn:hover{transform:scale(1.05)}
+/* 结算 */
+.result{text-align:center;padding:10px 0}
+.result .big{font-size:48px;margin-bottom:6px;animation:bounceIn .5s ease-out}
+@keyframes bounceIn{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+.result .title{font-size:24px;font-weight:800;margin-bottom:4px}
+.result .title.win{color:#fbbf24}
+.result .title.lose{color:#ef4444}
+.result .stars{font-size:36px;margin:14px 0;letter-spacing:4px}
+.result .stars .dim{opacity:.2}
+.result .score{font-size:32px;color:#fbbf24;font-weight:900;margin:10px 0;text-shadow:0 0 12px rgba(251,191,36,.5)}
+.result .info{color:#94a3b8;font-size:13px;margin:5px 0}
+.result .info strong{color:#e2e8f0}
+.result-btns{display:flex;gap:10px;justify-content:center;margin-top:20px}
+.result-btns .btn{padding:12px 24px;font-size:14px}
+.btn.primary{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;box-shadow:0 4px 16px rgba(245,158,11,.4)}
+.btn.secondary{background:rgba(71,85,105,.8);color:#fff}
+/* 进度条 */
+.progress{height:6px;background:rgba(51,65,85,.6);border-radius:3px;margin:10px 0 14px;overflow:hidden}
+.progress .fill{height:100%;background:linear-gradient(90deg,#fbbf24,#f59e0b);border-radius:3px;transition:width .3s}
+/* 粒子效果示意 */
+.particles{position:absolute;inset:0;pointer-events:none;overflow:visible}
+.particle{position:absolute;width:8px;height:8px;border-radius:50%;opacity:0}
+/* 移动端标注 */
+.mobile-note{text-align:center;color:#64748b;font-size:11px;margin-top:12px}
+</style>
+</head>
+<body>
+
+<!-- ① 开始页 / 关卡选择 -->
+<div class="frame">
+<h3>① 开始页 · 关卡选择</h3>
+<div class="menu">
+<div class="icon-row">🐱🐶🐰🦊🐻</div>
+<div class="title">连连看</div>
+<div class="subtitle">找到相同图案，连线消除 · 60关挑战</div>
+<div class="level-grid">
+<div class="level-btn">1<span class="stars">⭐⭐⭐</span></div>
+<div class="level-btn">2<span class="stars">⭐⭐</span></div>
+<div class="level-btn">3<span class="stars">⭐</span></div>
+<div class="level-btn current">4</div>
+<div class="level-btn">5</div>
+<div class="level-btn">6</div>
+<div class="level-btn">7</div>
+<div class="level-btn locked">8</div>
+<div class="level-btn locked">9</div>
+<div class="level-btn locked">10</div>
+</div>
+<button class="start-btn">▶ 开始第 4 关</button>
+</div>
+<div class="mobile-note">📱 移动端自适应布局</div>
+</div>
+
+<!-- ② 游戏中（连线消除） -->
+<div class="frame">
+<h3>② 游戏中 · 连线消除</h3>
+<div class="combo show">COMBO ×3!</div>
+<div class="hud">
+<span class="badge">🐾 LV 5</span>
+<span class="badge">⭐ 2,450</span>
+<span class="timer">⏱ 67</span>
+</div>
+<div class="progress"><div class="fill" style="width:65%"></div></div>
+<div class="board-outer">
+<div class="board" style="grid-template-columns:repeat(6,1fr);width:310px">
+<div class="cell selected"><span class="fr">🐱</span></div>
+<div class="cell"><span class="fr">🐶</span></div>
+<div class="cell"><span class="fr">🐰</span></div>
+<div class="cell gone"></div>
+<div class="cell"><span class="fr">🐻</span><span class="bonus">⏰</span></div>
+<div class="cell"><span class="fr">🐱</span></div>
+<div class="cell"><span class="fr">🐶</span></div>
+<div class="cell"><span class="fr">🦊</span></div>
+<div class="cell"><span class="fr">🐼</span></div>
+<div class="cell"><span class="fr">🐰</span></div>
+<div class="cell"><span class="fr">🐻</span></div>
+<div class="cell"><span class="fr">🦊</span></div>
+<div class="cell gone"></div>
+<div class="cell"><span class="fr">🐼</span></div>
+<div class="cell"><span class="fr">🐨</span></div>
+<div class="cell"><span class="fr">🐯</span></div>
+<div class="cell"><span class="fr">🐰</span></div>
+<div class="cell"><span class="fr">🐯</span></div>
+<div class="cell"><span class="fr">🦊</span></div>
+<div class="cell"><span class="fr">🐼</span></div>
+<div class="cell"><span class="fr">🐱</span></div>
+<div class="cell"><span class="fr">🐶</span></div>
+<div class="cell"><span class="fr">🐨</span></div>
+<div class="cell"><span class="fr">🦊</span></div>
+<div class="cell"><span class="fr">🐯</span></div>
+<div class="cell"><span class="fr">🐸</span></div>
+<div class="cell"><span class="fr">🦊</span></div>
+<div class="cell"><span class="fr">🐱</span></div>
+<div class="cell"><span class="fr">🐶</span></div>
+<div class="cell"><span class="fr">🐰</span></div>
+<div class="cell"><span class="fr">🐨</span></div>
+<div class="cell"><span class="fr">🐯</span></div>
+<div class="cell"><span class="fr">🐼</span></div>
+<div class="cell"><span class="fr">🦊</span></div>
+<div class="cell"><span class="fr">🐨</span></div>
+<div class="cell"><span class="fr">🐸</span></div>
+</div>
+<svg class="link-layer" viewBox="0 0 386 386" style="left:0;top:0;width:386px;height:386px">
+<defs>
+<linearGradient id="linkGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+<stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1"/>
+<stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1"/>
+</linearGradient>
+</defs>
+<!-- 连线从左上角苹果向上进入外围空白通道，沿顶部绕行，再向下到右上角苹果（2拐弯） -->
+<path d="M 72 72 L 72 19 L 314 19 L 314 72" stroke="url(#linkGrad)" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 8px rgba(251,191,36,.9))"/>
+<circle cx="72" cy="72" r="5" fill="#fbbf24" style="filter:drop-shadow(0 0 6px rgba(251,191,36,.8))"/>
+<circle cx="314" cy="72" r="5" fill="#fbbf24" style="filter:drop-shadow(0 0 6px rgba(251,191,36,.8))"/>
+</svg>
+</div>
+<div class="btn-row">
+<button class="btn hint">💡 提示 ×3</button>
+<button class="btn shuffle">🔀 洗牌 ×2</button>
+<button class="btn pause">⏸</button>
+</div>
+<div class="mobile-note">👆 点击两个相同图标，≤2拐弯即可消除</div>
+</div>
+
+<!-- ③ 过关结算 -->
+<div class="frame">
+<h3>③ 过关结算</h3>
+<div class="result">
+<div class="big">🎉</div>
+<div class="title win">过关！</div>
+<div class="stars">⭐⭐⭐</div>
+<div class="score">3,850</div>
+<div class="info">用时 <strong>42秒</strong> · 最高连击 <strong>×5</strong></div>
+<div class="info">剩余时间奖励 <strong>+280</strong></div>
+<div class="info">完美通关奖励 <strong>+500</strong></div>
+<div class="result-btns">
+<button class="btn secondary">🔄 重玩</button>
+<button class="btn primary">下一关 →</button>
+</div>
+</div>
+</div>
+
+</body>
+</html>
