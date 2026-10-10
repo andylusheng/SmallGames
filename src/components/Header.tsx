@@ -36,6 +36,7 @@ export default function Header() {
   const [languageOpen, setLanguageOpen] = useState(false);
   const languageMenuRef = useRef<HTMLDivElement>(null);
   const currentLanguage = LANGUAGES.find((item) => item.locale === locale) ?? LANGUAGES[0];
+  const isImmersiveGame = /(?:^|\/)game\/screw-sort-master\/?$/.test(pathname);
 
   useEffect(() => {
     if (!languageOpen) return;
@@ -108,7 +109,7 @@ export default function Header() {
         </div>
       </div>
 
-      <div className="hidden border-t border-white/5 md:block"><CategoryNav /></div>
+      {!isImmersiveGame && <div className="hidden border-t border-white/5 md:block"><CategoryNav /></div>}
 
       {mobileMenuOpen && (
         <div className="border-t border-white/10 bg-dark md:hidden">

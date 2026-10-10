@@ -22,6 +22,7 @@ import { SITE_URL } from "@/lib/metadata";
 import GamePlayer from "@/components/GamePlayer";
 import GameGrid from "@/components/GameGrid";
 import AdBanner from "@/components/AdBanner";
+import ScrewSortHeroPage from "@/views/ScrewSortHeroPage";
 import { Download, Gift, HelpCircle, Info, Lightbulb, ShieldCheck, Sparkles, Star, Tag, Zap } from "lucide-react";
 
 interface GamePageViewProps {
@@ -160,10 +161,27 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
   const game = getGameBySlug(slug);
   if (!game) notFound();
 
+  const isScrewSortSpotlight = game.slug === "screw-sort-master";
   const t = getServerTranslations(locale);
   const isEn = locale === "en";
   const profile = getGameProfile(game);
   const p2 = getLocalizedGameProfile(game, locale);
+
+  if (isScrewSortSpotlight) {
+    const nextGames = ["hexa-color-stack", "bus-queue-sort", "color-block-route", "block-blast", "gem-crush", "bubble-pop"]
+      .map((nextSlug) => getGameBySlug(nextSlug))
+      .filter((item): item is Game => Boolean(item));
+
+    return (
+      <>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(buildGameJsonLd(game, locale)) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(buildFaqJsonLd(game, locale)) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(buildBreadcrumbJsonLd(game, locale, t)) }} />
+        <ScrewSortHeroPage game={game} locale={locale} nextGames={nextGames} />
+      </>
+    );
+  }
+
   const pageSeo = getGamePageSeo(game, locale);
   const primaryTopic = profile?.mechanics.gameplayTopics.find((topic) => getLocalizedTopicSeo(topic, locale));
   const topicGames = primaryTopic ? getGamesByGameplayTopic(primaryTopic, game.slug, 6) : [];
@@ -194,6 +212,10 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
       : locale === "zh-tw"
         ? "探索其他遊戲"
         : "探索其他游戏";
+  const spotlightTitle = isEn ? game.title : zh(locale, "Screw Sort Master 螺丝颜色分类");
+  const spotlightIntro = isEn
+    ? "Clear the exposed screws, keep a color streak, and uncover the next satisfying layer. There is no timer — take a relaxed route to the clear."
+    : zh(locale, "拆下露出的螺丝、连续处理同色螺丝，并逐层解锁下一块面板。这里没有倒计时，轻松完成每一关。");
 
   const infoRows: string[][] = [
     [isEn ? "Game Name" : zh(locale, "游戏名称"), game.title],
@@ -244,15 +266,16 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
         </nav>
 
         {p2 && (
-          <header className="mb-5 max-w-4xl">
-            <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl">{pageSeo.h1}</h1>
-            <p className="mt-2 text-sm leading-relaxed text-gray-300 sm:text-base lg:text-lg">{pageSeo.intro}</p>
+          <header className={isScrewSortSpotlight ? "mb-4 max-w-5xl" : "mb-5 max-w-4xl"}>
+            {isScrewSortSpotlight && <div className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">{isEn ? "Relaxed color puzzle" : zh(locale, "轻松颜色解谜")}</div>}
+            <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl">{isScrewSortSpotlight ? spotlightTitle : pageSeo.h1}</h1>
+            <p className="mt-2 text-sm leading-relaxed text-gray-300 sm:text-base lg:text-lg">{isScrewSortSpotlight ? spotlightIntro : pageSeo.intro}</p>
           </header>
         )}
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
+        <div className={`grid gap-6 ${isScrewSortSpotlight ? "lg:grid-cols-[minmax(0,1fr)_300px]" : "lg:grid-cols-[minmax(0,1fr)_280px]"}`}>
           <main className="min-w-0">
-            <GamePlayer gameUrl={game.gameUrl} title={game.title} slug={game.slug} />
+            <GamePlayer gameUrl={game.gameUrl} title={game.title} slug={game.slug} presentation={isScrewSortSpotlight ? "featured" : "default"} />
 
             <div className="mt-5">
               {!p2 && <h1 className="text-2xl font-bold text-white lg:text-3xl">{pageSeo.h1}</h1>}
@@ -415,8 +438,14 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
 
           <aside className="hidden lg:block">
             <div className="sticky top-24 rounded-xl border border-white/10 bg-surface/40 p-4">
+              {isScrewSortSpotlight && (
+                <section className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-white"><Sparkles className="h-4 w-4 text-primary" />{isEn ? "A calm, satisfying clear" : zh(locale, "轻松又有成就感的清除")}</div>
+                  <p className="mt-2 text-sm leading-relaxed text-gray-300">{isEn ? "Start with the bright top screws. Matching colors in a row grows your combo; use a hint whenever you want a nudge." : zh(locale, "先从最上层的明亮螺丝开始。连续处理同色螺丝可提升连击；需要提示时随时使用。")}</p>
+                </section>
+              )}
               <section>
-                <h2 className="text-sm font-semibold text-white">{sameCategoryTitle}</h2>
+                <h2 className={`${isScrewSortSpotlight ? "mt-4 " : ""}text-sm font-semibold text-white`}>{isScrewSortSpotlight ? (isEn ? "Play next" : zh(locale, "接下来玩")) : sameCategoryTitle}</h2>
                 <div className="mt-3 space-y-3">
                   {categoryGames.map((item) => (
                     <NextLink key={item.slug} href={lp(locale, `/game/${item.slug}`)} className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-white/5">

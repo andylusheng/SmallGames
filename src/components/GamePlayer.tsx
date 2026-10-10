@@ -9,9 +9,11 @@ interface GamePlayerProps {
   gameUrl: string;
   title: string;
   slug: string;
+  presentation?: "default" | "featured" | "hero";
+  showFrameControls?: boolean;
 }
 
-export default function GamePlayer({ gameUrl, title, slug }: GamePlayerProps) {
+export default function GamePlayer({ gameUrl, title, slug, presentation = "default", showFrameControls = true }: GamePlayerProps) {
   const t = useTranslations();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -101,7 +103,12 @@ export default function GamePlayer({ gameUrl, title, slug }: GamePlayerProps) {
 
   return (
     <div ref={containerRef} className="relative w-full overflow-hidden rounded-xl border border-white/10 bg-black">
-      <div className="relative h-[calc(100svh-6rem)] min-h-[520px] max-h-[820px] w-full md:h-[clamp(480px,78vh,820px)] md:min-h-0">
+      <div className={presentation === "hero"
+        ? "relative h-[calc(100svh-4.5rem)] min-h-[620px] w-full md:h-auto md:min-h-0 md:aspect-[5/4]"
+        : presentation === "featured"
+          ? "relative h-[calc(100svh-6rem)] min-h-[580px] w-full md:h-[700px]"
+          : "relative h-[calc(100svh-6rem)] min-h-[520px] max-h-[820px] w-full md:h-[clamp(480px,78vh,820px)] md:min-h-0"}
+      >
         {!hasStarted && (
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-gradient-to-br from-primary/30 to-dark">
             <button
@@ -118,7 +125,7 @@ export default function GamePlayer({ gameUrl, title, slug }: GamePlayerProps) {
           </div>
         )}
 
-        {hasStarted && isLoading && (
+        {hasStarted && isLoading && presentation !== "hero" && (
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-dark">
             <Loader2 className="h-10 w-10 animate-spin text-primary" />
             <p className="mt-4 text-sm text-gray-400">{t("game.loading")}</p>
@@ -131,7 +138,7 @@ export default function GamePlayer({ gameUrl, title, slug }: GamePlayerProps) {
             src={gameUrl}
             title={title}
             className="h-full w-full border-0"
-            allow="fullscreen; autoplay; gamepad"
+            allow="autoplay; gamepad"
             allowFullScreen
             onLoad={handleLoad}
             onError={handleError}
@@ -139,7 +146,7 @@ export default function GamePlayer({ gameUrl, title, slug }: GamePlayerProps) {
         )}
       </div>
 
-      {hasStarted && (
+      {hasStarted && showFrameControls && (
         <div className="flex items-center justify-between border-t border-white/10 bg-surface px-3 py-1.5 md:px-4 md:py-2">
           <span className="truncate pr-3 text-sm font-medium text-white">{title}</span>
           <div className="flex items-center gap-1 md:gap-2">
@@ -153,9 +160,11 @@ export default function GamePlayer({ gameUrl, title, slug }: GamePlayerProps) {
         </div>
       )}
 
-      <div className="hidden max-[480px]:flex items-center justify-center gap-2 bg-secondary/10 px-4 py-1.5 text-xs text-secondary">
-        📱 {t("game.tips")}
-      </div>
+      {presentation !== "hero" && (
+        <div className="hidden max-[480px]:flex items-center justify-center gap-2 bg-secondary/10 px-4 py-1.5 text-xs text-secondary">
+          📱 {t("game.tips")}
+        </div>
+      )}
     </div>
   );
 }
