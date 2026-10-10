@@ -166,6 +166,12 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
   const isEn = locale === "en";
   const profile = getGameProfile(game);
   const p2 = getLocalizedGameProfile(game, locale);
+  const fallbackSeo = getGameSeo(game, locale);
+  const longDescription = fallbackSeo.longDescription || getLocalizedGameDescription(game, locale);
+  const aboutParagraphs = p2?.about ?? longDescription.split("\n").filter(Boolean);
+  const howToPlaySteps = p2?.howToPlay ?? game.instructions.split(/(?<=\.)\s+(?=[A-Z])/).map((step) => zh(locale, step));
+  const tips = p2?.tips ?? fallbackSeo.tips;
+  const faqs = getGameFaqs(game, locale);
 
   if (isScrewSortSpotlight) {
     const nextGames = ["hexa-color-stack", "bus-queue-sort", "color-block-route", "block-blast", "gem-crush", "bubble-pop"]
@@ -177,7 +183,12 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(buildGameJsonLd(game, locale)) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(buildFaqJsonLd(game, locale)) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(buildBreadcrumbJsonLd(game, locale, t)) }} />
-        <ScrewSortHeroPage game={game} locale={locale} nextGames={nextGames} />
+        <ScrewSortHeroPage
+          game={game}
+          locale={locale}
+          nextGames={nextGames}
+          content={{ about: aboutParagraphs, howToPlay: howToPlaySteps, rules: p2?.rules ?? [], tips: tips ?? [], faqs }}
+        />
       </>
     );
   }
@@ -190,12 +201,6 @@ export default async function GamePageView({ locale, slug }: GamePageViewProps) 
   const relatedGames = getRelatedGames(game, 8);
   const categoryGames = getGamesByCategory(game.category).filter((item) => item.id !== game.id).slice(0, 4);
   const crossCategoryGames = getCrossCategoryRecommendations(game, 4);
-  const fallbackSeo = getGameSeo(game, locale);
-  const longDescription = fallbackSeo.longDescription || getLocalizedGameDescription(game, locale);
-  const aboutParagraphs = p2?.about ?? longDescription.split("\n").filter(Boolean);
-  const howToPlaySteps = p2?.howToPlay ?? game.instructions.split(/(?<=\.)\s+(?=[A-Z])/).map((step) => zh(locale, step));
-  const tips = p2?.tips ?? fallbackSeo.tips;
-  const faqs = getGameFaqs(game, locale);
   const difficulty = fallbackSeo.difficulty || (isEn ? "Easy" : zh(locale, "简单"));
   const localize = (value: { en: string; zh: string }) => isEn ? value.en : zh(locale, value.zh);
   const sameCategoryTitle = locale === "en"

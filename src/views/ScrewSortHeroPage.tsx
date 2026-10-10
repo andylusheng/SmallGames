@@ -1,5 +1,5 @@
 import NextLink from "next/link";
-import { ChevronRight, Gamepad2, Sparkles, Target } from "lucide-react";
+import { ChevronRight, Gamepad2, HelpCircle, Lightbulb, ListChecks, Sparkles, Target } from "lucide-react";
 import GamePlayer from "@/components/GamePlayer";
 import type { Game } from "@/lib/games";
 
@@ -7,13 +7,20 @@ interface ScrewSortHeroPageProps {
   game: Game;
   locale: string;
   nextGames: Game[];
+  content: {
+    about: string[];
+    howToPlay: string[];
+    rules: string[];
+    tips: string[];
+    faqs: Array<{ q: string; a: string }>;
+  };
 }
 
 function localizedGameHref(locale: string, slug: string) {
   return locale === "en" ? `/game/${slug}` : `/${locale}/game/${slug}`;
 }
 
-export default function ScrewSortHeroPage({ game, locale, nextGames }: ScrewSortHeroPageProps) {
+export default function ScrewSortHeroPage({ game, locale, nextGames, content }: ScrewSortHeroPageProps) {
   const isEn = locale === "en";
   const copy = isEn
     ? {
@@ -67,6 +74,47 @@ export default function ScrewSortHeroPage({ game, locale, nextGames }: ScrewSort
           </section>
         </aside>
       </div>
+
+      <article className="mx-auto mt-5 max-w-5xl border-t border-white/10 px-1 pt-5 sm:mt-6 sm:pt-6">
+        <section>
+          <h2 className="text-xl font-bold text-white">{isEn ? `About ${game.title}` : `关于 ${game.title}`}</h2>
+          <div className="mt-3 space-y-3 text-sm leading-7 text-gray-300">
+            {content.about.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+          </div>
+        </section>
+
+        <section className="mt-7">
+          <h2 className="flex items-center gap-2 text-xl font-bold text-white"><ListChecks className="h-5 w-5 text-primary" />{isEn ? `How to Play ${game.title}` : `${game.title} 怎么玩`}</h2>
+          <ol className="mt-3 grid gap-2 sm:grid-cols-2">
+            {content.howToPlay.map((step, index) => <li key={index} className="flex gap-3 rounded-xl border border-white/10 bg-surface/45 p-3 text-sm leading-6 text-gray-300"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">{index + 1}</span><span>{step}</span></li>)}
+          </ol>
+        </section>
+
+        {content.rules.length > 0 && (
+          <section className="mt-7">
+            <h2 className="text-xl font-bold text-white">{isEn ? `${game.title} Rules` : `${game.title} 游戏规则`}</h2>
+            <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+              {content.rules.map((rule, index) => <li key={index} className="flex gap-2 text-sm leading-6 text-gray-300"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />{rule}</li>)}
+            </ul>
+          </section>
+        )}
+
+        {content.tips.length > 0 && (
+          <section className="mt-7">
+            <h2 className="flex items-center gap-2 text-xl font-bold text-white"><Lightbulb className="h-5 w-5 text-yellow-400" />{isEn ? "Tips & Strategies" : "技巧与攻略"}</h2>
+            <ul className="mt-3 space-y-2">
+              {content.tips.map((tip, index) => <li key={index} className="flex gap-2 text-sm leading-6 text-gray-300"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-yellow-400" />{tip}</li>)}
+            </ul>
+          </section>
+        )}
+
+        <section className="mt-7">
+          <h2 className="flex items-center gap-2 text-xl font-bold text-white"><HelpCircle className="h-5 w-5 text-primary" />{isEn ? "Frequently Asked Questions" : "常见问题"}</h2>
+          <div className="mt-3 space-y-3">
+            {content.faqs.map((faq, index) => <details key={index} className="rounded-xl border border-white/10 bg-surface/45"><summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-white hover:text-primary">{faq.q}</summary><p className="border-t border-white/5 px-4 py-3 text-sm leading-6 text-gray-300">{faq.a}</p></details>)}
+          </div>
+        </section>
+      </article>
 
       <section className="mt-4 border-t border-white/10 px-1 pt-4 sm:mt-5">
         <div className="flex items-center justify-between gap-3"><h2 className="flex items-center gap-2 text-base font-bold text-white sm:text-lg"><Sparkles className="h-5 w-5 text-primary" />{copy.more}</h2><NextLink href={locale === "en" ? "/puzzle" : `/${locale}/puzzle`} className="text-xs font-semibold text-primary hover:text-primary-light">{copy.seeAll}</NextLink></div>

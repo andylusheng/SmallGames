@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1672 941" role="img" aria-labelledby="title">
+  <title id="title">Screw Sort Master toy screw puzzle board</title>
+  <image href="/games/screw-sort-master/assets/levels-v1/level-01-moon-star-cloud.png" width="1672" height="941"/>
+  <rect width="1672" height="941" fill="url(#shade)"/>
+  <g filter="url(#shadow)">
+    <image href="/games/screw-sort-master/assets/master-v2/screw-yellow.png" x="463" y="116" width="145" height="145"/>
+    <image href="/games/screw-sort-master/assets/master-v2/screw-green.png" x="325" y="354" width="145" height="145"/>
+    <image href="/games/screw-sort-master/assets/master-v2/screw-purple.png" x="680" y="333" width="145" height="145"/>
+    <image href="/games/screw-sort-master/assets/master-v2/screw-red.png" x="884" y="328" width="145" height="145"/>
+    <image href="/games/screw-sort-master/assets/master-v2/screw-blue.png" x="1078" y="353" width="145" height="145"/>
+    <image href="/games/screw-sort-master/assets/master-v2/screw-orange.png" x="1202" y="559" width="145" height="145"/>
+  </g>
+  <defs>
+    <linearGradient id="shade" x1="0" x2="0" y2="1"><stop stop-color="#ffffff" stop-opacity=".08"/><stop offset="1" stop-color="#2a1200" stop-opacity=".14"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="8" stdDeviation="7" flood-color="#2c1607" flood-opacity=".46"/></filter>
+  </defs>
+</svg>
